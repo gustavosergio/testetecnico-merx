@@ -22,14 +22,14 @@ const pageSize = 12
 
 function readFilters(): Filters {
   const url = new URLSearchParams(location.search)
-  const region = url.get('regiao') || 'kanto'
+  const region = url.get('regiao') || 'all'
   const type = url.get('tipo') || ''
   const page = Number(url.get('pagina'))
   return {
     region:
       region === 'all' || regions.some(([key]) => key === region)
         ? region
-        : 'kanto',
+        : 'all',
     type: Object.hasOwn(typeLabels, type) ? type : '',
     search: url.get('busca') || '',
     page: Number.isSafeInteger(page) && page > 0 ? page : 1,
@@ -268,7 +268,7 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     setFilters(next)
     const url = new URL(location.href)
     const params = {
-      regiao: next.region === 'kanto' ? '' : next.region,
+      regiao: next.region === 'all' ? '' : next.region,
       tipo: next.type,
       busca: next.search,
       pagina: next.page === 1 ? '' : String(next.page),

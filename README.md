@@ -6,7 +6,7 @@ Pokédex regional desenvolvida para o [teste de estágio da MERX Energia](https:
 
 ## Como explorar
 
-O catálogo abre em Kanto, em ordem de número nacional. Use o seletor de região para trocar de catálogo ou selecione **Todas as regiões** para pesquisar em todas as espécies. A busca aceita nomes parciais e números como `25` e `#025`. O filtro por tipo combina com a busca. A URL guarda os filtros e a página para que uma consulta possa ser compartilhada.
+O catálogo abre em **Todas as regiões**, com as espécies em ordem de número nacional. Se quiser restringir a consulta, escolha uma região no seletor. A busca aceita nomes parciais e números como `25` e `#025`. O filtro por tipo combina com a busca. A URL guarda os filtros e a página para que uma consulta possa ser compartilhada.
 
 Abra um cartão para consultar tipos, medidas, descrição da espécie e cadeia evolutiva. Evoluções ramificadas, como as de Eevee, aparecem em ramos separados. A interface sinaliza carregamento, erro e buscas sem resultado. Em caso de falha de rede, é possível repetir a consulta.
 
