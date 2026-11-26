@@ -132,6 +132,22 @@ export const listType = cached(async (type) => {
   const data = await read<{ pokemon: { pokemon: Ref }[] }>('type/' + type)
   return new Set(data.pokemon.map(({ pokemon }) => idFromUrl(pokemon.url)))
 })
+export async function loadCatalogIndex(
+  regionKeys: string[],
+  typeKeys: string[],
+) {
+  const [catalogs, typeSets] = await Promise.all([
+    Promise.all((regionKeys.length ? regionKeys : ['all']).map(listRegion)),
+    Promise.all(typeKeys.map(listType)),
+  ])
+  const byNumber = new Map<number, SpeciesEntry>()
+  for (const species of catalogs.flat()) byNumber.set(species.id, species)
+  const all = [...byNumber.values()].sort((a, b) => a.id - b.id)
+  const typed = typeSets.length
+    ? new Set(typeSets.flatMap((ids) => [...ids]))
+    : null
+  return { all, typed }
+}
 function normalize(value: string) {
   return value
     .normalize('NFD')

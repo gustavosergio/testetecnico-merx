@@ -49,24 +49,60 @@
     monospace;
   color: #3b5a60;
 }
-.dex-region {
+.dex-filter-groups {
   display: grid;
-  gap: 0.2rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
 }
-.dex-region > span {
-  font-size: 0.78rem;
-  font-weight: 650;
-}
-.dex-catalog select {
-  appearance: none;
-  color: var(--dex-ink);
+.dex-choices {
+  min-width: 0;
   border: 1px solid var(--dex-line);
   border-radius: 0.5rem;
-  min-height: 42px;
-  padding: 0.55rem 2.1rem 0.55rem 0.85rem;
-  background: #f6fcfc
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%2327474d' stroke-width='1.6'/%3E%3C/svg%3E")
-    no-repeat right 0.7rem center;
+  background: #f6fcfc;
+}
+.dex-choices summary {
+  padding: 0.75rem;
+  cursor: pointer;
+}
+.dex-choices summary span {
+  margin-inline-start: 0.65rem;
+  color: #49676d;
+}
+.dex-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.35rem 0.75rem;
+}
+.dex-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--dex-line);
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+.dex-options input {
+  margin: 0;
+  accent-color: #1a5158;
+}
+.dex-options label:has(:checked) {
+  background: #d6edeb;
+  border-color: #497f83;
+}
+.dex-choices button {
+  border: 0;
+  background: none;
+  text-decoration: underline;
+  padding: 0.65rem 0.75rem;
+}
+@media (max-width: 650px) {
+  .dex-filter-groups {
+    grid-template-columns: 1fr;
+  }
 }
 .dex-filters {
   display: flex;

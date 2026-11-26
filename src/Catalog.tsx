@@ -2,8 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Evolution, Pokemon } from './catalog'
 import {
   displayName,
-  listRegion,
-  listType,
+  loadCatalogIndex,
   loadDetails,
   loadPokemon,
   numberLabel,
@@ -17,20 +16,22 @@ type Props = {
   favorite: number | null
   onFavorite: (id: number, name: string) => void
 }
-type Filters = { region: string; type: string; search: string; page: number }
+type Filters = {
+  regions: string[]
+  types: string[]
+  search: string
+  page: number
+}
 const pageSize = 12
 
 function readFilters(): Filters {
   const url = new URLSearchParams(location.search)
-  const region = url.get('regiao') || 'all'
-  const type = url.get('tipo') || ''
+  const validRegions = new Set(url.getAll('regiao'))
+  const validTypes = new Set(url.getAll('tipo'))
   const page = Number(url.get('pagina'))
   return {
-    region:
-      region === 'all' || regions.some(([key]) => key === region)
-        ? region
-        : 'all',
-    type: Object.hasOwn(typeLabels, type) ? type : '',
+    regions: regions.map(([key]) => key).filter((key) => validRegions.has(key)),
+    types: Object.keys(typeLabels).filter((key) => validTypes.has(key)),
     search: url.get('busca') || '',
     page: Number.isSafeInteger(page) && page > 0 ? page : 1,
   }
@@ -254,6 +255,62 @@ function CardGrid({
     </div>
   )
 }
+type Option = readonly [string, string]
+const regionOptions: Option[] = regions.map(([key, label]) => [key, label])
+const typeOptions = Object.entries(typeLabels).sort((a, b) =>
+  a[1].localeCompare(b[1], 'pt'),
+)
+
+function FilterChoices({
+  label,
+  unrestricted,
+  options,
+  selected,
+  onChange,
+}: {
+  label: string
+  unrestricted: string
+  options: Option[]
+  selected: string[]
+  onChange: (values: string[]) => void
+}) {
+  const labels = options
+    .filter(([key]) => selected.includes(key))
+    .map(([, name]) => name)
+  return (
+    <details className="dex-choices">
+      <summary>
+        <strong>{label}</strong>
+        <span>{labels.join(', ') || unrestricted}</span>
+      </summary>
+      <div role="group" aria-label={label} className="dex-options">
+        {options.map(([key, name]) => (
+          <label key={key}>
+            <input
+              type="checkbox"
+              checked={selected.includes(key)}
+              onChange={(event) =>
+                onChange(
+                  event.target.checked
+                    ? [...selected, key]
+                    : selected.filter((value) => value !== key),
+                )
+              }
+            />
+            {name}
+          </label>
+        ))}
+      </div>
+      <button
+        type="button"
+        disabled={!selected.length}
+        onClick={() => onChange([])}
+      >
+        Limpar {label.toLowerCase()}
+      </button>
+    </details>
+  )
+}
 export default function Catalog({ favorite, onFavorite }: Props) {
   const [filters, setFilters] = useState(readFilters)
   const [detail, setDetail] = useState<Pokemon | null>(null)
@@ -268,25 +325,23 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     setFilters(next)
     const url = new URL(location.href)
     const params = {
-      regiao: next.region === 'all' ? '' : next.region,
-      tipo: next.type,
-      busca: next.search,
-      pagina: next.page === 1 ? '' : String(next.page),
+      regiao: next.regions,
+      tipo: next.types,
+      busca: next.search ? [next.search] : [],
+      pagina: next.page === 1 ? [] : [String(next.page)],
     }
-    Object.entries(params).forEach(([k, v]) =>
-      v ? url.searchParams.set(k, v) : url.searchParams.delete(k),
-    )
+    for (const [key, values] of Object.entries(params)) {
+      url.searchParams.delete(key)
+      for (const value of values) url.searchParams.append(key, value)
+    }
     if (replace) history.replaceState(history.state, '', url)
     else history.pushState(history.state, '', url)
   }
   const index = useRequest(
-    useCallback(async () => {
-      const [all, typed] = await Promise.all([
-        listRegion(filters.region),
-        filters.type ? listType(filters.type) : null,
-      ])
-      return { all, typed }
-    }, [filters.region, filters.type]),
+    useCallback(
+      () => loadCatalogIndex(filters.regions, filters.types),
+      [filters.regions, filters.types],
+    ),
   )
   const entries = index.data
     ? selectEntries(index.data.all, filters.search, index.data.typed)
@@ -313,20 +368,6 @@ export default function Catalog({ favorite, onFavorite }: Props) {
               : 'Consultando espécies…'}
           </p>
         </div>
-        <label className="dex-region">
-          <span>Região</span>
-          <select
-            value={filters.region}
-            onChange={(e) => update({ region: e.target.value })}
-          >
-            <option value="all">Todas as regiões</option>
-            {regions.map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
       </div>
       <div className="dex-filters">
         <label className="dex-search">
@@ -351,20 +392,22 @@ export default function Catalog({ favorite, onFavorite }: Props) {
             onChange={(e) => update({ search: e.target.value }, true)}
           />
         </label>
-        <select
-          aria-label="Filtrar por tipo"
-          value={filters.type}
-          onChange={(e) => update({ type: e.target.value })}
-        >
-          <option value="">Todos os tipos</option>
-          {Object.entries(typeLabels)
-            .sort((a, b) => a[1].localeCompare(b[1], 'pt'))
-            .map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-        </select>
+      </div>
+      <div className="dex-filter-groups">
+        <FilterChoices
+          label="Regiões"
+          unrestricted="Todas as regiões"
+          options={regionOptions}
+          selected={filters.regions}
+          onChange={(regions) => update({ regions })}
+        />
+        <FilterChoices
+          label="Tipos"
+          unrestricted="Todos os tipos"
+          options={typeOptions}
+          selected={filters.types}
+          onChange={(types) => update({ types })}
+        />
       </div>
       <div ref={listStart} tabIndex={-1} className="dex-results">
         {index.error ? (
@@ -378,7 +421,7 @@ export default function Catalog({ favorite, onFavorite }: Props) {
             <strong>Nenhum Pokémon encontrado</strong>
             <span>Altere a região, o tipo ou o termo de busca.</span>
             <button
-              onClick={() => update({ search: '', type: '', region: 'all' })}
+              onClick={() => update({ search: '', types: [], regions: [] })}
             >
               Ver todas as espécies
             </button>

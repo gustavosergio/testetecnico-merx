@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { loadDetails, selectEntries } from '../src/catalog.ts'
+import { loadCatalogIndex, loadDetails, selectEntries } from '../src/catalog.ts'
 
 test('combina busca parcial, numeração nacional e tipo antes de paginar', () => {
   const entries = [
@@ -49,5 +49,31 @@ test('preserva os ramos da evolução e usa descrição em inglês se não houve
   assert.deepEqual(
     result.tree.next.map((p) => p.name),
     ['jolteon', 'vaporeon'],
+  )
+})
+
+test('une regiões e tipos, cruza os dois filtros e mantém a ordem nacional', async (t) => {
+  const ref = (id) => ({
+    name: String(id),
+    url: 'https://pokeapi.co/api/v2/pokemon/' + id + '/',
+  })
+  const endpoints = {
+    'generation/1': { pokemon_species: [7, 6, 1].map(ref) },
+    'generation/6': { pokemon_species: [658, 661].map(ref) },
+    'type/water': {
+      pokemon: [7, 658, 260].map((id) => ({ pokemon: ref(id) })),
+    },
+    'type/flying': { pokemon: [6, 661].map((id) => ({ pokemon: ref(id) })) },
+  }
+  t.mock.method(globalThis, 'fetch', async (url) =>
+    Response.json(endpoints[url.split('/v2/')[1]]),
+  )
+  const { all, typed } = await loadCatalogIndex(
+    ['kalos', 'kanto'],
+    ['water', 'flying'],
+  )
+  assert.deepEqual(
+    selectEntries(all, '', typed).map((p) => p.id),
+    [6, 7, 658, 661],
   )
 })
