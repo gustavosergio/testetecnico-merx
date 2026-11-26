@@ -16,8 +16,8 @@ export default defineConfig({
               outgoing.setHeader('Origin', workerOrigin)
             }
           })
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 })
