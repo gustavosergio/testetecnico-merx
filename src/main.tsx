@@ -49,7 +49,7 @@ function App() {
           <div className="device-stage"><Device/></div>
           <div className="vents" aria-hidden="true"/>
         </section>
-        <section className="console"><Catalog favorite={trainer?.favorite?.id ?? null} onFavorite={onFavorite}/></section>
+        <section className="console"><div className="rail rail-top" aria-hidden="true"><i/></div><div className="console-screen"><Catalog favorite={trainer?.favorite?.id ?? null} onFavorite={onFavorite}/></div><div className="rail rail-bottom" aria-hidden="true"><i/></div></section>
       </>}
     </main>
     <footer className="foot"><span>KalosDex</span><a href="https://pokeapi.co/">Dados da PokéAPI</a></footer>
