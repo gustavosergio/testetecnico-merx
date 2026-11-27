@@ -48,7 +48,7 @@ export function avatarImage(id: number) {
 
 const starterRows = [
   ['Kanto', [1, 4, 7]],
-  ['Johto', [155, 158]],
+  ['Johto', [152, 155, 158]],
   ['Hoenn', [252, 255, 258]],
   ['Sinnoh', [387, 390, 393]],
   ['Unova', [495, 498, 501]],
@@ -156,12 +156,6 @@ function Credentials({
               {renderChoices(ids)}
             </div>
           ))}
-          {!setup && mode === 'login' && (
-            <details>
-              <summary>Opções de contas antigas</summary>
-              {renderChoices([25, 133, 152])}
-            </details>
-          )}
         </div>
         <label>
           PIN de 4 dígitos
