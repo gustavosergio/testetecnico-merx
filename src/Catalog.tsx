@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
   useSyncExternalStore,
@@ -137,9 +138,23 @@ function EvolutionItem({ name }: { name: string }) {
     </span>
   )
 }
-function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
+function Chain({
+  item,
+  currentId,
+  onOpenEvolution,
+}: {
+  item: Evolution
+  currentId: number
+  onOpenEvolution: (pokemon: Pokemon) => void
+}) {
   const stage = useRequest(
     useCallback(() => loadPokemon(String(item.id)), [item.id]),
+  )
+  const pokemon = stage.data
+  const art = pokemon ? (
+    <Art pokemon={pokemon} />
+  ) : (
+    <span aria-hidden="true">{numberLabel(item.id)}</span>
   )
   return (
     <li>
@@ -147,13 +162,18 @@ function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
         className="dex-stage"
         aria-current={item.id === currentId ? 'true' : undefined}
       >
-        <div className="dex-stage-art">
-          {stage.data ? (
-            <Art pokemon={stage.data} />
-          ) : (
-            <span aria-hidden="true">{numberLabel(item.id)}</span>
-          )}
-        </div>
+        {pokemon && item.id !== currentId ? (
+          <button
+            className="dex-stage-art"
+            type="button"
+            aria-label={'Ver ficha de ' + displayName(item.name)}
+            onClick={() => onOpenEvolution(pokemon)}
+          >
+            {art}
+          </button>
+        ) : (
+          <div className="dex-stage-art">{art}</div>
+        )}
         <strong>{displayName(item.name)}</strong>
         <small>{numberLabel(item.id)}</small>
         {stage.data && <Types types={stage.data.types} />}
@@ -176,7 +196,12 @@ function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
       {item.next.length > 0 && (
         <ul>
           {item.next.map((child) => (
-            <Chain key={child.id} item={child} currentId={currentId} />
+            <Chain
+              key={child.id}
+              item={child}
+              currentId={currentId}
+              onOpenEvolution={onOpenEvolution}
+            />
           ))}
         </ul>
       )}
@@ -186,10 +211,15 @@ function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
 function PokemonDetails({
   pokemon,
   children,
+  nameId,
+  onOpenEvolution,
 }: {
   pokemon: Pokemon
   children?: ReactNode
+  nameId?: string
+  onOpenEvolution: (pokemon: Pokemon) => void
 }) {
+  const evolutionTitleId = useId()
   const request = useRequest(
     useCallback(() => loadDetails(pokemon.speciesUrl), [pokemon.speciesUrl]),
   )
@@ -200,7 +230,7 @@ function PokemonDetails({
       </div>
       <div className="dex-detail-info">
         <small>{numberLabel(pokemon.id)}</small>
-        <h2 id="dex-detail-name">{displayName(pokemon.name)}</h2>
+        <h2 id={nameId}>{displayName(pokemon.name)}</h2>
         <Types types={pokemon.types} />
         <p>
           {pokemon.height.toLocaleString('pt-BR')} m{' '}
@@ -219,12 +249,16 @@ function PokemonDetails({
             </p>
             <section
               className="dex-evolution"
-              aria-labelledby="dex-evolution-title"
+              aria-labelledby={evolutionTitleId}
             >
-              <h3 id="dex-evolution-title">Cadeia de evolução</h3>
+              <h3 id={evolutionTitleId}>Cadeia de evolução</h3>
               {request.data.tree ? (
                 <ul className="dex-chain">
-                  <Chain item={request.data.tree} currentId={pokemon.id} />
+                  <Chain
+                    item={request.data.tree}
+                    currentId={pokemon.id}
+                    onOpenEvolution={onOpenEvolution}
+                  />
                 </ul>
               ) : (
                 <p>Cadeia indisponível.</p>
@@ -238,19 +272,35 @@ function PokemonDetails({
   )
 }
 
-export function FavoriteDetails({ id }: { id: number }) {
+export function FavoriteDetails({ id, favorite, onFavorite }: Props & { id: number }) {
+  const [detail, setDetail] = useState<Pokemon | null>(null)
   const request = useRequest(useCallback(() => loadPokemon(String(id)), [id]))
   if (request.error) return <ErrorPanel retry={request.retry} />
   if (!request.data) return <p role="status">Carregando Pokémon favorito…</p>
-  return <PokemonDetails pokemon={request.data} />
+  return (
+    <>
+      <PokemonDetails pokemon={request.data} onOpenEvolution={setDetail} />
+      {detail && (
+        <Details
+          pokemon={detail}
+          favorite={favorite}
+          onFavorite={onFavorite}
+          close={() => setDetail(null)}
+        />
+      )}
+    </>
+  )
 }
 
 function Details({
-  pokemon,
+  pokemon: initialPokemon,
   favorite,
   onFavorite,
   close,
 }: Props & { pokemon: Pokemon; close: () => void }) {
+  const [pokemon, setPokemon] = useState(initialPokemon)
+  const nameId = useId()
+  const closeButton = useRef<HTMLButtonElement>(null)
   const dialog = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     const modal = dialog.current
@@ -261,7 +311,7 @@ function Details({
     <dialog
       className="dex-detail"
       ref={dialog}
-      aria-labelledby="dex-detail-name"
+      aria-labelledby={nameId}
       onCancel={close}
       onClick={(e) => {
         if (e.target === e.currentTarget) close()
@@ -272,11 +322,20 @@ function Details({
           className="dex-close"
           type="button"
           aria-label="Fechar detalhes"
+          ref={closeButton}
           onClick={close}
         >
           ×
         </button>
-        <PokemonDetails pokemon={pokemon}>
+        <PokemonDetails
+          pokemon={pokemon}
+          nameId={nameId}
+          onOpenEvolution={(next) => {
+            setPokemon(next)
+            if (dialog.current) dialog.current.scrollTop = 0
+            closeButton.current?.focus({ preventScroll: true })
+          }}
+        >
           <button
             className="dex-primary"
             onClick={() => onFavorite(pokemon)}

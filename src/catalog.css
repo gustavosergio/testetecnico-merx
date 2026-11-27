@@ -489,6 +489,17 @@
   border: 0;
   text-decoration: underline;
 }
+.dex-stage button.dex-stage-art {
+  padding: 0;
+  border: 2px solid #81b9bf;
+  background: radial-gradient(circle, #c6efee, #5d8c97 78%);
+  text-decoration: none;
+}
+.dex-stage button.dex-stage-art:hover,
+.dex-stage button.dex-stage-art:focus-visible {
+  border-color: #edfafa;
+  box-shadow: 0 0 0 3px #83d4cb70;
+}
 @media (max-width: 570px) {
   .dex-detail-info {
     padding-inline: 0.85rem;

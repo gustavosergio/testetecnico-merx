@@ -174,7 +174,11 @@ function FavoritePage({
       <h1 id="favorite-page-title">Meu favorito</h1>
       {favorite ? (
         <>
-          <FavoriteDetails id={favorite.id} />
+          <FavoriteDetails
+            id={favorite.id}
+            favorite={favorite.id}
+            onFavorite={onRemove}
+          />
           <div className="favorite-page-actions">
             <a href={`/?busca=${favorite.id}#pokedex`}>Ver na Pokédex</a>
             <button type="button" onClick={() => onRemove({ ...favorite, image })}>
