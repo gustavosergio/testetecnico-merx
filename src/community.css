@@ -418,29 +418,43 @@
   min-height: clamp(26rem, 49vw, 38rem);
   background: #283950 url('/art/trainer-landscape.png') center / cover no-repeat;
 }
-.trainer-directory-panel {
+.scenery-panel {
+  --scenery-control: rgb(251 255 255 / 60%);
+  --scenery-border: #516e75;
   width: min(100%, 32rem);
-  color: #132d39;
-  background: #f6fcfd;
   padding: clamp(1rem, 3vw, 1.75rem);
+  border: 1px solid rgb(255 255 255 / 60%);
   border-radius: 1rem;
-  box-shadow: 0 8px 30px #17213744;
+  color: #10242b;
+  background: rgb(249 255 254 / 66%);
+  box-shadow: 0 8px 30px #17213733;
 }
-[data-theme='dark'] .trainer-directory-panel {
-  color: var(--night-text);
-  background: var(--night-panel);
+[data-theme='dark'] .scenery-panel {
+  --scenery-control: rgb(14 32 39 / 52%);
+  --scenery-border: #aec4c7;
+  border-color: rgb(210 234 236 / 40%);
+  color: #f3fafa;
+  background: rgb(11 27 34 / 73%);
 }
-[data-theme='dark'] .trainer-directory-panel p {
-  color: var(--night-muted);
+.scenery-panel p {
+  color: inherit;
+}
+.scenery-panel :is(.trainer-search-row input, .trainer-results li, .trainer-history li button) {
+  color: inherit;
+  border-color: var(--scenery-border);
+  background: var(--scenery-control);
+}
+.scenery-panel :is(button, input):focus-visible {
+  outline: 2px solid white;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 5px #143540;
 }
 @media (max-width: 620px) {
-  .community.trainer-directory {
-    padding: clamp(8rem, 42vw, 15rem) 0.75rem 0.75rem;
+  .community:is(.trainer-directory, .type-matchups) {
     min-height: 0;
-    background-position: center top;
-    background-size: 100% auto;
+    padding: clamp(4rem, 22vw, 8rem) 0.75rem 0.75rem;
   }
-  .trainer-directory-panel {
+  .scenery-panel {
     margin-inline: auto;
   }
 }

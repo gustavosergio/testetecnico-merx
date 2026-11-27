@@ -68,7 +68,7 @@ export default function TypeMatchups() {
       className="community type-matchups"
       aria-labelledby="matchups-title"
     >
-      <div className="matchups-panel">
+      <div className="scenery-panel">
         <h2 id="matchups-title">Vantagens e fraquezas</h2>
         <p>
           Escolha um tipo para conferir suas vantagens no ataque e fraquezas na

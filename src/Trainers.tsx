@@ -74,7 +74,7 @@ export default function Trainers() {
       className="community trainer-directory"
       aria-labelledby="trainer-directory-title"
     >
-      <div className="trainer-directory-panel">
+      <div className="scenery-panel">
         <h2 id="trainer-directory-title">Pesquisar treinadores</h2>
         <form
           onSubmit={(event) => {
