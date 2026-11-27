@@ -213,3 +213,63 @@
 .ranking-rest li > span {
   margin-left: auto;
 }
+.credentials {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.auth-tabs,
+.trio-slots,
+.avatar-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.auth-tabs button,
+.starter-grid button {
+  background: #fff;
+  border: 1px solid #9bbdc3;
+  border-radius: 0.5rem;
+  padding: 0.45rem;
+}
+.auth-tabs button[aria-pressed='true'],
+.starter-grid button[aria-pressed='true'] {
+  border-color: #087183;
+  background: #d6f0ef;
+  color: #093e48;
+}
+.trio-slots {
+  padding: 0;
+  list-style-position: inside;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+}
+.starter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  max-height: 15rem;
+  overflow: auto;
+  padding: 0.25rem;
+  background: #e6efef;
+}
+.starter-grid button {
+  display: grid;
+  justify-items: center;
+  font-size: 0.83rem;
+}
+.starter-grid img {
+  width: 45px;
+  height: 45px;
+}
+.avatar-heading img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #dfefef;
+}
+.trainer-dialog {
+  max-height: 90dvh;
+  overflow: auto;
+}

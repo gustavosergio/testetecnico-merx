@@ -1,9 +1,15 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import './community.css'
+import { starters } from '../shared/starters'
 import { displayName } from './catalog'
 
 type Pokemon = { id: number; name: string }
-type Trainer = { name: string; favorite: Pokemon | null }
+type Trainer = {
+  avatar: number
+  needsSetup: boolean
+  name: string
+  favorite: Pokemon | null
+}
 export async function communityRequest<T>(
   path: string,
   body?: object,
@@ -32,6 +38,134 @@ export async function communityRequest<T>(
   return data as T
 }
 
+export function avatarImage(id: number) {
+  return (
+    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' +
+    id +
+    '.png'
+  )
+}
+
+function Credentials({
+  setup,
+  busy,
+  authenticate,
+}: {
+  setup: boolean
+  busy: boolean
+  authenticate: (body: object) => Promise<void>
+}) {
+  const [mode, setMode] = useState<'signup' | 'login'>('login')
+  const [name, setName] = useState('')
+  const [pin, setPin] = useState('')
+  const [trio, setTrio] = useState<number[]>([])
+  function toggle(id: number) {
+    setTrio((prev) =>
+      prev.includes(id)
+        ? prev.filter((value) => value !== id)
+        : prev.length < 3
+          ? [...prev, id]
+          : prev,
+    )
+  }
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        void authenticate({ action: setup ? 'setup' : mode, name, trio, pin })
+      }}
+    >
+      <fieldset disabled={busy} className="credentials">
+        {setup ? (
+          <p>Defina sua senha para entrar novamente com este treinador.</p>
+        ) : (
+          <>
+            <div className="auth-tabs">
+              {(['login', 'signup'] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  aria-pressed={mode === m}
+                  onClick={() => {
+                    setMode(m)
+                    setTrio([])
+                    setPin('')
+                  }}
+                >
+                  {m === 'login' ? 'Entrar' : 'Criar conta'}
+                </button>
+              ))}
+            </div>
+            <label>
+              Nome de treinador
+              <input
+                required
+                autoComplete="username"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </label>
+            {mode === 'signup' && (
+              <small>De 8 a 20 caracteres, sem espaços.</small>
+            )}
+          </>
+        )}
+        <p>Escolha três iniciais diferentes. A ordem faz parte da senha.</p>
+        <ol className="trio-slots">
+          {[0, 1, 2].map((i) => (
+            <li key={i}>{starters[trio[i]] || 'Escolher'}</li>
+          ))}
+        </ol>
+        <div className="starter-grid">
+          {Object.entries(starters).map(([key, label]) => {
+            const id = Number(key),
+              selected = trio.includes(id)
+            return (
+              <button
+                key={id}
+                aria-pressed={selected}
+                disabled={!selected && trio.length === 3}
+                type="button"
+                onClick={() => toggle(id)}
+              >
+                <img src={avatarImage(id)} alt="" loading="lazy" />
+                {label}
+              </button>
+            )
+          })}
+        </div>
+        <label>
+          PIN de 4 dígitos
+          <input
+            type="password"
+            inputMode="numeric"
+            autoComplete={
+              setup || mode === 'signup' ? 'new-password' : 'current-password'
+            }
+            pattern="[0-9]{4}"
+            maxLength={4}
+            required
+            value={pin}
+            onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, ''))}
+          />
+        </label>
+        <button
+          className="trainer-primary"
+          disabled={trio.length !== 3 || pin.length !== 4}
+        >
+          {busy
+            ? 'Aguarde…'
+            : setup
+              ? 'Salvar senha'
+              : mode === 'login'
+                ? 'Entrar no perfil'
+                : 'Cadastrar treinador'}
+        </button>
+      </fieldset>
+    </form>
+  )
+}
+
 export function useTrainer() {
   const [trainer, setTrainer] = useState<Trainer | null>(null)
   const [visible, setVisible] = useState(false)
@@ -39,7 +173,7 @@ export function useTrainer() {
   const [unavailable, setUnavailable] = useState(false)
   const [busy, setBusy] = useState(false)
   const [target, setTarget] = useState<Pokemon | null>(null)
-  const [name, setName] = useState('')
+  const [avatar, setAvatar] = useState('')
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
   const [revision, setRevision] = useState(0)
@@ -77,7 +211,7 @@ export function useTrainer() {
   function open(pokemon: Pokemon | null) {
     setTarget(pokemon)
     setStatus('')
-    setName('')
+    setAvatar('')
     setVisible(true)
     void check()
   }
@@ -87,13 +221,8 @@ export function useTrainer() {
     setBusy(true)
     setError('')
     try {
-      let current = trainer
-      if (!current) {
-        current = await communityRequest<Trainer>('trainer', { name })
-        setTrainer(current)
-        // A sessão pode ter sido criada em outra aba enquanto o formulário estava aberto.
-        if (current.favorite && target) return
-      }
+      const current = trainer
+      if (!current) return
       if (target && current.favorite?.id !== target.id) {
         const updated = await communityRequest<Trainer>('favorite', {
           id: target.id,
@@ -109,6 +238,21 @@ export function useTrainer() {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Falha na conexão.')
       await refresh().catch(() => {})
+    } finally {
+      setBusy(false)
+    }
+  }
+  async function accountAction(body: object, close = false) {
+    setBusy(true)
+    setError('')
+    try {
+      const updated = await communityRequest<Trainer | null>('trainer', body)
+      setTrainer(updated)
+      setAvatar('')
+      if (close || (!target && !trainer?.needsSetup && updated && !trainer))
+        setVisible(false)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Falha na conexão.')
     } finally {
       setBusy(false)
     }
@@ -154,112 +298,100 @@ export function useTrainer() {
           >
             ×
           </button>
-          <form onSubmit={submit}>
-            <h2 id="trainer-title">
-              {checking ? 'Perfil de treinador' : title}
-            </h2>
-            {checking ? (
-              <p role="status">Consultando perfil…</p>
-            ) : (
-              !unavailable && (
-                <>
-                  {!trainer && (
-                    <>
-                      <label htmlFor="trainer-name">
-                        Como você quer ser chamado?
-                      </label>
-                      <input
-                        autoFocus
-                        id="trainer-name"
-                        autoComplete="nickname"
-                        placeholder="Nome de treinador"
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        aria-describedby="trainer-hint"
-                      />
-                      <small id="trainer-hint">
-                        De 8 a 20 caracteres, sem espaços. Seu perfil fica
-                        conectado neste navegador.
-                      </small>
-                    </>
-                  )}
-                  {target ? (
-                    <p>
-                      {trainer?.favorite?.id === target.id ? (
-                        <>
-                          <strong>{displayName(target.name)}</strong> já é seu
-                          favorito.
-                        </>
-                      ) : trainer?.favorite ? (
-                        <>
-                          Substituir{' '}
-                          <strong>{displayName(trainer.favorite.name)}</strong>{' '}
-                          por <strong>{displayName(target.name)}</strong> como
-                          seu único favorito?
-                        </>
-                      ) : (
-                        <>
-                          Seu voto vai para{' '}
-                          <strong>{displayName(target.name)}</strong>.
-                        </>
-                      )}
-                    </p>
-                  ) : (
-                    trainer && (
-                      <p>
-                        <strong>{trainer.name}</strong>
-                        <br />
-                        {trainer.favorite
-                          ? 'Seu favorito é ' +
-                            displayName(trainer.favorite.name) +
-                            '.'
-                          : 'Escolha um Pokémon no catálogo para votar.'}
-                      </p>
-                    )
-                  )}
-                </>
-              )
-            )}
-            {error && (
-              <p className="trainer-error" role="alert">
-                {error}
-              </p>
-            )}
-            {unavailable && (
-              <button
-                type="button"
-                className="trainer-primary"
-                onClick={() => void check()}
-              >
-                Tentar novamente
-              </button>
-            )}
-            {!checking && !unavailable && (
-              <div className="trainer-actions">
-                {target && target.id !== trainer?.favorite?.id && (
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => setVisible(false)}
-                  >
-                    Cancelar
-                  </button>
+          <h2 id="trainer-title">
+            {!trainer
+              ? 'Conta de treinador'
+              : trainer.needsSetup
+                ? 'Configure sua senha'
+                : title}
+          </h2>
+          {checking ? (
+            <p role="status">Consultando perfil…</p>
+          ) : unavailable ? (
+            <button onClick={() => void check()}>Tentar novamente</button>
+          ) : !trainer || trainer.needsSetup ? (
+            <Credentials
+              setup={!!trainer}
+              busy={busy}
+              authenticate={accountAction}
+            />
+          ) : target ? (
+            <form onSubmit={submit}>
+              <p>
+                {trainer.favorite && trainer.favorite.id !== target.id ? (
+                  <>
+                    Substituir{' '}
+                    <strong>{displayName(trainer.favorite.name)}</strong> por{' '}
+                    <strong>{displayName(target.name)}</strong>?
+                  </>
+                ) : (
+                  <>
+                    Seu favorito será{' '}
+                    <strong>{displayName(target.name)}</strong>.
+                  </>
                 )}
+              </p>
+              <div className="trainer-actions">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setVisible(false)}
+                >
+                  Cancelar
+                </button>
                 <button className="trainer-primary" disabled={busy}>
-                  {busy
-                    ? 'Salvando…'
-                    : !trainer
-                      ? target
-                        ? 'Criar perfil e votar'
-                        : 'Criar perfil'
-                      : target && target.id !== trainer.favorite?.id
-                        ? 'Confirmar voto'
-                        : 'Concluir'}
+                  Confirmar voto
                 </button>
               </div>
-            )}
-          </form>
+            </form>
+          ) : (
+            <>
+              <div className="avatar-heading">
+                <img src={avatarImage(trainer.avatar)} alt="Foto de perfil" />
+                <strong>{trainer.name}</strong>
+              </div>
+              <p>
+                {trainer.favorite
+                  ? 'Favorito: ' + displayName(trainer.favorite.name)
+                  : 'Escolha seu favorito no catálogo.'}
+              </p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  void accountAction({ action: 'avatar', pokemon: avatar })
+                }}
+              >
+                <label>
+                  Trocar foto de perfil
+                  <input
+                    value={avatar}
+                    required
+                    placeholder="Nome ou número do Pokémon"
+                    onChange={(e) => setAvatar(e.target.value)}
+                  />
+                </label>
+                <button
+                  className="trainer-primary"
+                  disabled={busy || !avatar.trim()}
+                >
+                  Salvar foto
+                </button>
+              </form>
+              <div className="trainer-actions">
+                <button
+                  disabled={busy}
+                  onClick={() => void accountAction({ action: 'logout' }, true)}
+                >
+                  Sair da conta
+                </button>
+              </div>
+            </>
+          )}
+          {error && (
+            <p className="trainer-error" role="alert">
+              {error}
+            </p>
+          )}
         </dialog>
       )}
     </>

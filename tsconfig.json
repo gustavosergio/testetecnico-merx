@@ -15,7 +15,8 @@
     "types": [
       "@cloudflare/workers-types",
       "vite/client"
-    ]
+    ],
+    "allowImportingTsExtensions": true
   },
   "include": [
     "src",

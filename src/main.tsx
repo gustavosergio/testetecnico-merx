@@ -8,7 +8,7 @@ import { createRoot } from 'react-dom/client'
 import Catalog from './Catalog'
 import Community from './Community'
 import Device from './Device'
-import { useTrainer } from './trainer'
+import { avatarImage, useTrainer } from './trainer'
 import './shell.css'
 
 type IconName = 'book' | 'trophy' | 'user'
@@ -68,7 +68,18 @@ function App() {
             </a>
           </nav>
           <button className="identity" onClick={openTrainer}>
-            <Icon name="user" />
+            <>
+              {trainer ? (
+                <img
+                  width="34"
+                  height="34"
+                  src={avatarImage(trainer.avatar)}
+                  alt=""
+                />
+              ) : (
+                <Icon name="user" />
+              )}
+            </>
             {trainer?.name ?? 'Entrar'}
           </button>
         </div>

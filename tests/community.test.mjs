@@ -13,6 +13,12 @@ function database() {
       'utf8',
     ),
   )
+  sqlite.exec(
+    readFileSync(
+      new URL('../drizzle/0001_accounts.sql', import.meta.url),
+      'utf8',
+    ),
+  )
   const wrap = (sql, args = []) => ({
     bind: (...params) => wrap(sql, params),
     run: async () => ({ meta: sqlite.prepare(sql).run(...args) }),
@@ -32,7 +38,13 @@ test('nomes únicos, sessão protegida, troca condicional e ranking compartilhad
       new Request('https://kalos.test/api/' + path, {
         method: body ? 'POST' : 'GET',
         headers: { Cookie: cookie, 'Content-Type': 'application/json' },
-        body: body ? JSON.stringify(body) : undefined,
+        body: body
+          ? JSON.stringify(
+              path === 'trainer'
+                ? { action: 'signup', trio: [1, 4, 7], pin: '0123', ...body }
+                : body,
+            )
+          : undefined,
       }),
       env,
     )
@@ -49,6 +61,8 @@ test('nomes únicos, sessão protegida, troca condicional e ranking compartilhad
   assert.equal((await call('trainer', { name: 'TREINADORA' })).status, 409)
   assert.deepEqual(await (await call('trainer', undefined, session)).json(), {
     name: 'TreinadorA',
+    avatar: 25,
+    needsSetup: false,
     favorite: null,
   })
   assert.equal((await call('favorite', { id: 1, previous: null })).status, 401)
@@ -75,4 +89,66 @@ test('nomes únicos, sessão protegida, troca condicional e ranking compartilhad
     { id: 1, name: 'bulbasaur', votes: 1 },
     { id: 4, name: 'charmander', votes: 1 },
   ])
+  assert.equal(
+    (await call('trainer', { action: 'avatar', pokemon: '4' }, session)).status,
+    200,
+  )
+  assert.equal(
+    (await call('trainer', { action: 'logout' }, session)).status,
+    200,
+  )
+  assert.equal(await (await call('trainer', undefined, session)).json(), null)
+  assert.equal(
+    (
+      await call('trainer', {
+        action: 'login',
+        name: 'TreinadorA',
+        trio: [4, 1, 7],
+      })
+    ).status,
+    401,
+  )
+  const back = await call('trainer', { action: 'login', name: 'TreinadorA' })
+  assert.equal(back.status, 200)
+  assert.equal((await back.json()).avatar, 4)
+  for (let i = 0; i < 5; i++)
+    assert.equal(
+      (
+        await call('trainer', {
+          action: 'login',
+          name: 'TreinadorA',
+          pin: '9999',
+        })
+      ).status,
+      401,
+    )
+  assert.equal(
+    (await call('trainer', { action: 'login', name: 'TreinadorA' })).status,
+    429,
+  )
+
+  const legacyToken = 'a'.repeat(64)
+  const bytes = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(legacyToken),
+  )
+  const legacyHash = Buffer.from(bytes).toString('hex')
+  await env.DB.prepare(
+    "INSERT INTO trainers(name_key,name,session_hash,favorite_id,favorite_name) VALUES ('veterano','Veterano',?,1,'bulbasaur')",
+  )
+    .bind(legacyHash)
+    .run()
+  const legacyCookie = 'kalos_trainer=' + legacyToken
+  assert.equal((await call('trainer', { action: 'setup' })).status, 403)
+  const setup = await call('trainer', { action: 'setup' }, legacyCookie)
+  assert.deepEqual(await setup.json(), {
+    name: 'Veterano',
+    needsSetup: false,
+    avatar: 25,
+    favorite: { id: 1, name: 'bulbasaur' },
+  })
+  assert.equal(
+    (await call('trainer', { action: 'setup' }, legacyCookie)).status,
+    403,
+  )
 })

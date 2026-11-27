@@ -1,3 +1,4 @@
+import { starters } from '../shared/starters.ts'
 interface Statement {
   bind(...params: unknown[]): Statement
   first<T>(): Promise<T | null>
@@ -9,6 +10,8 @@ interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> }
 }
 interface TrainerRow {
+  avatar_id: number
+  password_hash: string | null
   name: string
   favorite_id: number | null
   favorite_name: string | null
@@ -28,6 +31,8 @@ function trainerDTO(row: TrainerRow | null) {
   if (!row) return null
   return {
     name: row.name,
+    avatar: row.avatar_id,
+    needsSetup: !row.password_hash,
     favorite: row.favorite_id
       ? { id: row.favorite_id, name: row.favorite_name }
       : null,
@@ -57,7 +62,7 @@ async function handleAPI(req: Request, env: Env, url: URL) {
   const current = async () =>
     hash
       ? await env.DB.prepare(
-          'SELECT name, favorite_id, favorite_name FROM trainers WHERE session_hash = ?',
+          'SELECT name, avatar_id, password_hash, favorite_id, favorite_name FROM trainers WHERE session_hash = ?',
         )
           .bind(hash)
           .first<TrainerRow>()
@@ -85,7 +90,109 @@ async function handleAPI(req: Request, env: Env, url: URL) {
     return json({ error: 'Dados inválidos.' }, 400)
   const trainer = await current()
   if (path === '/api/trainer') {
-    if (trainer) return json(trainerDTO(trainer))
+    const action = body.action
+    const sessionHeaders = (value: string) => ({
+      'Set-Cookie':
+        cookie +
+        '=' +
+        value +
+        '; Path=/; HttpOnly; SameSite=Strict; Max-Age=' +
+        (value ? 31536000 : 0) +
+        (url.protocol === 'https:' ? '; Secure' : ''),
+    })
+    if (action === 'logout' && trainer && trainer.password_hash) {
+      await env.DB.prepare(
+        'UPDATE trainers SET session_hash = lower(hex(randomblob(32))) WHERE session_hash = ?',
+      )
+        .bind(hash)
+        .run()
+      return json(null, 200, sessionHeaders(''))
+    }
+    if (action === 'avatar' && trainer) {
+      const query = String(body.pokemon ?? '')
+        .trim()
+        .toLowerCase()
+      if (!/^[a-z0-9-]{1,50}$/.test(query))
+        return json({ error: 'Informe o nome ou número da espécie.' }, 400)
+      const r = await fetch(
+        'https://pokeapi.co/api/v2/pokemon-species/' + query + '/',
+        { signal: AbortSignal.timeout(10000) },
+      )
+      if (!r.ok)
+        return json(
+          { error: 'Não foi possível encontrar essa espécie.' },
+          r.status === 404 ? 400 : 502,
+        )
+      const { id } = (await r.json()) as { id: number }
+      await env.DB.prepare(
+        'UPDATE trainers SET avatar_id=? WHERE session_hash=?',
+      )
+        .bind(id, hash)
+        .run()
+      return json(trainerDTO(await current()))
+    }
+    if (!['signup', 'login', 'setup'].includes(String(action)))
+      return json({ error: 'Escolha entrar ou criar conta.' }, 400)
+    const { trio, pin } = body
+    if (
+      !Array.isArray(trio) ||
+      trio.length !== 3 ||
+      new Set(trio).size !== 3 ||
+      !trio.every(
+        (id) => Number.isInteger(id) && Object.hasOwn(starters, id),
+      ) ||
+      typeof pin !== 'string' ||
+      !/^[0-9]{4}$/.test(pin)
+    )
+      return json(
+        {
+          error: 'Escolha três iniciais diferentes e um PIN de quatro dígitos.',
+        },
+        400,
+      )
+    const password = async (salt: string) => {
+      const key = await crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(trio.join('-') + ':' + pin),
+        'PBKDF2',
+        false,
+        ['deriveBits'],
+      )
+      const bits = await crypto.subtle.deriveBits(
+        {
+          name: 'PBKDF2',
+          salt: new TextEncoder().encode(salt),
+          iterations: 100000,
+          hash: 'SHA-256',
+        },
+        key,
+        256,
+      )
+      return Array.from(new Uint8Array(bits), (n) =>
+        n.toString(16).padStart(2, '0'),
+      ).join('')
+    }
+    const salt = crypto.randomUUID()
+    if (action === 'setup') {
+      if (!trainer || trainer.password_hash)
+        return json(
+          { error: 'Use a sessão original do perfil para definir a senha.' },
+          403,
+        )
+      const changed = await env.DB.prepare(
+        'UPDATE trainers SET password_hash=?,salt=? WHERE session_hash=? AND password_hash IS NULL',
+      )
+        .bind(await password(salt), salt, hash)
+        .run()
+      if (!changed.meta.changes)
+        return json({ error: 'A senha já foi configurada.' }, 409)
+      return json(trainerDTO(await current()))
+    }
+    if (trainer)
+      return json(
+        { error: 'Saia do perfil atual antes de entrar em outro.' },
+        409,
+      )
     const name =
       typeof body.name === 'string' ? body.name.normalize('NFKC') : ''
     if (
@@ -98,20 +205,53 @@ async function handleAPI(req: Request, env: Env, url: URL) {
     const secret = Array.from(crypto.getRandomValues(new Uint8Array(32)), (n) =>
       n.toString(16).padStart(2, '0'),
     ).join('')
+    if (action === 'login') {
+      const key = name.toLowerCase()
+      const now = Date.now()
+      const account = await env.DB.prepare(
+        'SELECT * FROM trainers WHERE name_key=?',
+      )
+        .bind(key)
+        .first<TrainerRow & { salt: string }>()
+      const denied = () => json({ error: 'Nome, trio ou PIN incorreto.' }, 401)
+      if (!account?.password_hash) return denied()
+      const attempt = await env.DB.prepare(
+        'UPDATE trainers SET attempts=CASE WHEN window_end<=? THEN 1 ELSE attempts+1 END, window_end=CASE WHEN window_end<=? THEN ? ELSE window_end END WHERE name_key=? AND (window_end<=? OR attempts<5)',
+      )
+        .bind(now, now, now + 300000, key, now)
+        .run()
+      if (!attempt.meta.changes)
+        return json({ error: 'Muitas tentativas. Aguarde cinco minutos.' }, 429)
+      if ((await password(account.salt)) !== account.password_hash)
+        return denied()
+      await env.DB.prepare(
+        'UPDATE trainers SET session_hash=?, attempts=0,window_end=0 WHERE name_key=?',
+      )
+        .bind(await digest(secret), key)
+        .run()
+      return json(trainerDTO(account), 200, sessionHeaders(secret))
+    }
     const { meta } = await env.DB.prepare(
-      'INSERT INTO trainers(name_key,name,session_hash) VALUES (?,?,?) ON CONFLICT(name_key) DO NOTHING',
+      'INSERT INTO trainers(name_key,name,session_hash,password_hash,salt) VALUES (?,?,?,?,?) ON CONFLICT(name_key) DO NOTHING',
     )
-      .bind(name.toLowerCase(), name, await digest(secret))
+      .bind(
+        name.toLowerCase(),
+        name,
+        await digest(secret),
+        await password(salt),
+        salt,
+      )
       .run()
     if (!meta.changes)
       return json(
         { error: 'Esse nome já pertence a outro treinador. Escolha outro.' },
         409,
       )
-    const secure = url.protocol === 'https:' ? '; Secure' : ''
-    return json({ name, favorite: null }, 201, {
-      'Set-Cookie': `${cookie}=${secret}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Strict${secure}`,
-    })
+    return json(
+      { name, avatar: 25, needsSetup: false, favorite: null },
+      201,
+      sessionHeaders(secret),
+    )
   }
   if (!trainer)
     return json({ error: 'Identifique seu treinador para votar.' }, 401)
@@ -146,7 +286,9 @@ async function handleAPI(req: Request, env: Env, url: URL) {
     .bind(id, data.name, hash, previous)
     .run()
   if (!result.meta.changes) return conflict()
-  return json({ name: trainer.name, favorite: { id, name: data.name } })
+  return json(
+    trainerDTO({ ...trainer, favorite_id: id, favorite_name: data.name }),
+  )
 }
 export default {
   async fetch(req: Request, env: Env) {
