@@ -408,14 +408,19 @@ function FilterChoices({
 }
 export default function Catalog({ favorite, onFavorite }: Props) {
   const [filters, setFilters] = useState(readFilters)
+  const [searchDraft, setSearchDraft] = useState(filters.search)
   const [detail, setDetail] = useState<Pokemon | null>(null)
   const listStart = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    const sync = () => setFilters(readFilters())
+    const sync = () => {
+      const next = readFilters()
+      setFilters(next)
+      setSearchDraft(next.search)
+    }
     window.addEventListener('popstate', sync)
     return () => window.removeEventListener('popstate', sync)
   }, [])
-  const update = (patch: Partial<Filters>, replace = false) => {
+  const update = useCallback((patch: Partial<Filters>, replace = false) => {
     const next = { ...filters, page: 1, ...patch }
     setFilters(next)
     const url = new URL(location.href)
@@ -432,7 +437,12 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     }
     if (replace) history.replaceState(history.state, '', url)
     else history.pushState(history.state, '', url)
-  }
+  }, [filters])
+  useEffect(() => {
+    if (searchDraft === filters.search) return
+    const timer = window.setTimeout(() => update({ search: searchDraft }, true), 250)
+    return () => window.clearTimeout(timer)
+  }, [searchDraft, filters.search, update])
   const index = useRequest(
     useCallback(
       () => loadCatalogIndex(filters.regions, filters.types),
@@ -492,8 +502,8 @@ export default function Catalog({ favorite, onFavorite }: Props) {
               type="search"
               placeholder="Buscar por nome ou número"
               aria-label="Buscar Pokémon por nome ou número"
-              value={filters.search}
-              onChange={(e) => update({ search: e.target.value }, true)}
+              value={searchDraft}
+              onChange={(e) => setSearchDraft(e.target.value)}
             />
           </label>
         </div>
@@ -526,7 +536,10 @@ export default function Catalog({ favorite, onFavorite }: Props) {
               <strong>Nenhum Pokémon encontrado</strong>
               <span>Altere a região, o tipo ou o termo de busca.</span>
               <button
-                onClick={() => update({ search: '', types: [], regions: [] })}
+                onClick={() => {
+                  setSearchDraft('')
+                  update({ search: '', types: [], regions: [] })
+                }}
               >
                 Ver todas as espécies
               </button>
