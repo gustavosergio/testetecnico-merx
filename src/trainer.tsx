@@ -191,53 +191,6 @@ function Credentials({
   )
 }
 
-function ProfileField({
-  label,
-  initial,
-  multiline,
-  limit,
-  busy,
-  save,
-}: {
-  label: string
-  initial: string
-  multiline: boolean
-  limit: number
-  busy: boolean
-  save: (value: string) => Promise<void>
-}) {
-  const [value, setValue] = useState(initial)
-  const length = Array.from(value).length
-  const field = {
-    value,
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setValue(e.target.value),
-  }
-  return (
-    <form
-      className="profile-field"
-      onSubmit={(e) => {
-        e.preventDefault()
-        if (length <= limit) void save(value)
-      }}
-    >
-      <label>
-        {label} <small>Opcional · visível na busca</small>
-        {multiline ? <textarea rows={4} {...field} /> : <input {...field} />}
-      </label>
-      <small aria-live="polite">
-        {length}/{limit} caracteres
-      </small>
-      <button
-        className="trainer-primary"
-        disabled={busy || value === initial || length > limit}
-      >
-        Salvar {multiline ? 'descrição' : 'nick'}
-      </button>
-    </form>
-  )
-}
-
 export function useTrainer() {
   const [trainer, setTrainer] = useState<Trainer | null>(null)
   const [visible, setVisible] = useState(false)
@@ -246,6 +199,16 @@ export function useTrainer() {
   const [busy, setBusy] = useState(false)
   const [target, setTarget] = useState<Pokemon | null>(null)
   const [avatar, setAvatar] = useState('')
+  const [goNick, setGoNick] = useState('')
+  const [description, setDescription] = useState('')
+  const [profileSaved, setProfileSaved] = useState(false)
+  const nickLength = Array.from(goNick).length
+  const descriptionLength = Array.from(description).length
+  const profileChanges = Boolean(
+    avatar.trim() ||
+    goNick.trim() !== (trainer?.goNick ?? '') ||
+    description.trim() !== (trainer?.description ?? ''),
+  )
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
   const [revision, setRevision] = useState(0)
@@ -267,12 +230,18 @@ export function useTrainer() {
   useEffect(() => {
     if (visible) modal.current?.showModal()
   }, [visible])
+  function resetProfile(current: Trainer | null) {
+    setAvatar('')
+    setGoNick(current?.goNick ?? '')
+    setDescription(current?.description ?? '')
+    setProfileSaved(false)
+  }
   async function check() {
     setChecking(true)
     setUnavailable(false)
     setError('')
     try {
-      await refresh()
+      resetProfile(await refresh())
     } catch {
       setError('Não foi possível consultar seu perfil.')
       setUnavailable(true)
@@ -283,7 +252,6 @@ export function useTrainer() {
   function open(pokemon: Pokemon | null) {
     setTarget(pokemon)
     setStatus('')
-    setAvatar('')
     setVisible(true)
     void check()
   }
@@ -320,11 +288,59 @@ export function useTrainer() {
     try {
       const updated = await communityRequest<Trainer | null>('trainer', body)
       setTrainer(updated)
-      setAvatar('')
+      resetProfile(updated)
       if (close || (!target && !trainer?.needsSetup && updated && !trainer))
         setVisible(false)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Falha na conexão.')
+    } finally {
+      setBusy(false)
+    }
+  }
+  async function saveProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (
+      !trainer ||
+      busy ||
+      !profileChanges ||
+      nickLength > 32 ||
+      descriptionLength > 500
+    )
+      return
+
+    const changes = []
+    if (avatar.trim())
+      changes.push({ action: 'avatar', pokemon: avatar.trim() })
+    if (goNick.trim() !== (trainer.goNick ?? ''))
+      changes.push({ action: 'goNick', value: goNick.trim() })
+    if (description.trim() !== (trainer.description ?? ''))
+      changes.push({ action: 'description', value: description.trim() })
+
+    setBusy(true)
+    setError('')
+    setProfileSaved(false)
+    let completed = 0
+    try {
+      for (const change of changes) {
+        const updated = await communityRequest<Trainer | null>(
+          'trainer',
+          change,
+        )
+        if (!updated) throw new Error('Sua sessão expirou. Entre novamente.')
+        setTrainer(updated)
+        if (change.action === 'avatar') setAvatar('')
+        if (change.action === 'goNick') setGoNick(updated.goNick ?? '')
+        if (change.action === 'description')
+          setDescription(updated.description ?? '')
+        completed++
+      }
+      setProfileSaved(true)
+    } catch (cause) {
+      const message =
+        cause instanceof Error ? cause.message : 'Falha na conexão.'
+      setError(
+        completed > 0 ? 'Parte das alterações foi salva. ' + message : message,
+      )
     } finally {
       setBusy(false)
     }
@@ -427,56 +443,76 @@ export function useTrainer() {
                   ? 'Favorito: ' + displayName(trainer.favorite.name)
                   : 'Escolha seu favorito no catálogo.'}
               </p>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  void accountAction({ action: 'avatar', pokemon: avatar })
-                }}
-              >
+              <form className="profile-field" onSubmit={saveProfile}>
                 <label>
                   Trocar foto de perfil
                   <input
                     value={avatar}
-                    required
                     placeholder="Nome ou número do Pokémon"
-                    onChange={(e) => setAvatar(e.target.value)}
+                    disabled={busy}
+                    onChange={(e) => {
+                      setAvatar(e.target.value)
+                      setProfileSaved(false)
+                    }}
                   />
                 </label>
-                <button
-                  className="trainer-primary"
-                  disabled={busy || !avatar.trim()}
-                >
-                  Salvar foto
-                </button>
+                <label>
+                  Nick do Pokémon GO
+                  <small>Opcional · visível na busca</small>
+                  <input
+                    value={goNick}
+                    disabled={busy}
+                    aria-describedby="profile-nick-count"
+                    onChange={(e) => {
+                      setGoNick(e.target.value)
+                      setProfileSaved(false)
+                    }}
+                  />
+                </label>
+                <small id="profile-nick-count" aria-live="polite">
+                  {nickLength}/32 caracteres
+                </small>
+                <label>
+                  Descrição do perfil
+                  <small>Opcional · visível na busca</small>
+                  <textarea
+                    rows={4}
+                    value={description}
+                    disabled={busy}
+                    aria-describedby="profile-description-count"
+                    onChange={(e) => {
+                      setDescription(e.target.value)
+                      setProfileSaved(false)
+                    }}
+                  />
+                </label>
+                <small id="profile-description-count" aria-live="polite">
+                  {descriptionLength}/500 caracteres
+                </small>
+                <div className="trainer-actions profile-actions">
+                  <button
+                    className="trainer-primary"
+                    disabled={
+                      busy ||
+                      !profileChanges ||
+                      nickLength > 32 ||
+                      descriptionLength > 500
+                    }
+                  >
+                    Salvar alterações
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() =>
+                      void accountAction({ action: 'logout' }, true)
+                    }
+                  >
+                    Sair da conta
+                  </button>
+                </div>
+                {profileSaved && <p role="status">Alterações salvas.</p>}
               </form>
-              <ProfileField
-                key={'goNick' + (trainer.goNick ?? '')}
-                label="Nick do Pokémon GO"
-                initial={trainer.goNick ?? ''}
-                multiline={false}
-                limit={32}
-                busy={busy}
-                save={(value) => accountAction({ action: 'goNick', value })}
-              />
-              <ProfileField
-                key={'description' + (trainer.description ?? '')}
-                label="Descrição do perfil"
-                initial={trainer.description ?? ''}
-                multiline={true}
-                limit={500}
-                busy={busy}
-                save={(value) =>
-                  accountAction({ action: 'description', value })
-                }
-              />
-              <div className="trainer-actions">
-                <button
-                  disabled={busy}
-                  onClick={() => void accountAction({ action: 'logout' }, true)}
-                >
-                  Sair da conta
-                </button>
-              </div>
             </>
           )}
           {error && (

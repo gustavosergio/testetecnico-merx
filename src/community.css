@@ -345,8 +345,13 @@
   margin: 0.2rem 0;
 }
 
-.profile-field button {
-  margin-top: 0.35rem;
+.profile-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+}
+.profile-actions button {
+  padding-inline: 0.55rem;
 }
 
 .profile-field textarea {
