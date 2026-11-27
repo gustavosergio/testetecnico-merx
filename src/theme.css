@@ -42,7 +42,7 @@
     .mast,
     .skip,
     .identity,
-    .community,
+    .community:not(.trainer-directory),
     .trainer-dialog,
     .dex-detail,
     .dex-card,
