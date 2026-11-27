@@ -362,3 +362,80 @@
 .public-bio {
   white-space: pre-wrap;
 }
+
+.trainer-history {
+  margin-top: 1rem;
+  max-width: 30rem;
+}
+.trainer-history-heading,
+.trainer-history ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.trainer-history-heading {
+  justify-content: space-between;
+  align-items: center;
+}
+.trainer-history h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.trainer-history ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.trainer-history li {
+  min-width: 0;
+}
+.trainer-history button {
+  color: inherit;
+  background: transparent;
+  overflow-wrap: anywhere;
+}
+.trainer-history-heading button {
+  padding: 0.25rem 0.35rem;
+  border: 0;
+  text-decoration: underline;
+}
+.trainer-history li button {
+  padding: 0.35rem 0.65rem;
+  border: 1px solid #78959c;
+  border-radius: 0.55rem;
+  max-width: 100%;
+}
+.trainer-history li button:hover:not(:disabled) {
+  background: #78959c22;
+}
+
+.community.trainer-directory {
+  min-height: clamp(26rem, 49vw, 38rem);
+  background: #283950 url('/art/trainer-directory.png') center / cover no-repeat;
+}
+.trainer-directory-panel {
+  width: min(100%, 32rem);
+  color: #132d39;
+  background: #f6fcfd;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px #17213744;
+}
+[data-theme='dark'] .trainer-directory-panel {
+  color: var(--night-text);
+  background: var(--night-panel);
+}
+[data-theme='dark'] .trainer-directory-panel p {
+  color: var(--night-muted);
+}
+@media (max-width: 620px) {
+  .community.trainer-directory {
+    padding: clamp(8rem, 42vw, 15rem) 0.75rem 0.75rem;
+    min-height: 0;
+    background-position: center top;
+    background-size: 100% auto;
+  }
+  .trainer-directory-panel {
+    margin-inline: auto;
+  }
+}
