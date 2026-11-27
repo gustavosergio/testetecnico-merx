@@ -107,14 +107,36 @@ function Art({ pokemon }: { pokemon: Pokemon }) {
     <span>Sem imagem</span>
   )
 }
-function Chain({ item }: { item: Evolution }) {
+function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
+  const stage = useRequest(
+    useCallback(() => loadPokemon(String(item.id)), [item.id]),
+  )
   return (
     <li>
-      <span>{displayName(item.name)}</span>
+      <div
+        className="dex-stage"
+        aria-current={item.id === currentId ? 'true' : undefined}
+      >
+        <div className="dex-stage-art">
+          {stage.data ? (
+            <Art pokemon={stage.data} />
+          ) : (
+            <span aria-hidden="true">{numberLabel(item.id)}</span>
+          )}
+        </div>
+        <strong>{displayName(item.name)}</strong>
+        <small>{numberLabel(item.id)}</small>
+        {stage.data && <Types types={stage.data.types} />}
+        {stage.error && (
+          <button type="button" onClick={stage.retry}>
+            Tentar novamente
+          </button>
+        )}
+      </div>
       {item.next.length > 0 && (
         <ul>
           {item.next.map((child) => (
-            <Chain key={child.id} item={child} />
+            <Chain key={child.id} item={child} currentId={currentId} />
           ))}
         </ul>
       )}
@@ -177,14 +199,19 @@ function Details({
               <p lang={request.data.lang}>
                 {request.data.description || 'Descrição indisponível.'}
               </p>
-              <h3>Cadeia de evolução</h3>
-              {request.data.tree ? (
-                <ul className="dex-chain">
-                  <Chain item={request.data.tree} />
-                </ul>
-              ) : (
-                <p>Cadeia indisponível.</p>
-              )}
+              <section
+                className="dex-evolution"
+                aria-labelledby="dex-evolution-title"
+              >
+                <h3 id="dex-evolution-title">Cadeia de evolução</h3>
+                {request.data.tree ? (
+                  <ul className="dex-chain">
+                    <Chain item={request.data.tree} currentId={pokemon.id} />
+                  </ul>
+                ) : (
+                  <p>Cadeia indisponível.</p>
+                )}
+              </section>
             </>
           )}
           <button
