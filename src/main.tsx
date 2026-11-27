@@ -3,7 +3,7 @@ import '@fontsource/barlow/latin-600.css'
 import '@fontsource/barlow/latin-700.css'
 import '@fontsource/barlow-condensed/latin-700.css'
 import '@fontsource/ibm-plex-mono/latin-500.css'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import Catalog from './Catalog'
 import Community from './Community'
@@ -77,6 +77,86 @@ function ThemeSwitch() {
   )
 }
 
+const mainLinks = [
+  { href: '#pokedex', label: 'Pokédex', icon: 'book' },
+  { href: '#comunidade', label: 'Comunidade', icon: 'trophy' },
+  { href: '#treinadores', label: 'Treinadores', icon: 'user' },
+  { href: '#tipos', label: 'Tipos', icon: 'types' },
+] as const
+
+function Navigation({ page, close }: { page: string; close?: () => void }) {
+  const active =
+    page === '#sobre' || mainLinks.some((link) => link.href === page)
+      ? page
+      : '#pokedex'
+  return (
+    <nav
+      aria-label="Navegação principal"
+      className={close ? 'mobile-nav' : 'desktop-nav'}
+    >
+      {mainLinks.map(({ href, label, icon }) => (
+        <a
+          href={href}
+          key={href}
+          aria-current={active === href ? 'page' : undefined}
+          onClick={close}
+        >
+          <Icon name={icon} />
+          {label}
+        </a>
+      ))}
+      {close && (
+        <a
+          href="#sobre"
+          aria-current={active === '#sobre' ? 'page' : undefined}
+          onClick={close}
+        >
+          Sobre o projeto
+        </a>
+      )}
+    </nav>
+  )
+}
+
+function MobileMenu({ page }: { page: string }) {
+  const menu = useRef<HTMLDetailsElement>(null)
+  const toggle = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const dismiss = (event: PointerEvent) => {
+      if (
+        menu.current?.open &&
+        event.target instanceof Node &&
+        !menu.current.contains(event.target)
+      ) {
+        menu.current.open = false
+      }
+    }
+    document.addEventListener('pointerdown', dismiss)
+    return () => document.removeEventListener('pointerdown', dismiss)
+  }, [])
+  const close = () => {
+    if (menu.current) menu.current.open = false
+    toggle.current?.focus()
+  }
+  return (
+    <details
+      className="mast-menu"
+      ref={menu}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && menu.current?.open) {
+          event.preventDefault()
+          close()
+        }
+      }}
+    >
+      <summary ref={toggle} aria-label="Menu de navegação">
+        <span aria-hidden="true">⋮</span>
+      </summary>
+      <Navigation page={page} close={close} />
+    </details>
+  )
+}
+
 function App() {
   const [page, setPage] = useState(location.hash)
   const { trainer, openTrainer, onFavorite, dialog, revision } = useTrainer()
@@ -99,42 +179,7 @@ function App() {
             <img src="/dex.svg" alt="" />
             Merx<span>Dex</span>
           </a>
-          <nav aria-label="Navegação principal">
-            <a
-              href="#pokedex"
-              aria-current={
-                !['#comunidade', '#treinadores', '#tipos', '#sobre'].includes(
-                  page,
-                )
-                  ? 'page'
-                  : undefined
-              }
-            >
-              <Icon name="book" />
-              Pokédex
-            </a>
-            <a
-              href="#comunidade"
-              aria-current={page === '#comunidade' ? 'page' : undefined}
-            >
-              <Icon name="trophy" />
-              Comunidade
-            </a>
-            <a
-              href="#treinadores"
-              aria-current={page === '#treinadores' ? 'page' : undefined}
-            >
-              <Icon name="user" />
-              Treinadores
-            </a>
-            <a
-              href="#tipos"
-              aria-current={page === '#tipos' ? 'page' : undefined}
-            >
-              <Icon name="types" />
-              Tipos
-            </a>
-          </nav>
+          <Navigation page={page} />
           <div className="mast-controls">
             <a
               className="about-link"
@@ -159,6 +204,7 @@ function App() {
               </>
               {trainer?.name ?? 'Entrar'}
             </button>
+            <MobileMenu page={page} />
           </div>
         </div>
       </header>
