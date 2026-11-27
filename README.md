@@ -32,6 +32,10 @@ npm run build
 
 Os testes exercitam a combinação de filtros, a árvore de evolução, as regras do cadastro e a troca de votos entre sessões. O build verifica os tipos e gera a aplicação em `dist/client` e o Worker em `dist/server`.
 
+## Deploy na Vercel
+
+Importe este repositório na Vercel com a raiz do projeto no diretório do repositório. O arquivo `vercel.json` define o build do Vite e a pasta publicada. As funções em `api/` encaminham cadastro, favoritos e ranking ao Worker existente, que mantém o banco D1 compartilhado. Como a sessão é vinculada ao domínio, mudar de endereço não transfere o cookie do treinador.
+
 ## Tecnologias e decisões
 
 - **React, TypeScript, Vite e CSS.** A navegação e o consumo REST da PokéAPI acontecem no frontend. Componentes com elementos HTML nativos oferecem navegação por teclado, foco visível e diálogos que fecham com Escape.

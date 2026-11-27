@@ -3,12 +3,23 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["@cloudflare/workers-types", "vite/client"]
+    "types": [
+      "@cloudflare/workers-types",
+      "vite/client"
+    ]
   },
-  "include": ["src", "server"]
+  "include": [
+    "src",
+    "server",
+    "api"
+  ]
 }
