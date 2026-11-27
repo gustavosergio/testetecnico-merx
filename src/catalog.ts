@@ -18,8 +18,24 @@ type SpeciesResponse = {
   flavor_text_entries: { flavor_text: string; language: { name: string } }[]
   evolution_chain: { url: string } | null
 }
-type ChainLink = { species: Ref; evolves_to: ChainLink[] }
-export type Evolution = SpeciesEntry & { next: Evolution[] }
+type ChainLink = {
+  species: Ref
+  evolves_to: ChainLink[]
+  evolution_details?: {
+    min_level: number | null
+    item: Ref | null
+    held_item: Ref | null
+  }[]
+}
+type EvolutionRequirement = {
+  level: number | null
+  item: string | null
+  heldItem: string | null
+}
+export type Evolution = SpeciesEntry & {
+  next: Evolution[]
+  requirements: EvolutionRequirement[]
+}
 export type Pokemon = SpeciesEntry & {
   image: string | null
   types: string[]
@@ -199,7 +215,19 @@ export const loadPokemon = cached(async (id) => {
   } satisfies Pokemon
 })
 function evolution(link: ChainLink): Evolution {
+  const requirements = new Map<string, EvolutionRequirement>()
+  for (const detail of link.evolution_details ?? []) {
+    const requirement = {
+      level: detail.min_level ?? null,
+      item: detail.item?.name ?? null,
+      heldItem: detail.held_item?.name ?? null,
+    }
+    if (requirement.level || requirement.item || requirement.heldItem) {
+      requirements.set(JSON.stringify(requirement), requirement)
+    }
+  }
   return {
+    requirements: [...requirements.values()],
     id: idFromUrl(link.species.url),
     name: link.species.name,
     next: link.evolves_to.map(evolution),

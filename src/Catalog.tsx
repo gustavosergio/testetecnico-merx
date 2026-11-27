@@ -120,6 +120,29 @@ function Art({ pokemon }: { pokemon: Pokemon }) {
     <span>Sem imagem</span>
   )
 }
+function EvolutionItem({
+  name,
+  held = false,
+}: {
+  name: string
+  held?: boolean
+}) {
+  return (
+    <span className="dex-evolution-item">
+      <img
+        src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${name}.png`}
+        width="24"
+        height="24"
+        alt=""
+        onError={(event) => {
+          event.currentTarget.hidden = true
+        }}
+      />
+      {held ? 'Segurando ' : ''}
+      {displayName(name)}
+    </span>
+  )
+}
 function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
   const stage = useRequest(
     useCallback(() => loadPokemon(String(item.id)), [item.id]),
@@ -130,6 +153,17 @@ function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
         className="dex-stage"
         aria-current={item.id === currentId ? 'true' : undefined}
       >
+        {item.requirements.length > 0 && (
+          <div className="dex-evolution-requirements">
+            {item.requirements.map(({ level, item, heldItem }) => (
+              <div key={JSON.stringify([level, item, heldItem])}>
+                {level !== null && <span>Nível {level}</span>}
+                {item && <EvolutionItem name={item} />}
+                {heldItem && <EvolutionItem name={heldItem} held />}
+              </div>
+            ))}
+          </div>
+        )}
         <div className="dex-stage-art">
           {stage.data ? (
             <Art pokemon={stage.data} />

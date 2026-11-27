@@ -23,11 +23,16 @@ test('preserva os ramos da evolução e usa descrição em inglês se não houve
     url: 'https://pokeapi.co/api/v2/pokemon-species/' + id + '/',
   })
   const leaf = (name, id) => ({ species: ref(name, id), evolves_to: [] })
+  const stone = { name: 'water-stone', url: 'https://pokeapi.co/api/v2/item/84/' }
+  const detail = { min_level: null, item: stone, held_item: null }
   const speciesUrl = ref('eevee', 133).url
   const tree = {
     chain: {
       species: ref('eevee', 133),
-      evolves_to: [leaf('jolteon', 135), leaf('vaporeon', 134)],
+      evolves_to: [
+        leaf('jolteon', 135),
+        { ...leaf('vaporeon', 134), evolution_details: [detail, detail] },
+      ],
     },
   }
   t.mock.method(globalThis, 'fetch', async (url) =>
@@ -50,6 +55,9 @@ test('preserva os ramos da evolução e usa descrição em inglês se não houve
     result.tree.next.map((p) => p.name),
     ['jolteon', 'vaporeon'],
   )
+  assert.deepEqual(result.tree.next[1].requirements, [
+    { level: null, item: 'water-stone', heldItem: null },
+  ])
 })
 
 test('une regiões e tipos, cruza os dois filtros e mantém a ordem nacional', async (t) => {
