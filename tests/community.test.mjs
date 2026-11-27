@@ -19,6 +19,7 @@ function database() {
       'utf8',
     ),
   )
+  sqlite.exec(readFileSync(new URL("../drizzle/0003_go_nick.sql", import.meta.url), "utf8"))
   const wrap = (sql, args = []) => ({
     bind: (...params) => wrap(sql, params),
     run: async () => ({ meta: sqlite.prepare(sql).run(...args) }),
@@ -60,7 +61,7 @@ test('nomes únicos, sessão protegida, troca condicional e ranking compartilhad
   const session = setCookie.split(';')[0]
   assert.equal((await call('trainer', { name: 'TREINADORA' })).status, 409)
   assert.deepEqual(await (await call('trainer', undefined, session)).json(), {
-    name: 'TreinadorA',
+    name: 'TreinadorA', goNick:null,
     avatar: 25,
     needsSetup: false,
     favorite: null,
@@ -142,7 +143,7 @@ test('nomes únicos, sessão protegida, troca condicional e ranking compartilhad
   assert.equal((await call('trainer', { action: 'setup' })).status, 403)
   const setup = await call('trainer', { action: 'setup' }, legacyCookie)
   assert.deepEqual(await setup.json(), {
-    name: 'Veterano',
+    name: 'Veterano', goNick:null,
     needsSetup: false,
     avatar: 25,
     favorite: { id: 1, name: 'bulbasaur' },

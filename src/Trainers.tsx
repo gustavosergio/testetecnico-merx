@@ -3,6 +3,7 @@ import { avatarImage, communityRequest } from './trainer'
 import { displayName } from './catalog'
 
 type PublicTrainer = {
+  goNick: string | null
   name: string
   avatar: number
   favorite: { id: number; name: string } | null
@@ -47,6 +48,7 @@ export default function Trainers() {
           <img src={avatarImage(profile.avatar)} alt="" width="66" height="66" />
           <div><strong>{profile.name}</strong>
           {profile.favorite && <p>Favorito: {displayName(profile.favorite.name)}</p>}
+          {profile.goNick && <p>Pokémon GO: {profile.goNick}</p>}
           </div>
         </li>)}
       </ul>}

@@ -285,3 +285,5 @@
 .trainer-results { display: grid; list-style: none; gap: .55rem; padding: 0; }
 .trainer-results li { display: flex; align-items: flex-start; gap: .8rem; border: 1px solid #668b94; border-radius: .7rem; padding: .65rem; overflow-wrap: anywhere; }
 .trainer-results p { margin: .2rem 0; }
+
+.profile-field button { margin-top: .35rem; }
