@@ -10,6 +10,7 @@ import Community from './Community'
 import Device from './Device'
 import { avatarImage, useTrainer } from './trainer'
 import './shell.css'
+import './theme.css'
 
 type IconName = 'book' | 'trophy' | 'user'
 function Icon({ name }: { name: IconName }) {
@@ -35,6 +36,23 @@ function Icon({ name }: { name: IconName }) {
     </svg>
   )
 }
+function ThemeSwitch() {
+  const [dark, setDark] = useState(() => {
+    try {
+      const saved = localStorage.getItem('merxdex-theme')
+      if (saved === 'light' || saved === 'dark') return saved === 'dark'
+    } catch {}
+    return matchMedia('(prefers-color-scheme: dark)').matches
+  })
+  useEffect(() => {
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+  }, [dark])
+  return <button className="theme-switch" type="button" aria-pressed={dark} onClick={() => {
+    try { localStorage.setItem('merxdex-theme', dark ? 'light' : 'dark') } catch {}
+    setDark(!dark)
+  }}>Modo escuro</button>
+}
+
 function App() {
   const [community, setCommunity] = useState(location.hash === '#comunidade')
   const { trainer, openTrainer, onFavorite, dialog, revision } = useTrainer()
@@ -67,6 +85,8 @@ function App() {
               Comunidade
             </a>
           </nav>
+          <div className="mast-controls">
+          <ThemeSwitch />
           <button className="identity" onClick={openTrainer}>
             <>
               {trainer ? (
@@ -82,6 +102,7 @@ function App() {
             </>
             {trainer?.name ?? 'Entrar'}
           </button>
+          </div>
         </div>
       </header>
       <main id="conteudo" className="main-wrap">
