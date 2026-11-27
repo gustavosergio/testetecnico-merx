@@ -11,6 +11,7 @@ import FavoritePrompt from './FavoritePrompt'
 import Device from './Device'
 import TypeMatchups from './TypeMatchups'
 import TrainerGreeting from './TrainerGreeting'
+import PersonalStory from './PersonalStory'
 import './shell.css'
 import './theme.css'
 
@@ -124,7 +125,7 @@ function Navigation({
           aria-current={active === '#sobre' ? 'page' : undefined}
           onClick={close}
         >
-          Sobre o projeto
+          Relato pessoal
         </a>
       )}
     </nav>
@@ -287,7 +288,7 @@ function App() {
               href="#sobre"
               aria-current={page === '#sobre' ? 'page' : undefined}
             >
-              Sobre o projeto
+              Relato pessoal
             </a>
             <MobileMenu page={page} favoriteId={favorite?.id} />
           </div>
@@ -295,7 +296,7 @@ function App() {
       </header>
       <main ref={main} id="conteudo" className="main-wrap" tabIndex={-1}>
         <TrainerGreeting />
-        {page === '#sobre' ? null : page === '#tipos' ? (
+        {page === '#sobre' ? <PersonalStory /> : page === '#tipos' ? (
           <TypeMatchups />
         ) : page === '#favorito' ? (
           <FavoritePage favorite={favorite} onRemove={setCandidate} />
