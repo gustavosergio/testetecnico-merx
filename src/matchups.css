@@ -46,8 +46,9 @@
 }
 
 .community.type-matchups {
+  --scenery-image: url('/art/type-matchups.png');
+  --scenery-base: #164f42;
   min-height: clamp(25rem, 49vw, 38rem);
-  background: #164f42 url('/art/type-matchups.png') center / cover no-repeat;
 }
 .type-matchups .scenery-panel {
   width: min(100%, 36rem);
