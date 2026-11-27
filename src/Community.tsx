@@ -34,61 +34,63 @@ export default function Community({ revision = 0 }: { revision?: number }) {
     return () => controller.abort()
   }, [revision, attempt])
   return (
-    <section className="community" aria-labelledby="community-title">
-      <h2 id="community-title">Favoritos da comunidade</h2>
-      <p>Os cinco Pokémon mais escolhidos pelos treinadores.</p>
-      {error ? (
-        <div role="alert">
-          {error}{' '}
-          <button
-            className="trainer-primary"
-            onClick={() => setAttempt((n) => n + 1)}
-          >
-            Tentar novamente
-          </button>
-        </div>
-      ) : !ranking ? (
-        <p role="status">Contando votos…</p>
-      ) : (
-        <>
-          {ranking.length === 0 && (
-            <p className="ranking-empty">
-              O pódio espera pelo primeiro voto. Escolha seu favorito no
-              catálogo!
-            </p>
-          )}
-          <ol className="community-podium">
-            {[0, 1, 2].map((i) => (
-              <li key={i} className={'podium-place place-' + (i + 1)}>
-                <span className="podium-number">{i + 1}º</span>
-                <div className="podium-art">
-                  {ranking[i] ? (
-                    <Art entry={ranking[i]} />
-                  ) : (
-                    <span aria-hidden="true">◇</span>
-                  )}
-                </div>
-                <strong>
-                  {ranking[i] ? displayName(ranking[i].name) : 'Em aberto'}
-                </strong>
-                <span>{votes(ranking[i]?.votes ?? 0)}</span>
-              </li>
-            ))}
-          </ol>
-          <ol className="ranking-rest" start={4}>
-            {[3, 4].map((i) => (
-              <li key={i}>
-                <b>{i + 1}º</b>
-                {ranking[i] && <Art entry={ranking[i]} />}
-                <strong>
-                  {ranking[i] ? displayName(ranking[i].name) : 'Em aberto'}
-                </strong>
-                <span>{votes(ranking[i]?.votes ?? 0)}</span>
-              </li>
-            ))}
-          </ol>
-        </>
-      )}
+    <section className="community community-stadium" aria-labelledby="community-title">
+      <div className="scenery-panel stadium-ranking">
+        <h2 id="community-title">Favoritos da comunidade</h2>
+        <p>Os cinco Pokémon mais escolhidos pelos treinadores.</p>
+        {error ? (
+          <div role="alert">
+            {error}{' '}
+            <button
+              className="trainer-primary"
+              onClick={() => setAttempt((n) => n + 1)}
+            >
+              Tentar novamente
+            </button>
+          </div>
+        ) : !ranking ? (
+          <p role="status">Contando votos…</p>
+        ) : (
+          <>
+            {ranking.length === 0 && (
+              <p className="ranking-empty">
+                O pódio espera pelo primeiro voto. Escolha seu favorito no
+                catálogo!
+              </p>
+            )}
+            <ol className="community-podium">
+              {[0, 1, 2].map((i) => (
+                <li key={i} className={'podium-place place-' + (i + 1)}>
+                  <span className="podium-number">{i + 1}º</span>
+                  <div className="podium-art">
+                    {ranking[i] ? (
+                      <Art entry={ranking[i]} />
+                    ) : (
+                      <span aria-hidden="true">◇</span>
+                    )}
+                  </div>
+                  <strong>
+                    {ranking[i] ? displayName(ranking[i].name) : 'Em aberto'}
+                  </strong>
+                  <span>{votes(ranking[i]?.votes ?? 0)}</span>
+                </li>
+              ))}
+            </ol>
+            <ol className="ranking-rest" start={4}>
+              {[3, 4].map((i) => (
+                <li key={i}>
+                  <b>{i + 1}º</b>
+                  {ranking[i] && <Art entry={ranking[i]} />}
+                  <strong>
+                    {ranking[i] ? displayName(ranking[i].name) : 'Em aberto'}
+                  </strong>
+                  <span>{votes(ranking[i]?.votes ?? 0)}</span>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
+      </div>
     </section>
   )
 }

@@ -419,15 +419,15 @@
   --scenery-base: #283950;
   min-height: clamp(26rem, 49vw, 38rem);
 }
-.community:is(.trainer-directory, .type-matchups) {
+.community:is(.trainer-directory, .type-matchups, .community-stadium) {
   background: var(--scenery-base) var(--scenery-image) center / cover no-repeat;
 }
-[data-theme='dark'] .community:is(.trainer-directory, .type-matchups) {
+[data-theme='dark'] .community:is(.trainer-directory, .type-matchups, .community-stadium) {
   position: relative;
   isolation: isolate;
   background: #0b1528;
 }
-[data-theme='dark'] .community:is(.trainer-directory, .type-matchups)::before {
+[data-theme='dark'] .community:is(.trainer-directory, .type-matchups, .community-stadium)::before {
   position: absolute;
   z-index: -1;
   inset: 0;
@@ -471,11 +471,21 @@
   box-shadow: 0 0 0 5px #143540;
 }
 @media (max-width: 620px) {
-  .community:is(.trainer-directory, .type-matchups) {
+  .community:is(.trainer-directory, .type-matchups, .community-stadium) {
     min-height: 0;
     padding: clamp(4rem, 22vw, 8rem) 0.75rem 0.75rem;
   }
   .scenery-panel {
     margin-inline: auto;
   }
+}
+
+.community.community-stadium {
+  --scenery-image: url('/art/community-stadium.webp');
+  --scenery-base: #26314d;
+  padding-top: clamp(4rem, 11vw, 9rem);
+}
+.stadium-ranking.scenery-panel {
+  width: min(100%, 48rem);
+  margin-inline: auto;
 }
