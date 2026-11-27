@@ -256,10 +256,7 @@ function Details({
           <button
             className="dex-primary"
             disabled={favorite === pokemon.id}
-            onClick={() => {
-              close()
-              onFavorite(pokemon)
-            }}
+            onClick={() => onFavorite(pokemon)}
           >
             <Heart filled={favorite === pokemon.id} />
             {favorite === pokemon.id
