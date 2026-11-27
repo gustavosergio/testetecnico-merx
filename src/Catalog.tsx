@@ -118,8 +118,14 @@ function Types({ types }: { types: string[] }) {
   )
 }
 function Art({ pokemon }: { pokemon: Pokemon }) {
-  return pokemon.image ? (
-    <img src={pokemon.image} alt="" decoding="async" />
+  const [failedImage, setFailedImage] = useState<string | null>(null)
+  return pokemon.image && pokemon.image !== failedImage ? (
+    <img
+      src={pokemon.image}
+      alt=""
+      decoding="async"
+      onError={(event) => setFailedImage(event.currentTarget.getAttribute('src'))}
+    />
   ) : (
     <span>Sem imagem</span>
   )

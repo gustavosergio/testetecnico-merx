@@ -35,7 +35,15 @@ export default function FavoritePrompt({
     >
       <div className="favorite-conversation">
         <figure className="favorite-portrait">
-          {pokemon.image && <img src={pokemon.image} alt="" />}
+          {pokemon.image && (
+            <img
+              src={pokemon.image}
+              alt=""
+              onError={(event) => {
+                event.currentTarget.hidden = true
+              }}
+            />
+          )}
           <figcaption>{name}</figcaption>
         </figure>
         <div className="favorite-bubble">

@@ -234,6 +234,7 @@ function FavoritePage({
 
 function App() {
   const [page, setPage] = useState(location.hash)
+  const main = useRef<HTMLElement>(null)
   const [favorite, setFavorite] = useState(readFavorite)
 
   const [candidate, setCandidate] = useState<FavoriteCandidate | null>(null)
@@ -259,7 +260,15 @@ function App() {
   }, [])
   return (
     <>
-      <a className="skip" href="#conteudo">
+      <a
+        className="skip"
+        href="#conteudo"
+        onClick={(event) => {
+          event.preventDefault()
+          main.current?.focus({ preventScroll: true })
+          main.current?.scrollIntoView({ block: 'start' })
+        }}
+      >
         Pular para o conteúdo
       </a>
       <header className="mast">
@@ -284,7 +293,7 @@ function App() {
           </div>
         </div>
       </header>
-      <main id="conteudo" className="main-wrap">
+      <main ref={main} id="conteudo" className="main-wrap" tabIndex={-1}>
         <TrainerGreeting />
         {page === '#sobre' ? null : page === '#tipos' ? (
           <TypeMatchups />

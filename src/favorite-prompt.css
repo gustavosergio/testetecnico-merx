@@ -31,7 +31,7 @@
   font-weight: 650;
   overflow-wrap: anywhere;
 }
-.favorite-portrait img {
+.favorite-portrait img:not([hidden]) {
   display: block;
   width: 100%;
   aspect-ratio: 1;
