@@ -44,3 +44,5 @@ Os testes automatizados cobrem busca, combinação de filtros e leitura da cadei
 - **Escopo da entrega.** A `main` usa o armazenamento do navegador para o favorito. A [branch versao-completa](https://github.com/gustavosergio/testetecnico-merx/tree/versao-completa) preserva o projeto anterior, com contas, perfis e ranking comunitário. [Abrir a versão completa](https://merxdex.vercel.app/)
 
 A carcaça e o visor da Pokédex de Kalos inspiraram a ilustração do aparelho em CSS. Os sprites vêm do [repositório de imagens da PokéAPI](https://github.com/PokeAPI/sprites).
+
+Os retratos pixelados do ícone Meu favorito vêm dos colaboradores do [PMDCollab SpriteCollab](https://github.com/PMDCollab/SpriteCollab), conforme os [créditos por espécie](https://sprites.pmdcollab.org/) e a [licença CC BY-NC 4.0 do projeto](https://github.com/PMDCollab/SpriteCollab/blob/master/LICENSE.md).

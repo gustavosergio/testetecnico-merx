@@ -59,7 +59,39 @@ const mainLinks = [
   { href: '#favorito', label: 'Meu favorito', icon: null },
 ] as const
 
-function Navigation({ page, close }: { page: string; close?: () => void }) {
+function FavoriteIcon({ id }: { id: number }) {
+  const [portraitFailed, setPortraitFailed] = useState(false)
+  const [spriteFailed, setSpriteFailed] = useState(false)
+  if (spriteFailed) return <Heart filled={false} />
+
+  const portraitId = String(id).padStart(4, '0')
+  const src = portraitFailed
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+    : `https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/${portraitId}/Normal.png`
+  return (
+    <img
+      className="favorite-nav-icon"
+      src={src}
+      width="22"
+      height="22"
+      alt=""
+      onError={() => {
+        if (portraitFailed) setSpriteFailed(true)
+        else setPortraitFailed(true)
+      }}
+    />
+  )
+}
+
+function Navigation({
+  page,
+  favoriteId,
+  close,
+}: {
+  page: string
+  favoriteId?: number
+  close?: () => void
+}) {
   const active =
     page === '#sobre' || mainLinks.some((link) => link.href === page)
       ? page
@@ -78,6 +110,8 @@ function Navigation({ page, close }: { page: string; close?: () => void }) {
         >
           {icon ? (
             <img src={icon} width="19" height="19" alt="" style={{ objectFit: 'contain' }} />
+          ) : favoriteId ? (
+            <FavoriteIcon key={favoriteId} id={favoriteId} />
           ) : (
             <Heart filled={false} />
           )}
@@ -97,7 +131,7 @@ function Navigation({ page, close }: { page: string; close?: () => void }) {
   )
 }
 
-function MobileMenu({ page }: { page: string }) {
+function MobileMenu({ page, favoriteId }: { page: string; favoriteId?: number }) {
   const menu = useRef<HTMLDetailsElement>(null)
   const toggle = useRef<HTMLElement>(null)
   useEffect(() => {
@@ -131,7 +165,7 @@ function MobileMenu({ page }: { page: string }) {
       <summary ref={toggle} aria-label="Menu de navegação">
         <span aria-hidden="true">⋮</span>
       </summary>
-      <Navigation page={page} close={close} />
+      <Navigation page={page} favoriteId={favoriteId} close={close} />
     </details>
   )
 }
@@ -235,7 +269,7 @@ function App() {
             Merx<span>Dex</span>
           </a>
           <div className="mast-links">
-            <Navigation page={page} />
+            <Navigation page={page} favoriteId={favorite?.id} />
             <ThemeSwitch />
           </div>
           <div className="mast-controls">
@@ -246,7 +280,7 @@ function App() {
             >
               Sobre o projeto
             </a>
-            <MobileMenu page={page} />
+            <MobileMenu page={page} favoriteId={favorite?.id} />
           </div>
         </div>
       </header>

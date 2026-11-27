@@ -94,6 +94,11 @@ select:focus-visible {
   position: relative;
   color: #53606a;
 }
+.favorite-nav-icon {
+  flex: 0 0 22px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
 .mast nav a[aria-current] {
   color: #af2034;
 }
