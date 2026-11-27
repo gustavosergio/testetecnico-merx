@@ -292,12 +292,14 @@ function FilterChoices({
   label,
   unrestricted,
   options,
+  showTypeIcons = false,
   selected,
   onChange,
 }: {
   label: string
   unrestricted: string
   options: Option[]
+  showTypeIcons?: boolean
   selected: string[]
   onChange: (values: string[]) => void
 }) {
@@ -324,6 +326,15 @@ function FilterChoices({
                 )
               }
             />
+            {showTypeIcons && (
+              <img
+                className="dex-filter-icon"
+                src={`/art/types/${key}.png`}
+                alt=""
+                width="20"
+                height="20"
+              />
+            )}
             {name}
           </label>
         ))}
@@ -432,6 +443,7 @@ export default function Catalog({ favorite, onFavorite }: Props) {
           label="Tipos"
           unrestricted="Todos os tipos"
           options={typeOptions}
+          showTypeIcons
           selected={filters.types}
           onChange={(types) => update({ types })}
         />

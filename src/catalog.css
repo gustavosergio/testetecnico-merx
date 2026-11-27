@@ -85,6 +85,10 @@
   border-radius: 0.4rem;
   cursor: pointer;
 }
+.dex-filter-icon {
+  flex: none;
+  object-fit: contain;
+}
 .dex-options input {
   margin: 0;
   accent-color: #1a5158;
