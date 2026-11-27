@@ -212,14 +212,14 @@ function App() {
             <section className="hero" aria-labelledby="title">
               <div className="hero-copy">
                 <div className="eyeline">
-                  <i aria-hidden="true" /> SISTEMA KALOS
+                  <i aria-hidden="true" /> MERXDEX
                 </div>
                 <h1 id="title">
-                  Pokédex regional<span>.</span>
+                  Explore o mundo Pokémon<span>.</span>
                 </h1>
                 <p>
-                  Explore as regiões, descubra evoluções e escolha seu Pokémon
-                  favorito.
+                  Busque por nome ou número, filtre por região ou tipo e
+                  descubra como cada Pokémon evolui.
                 </p>
               </div>
               <div className="device-stage">
