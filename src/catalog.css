@@ -522,6 +522,10 @@
     padding-inline: 0.85rem;
   }
   .dex-chain {
+    --stage-art-size: 3rem;
+    --stage-padding: 0.35rem;
+    --branch-padding: 0.4rem;
+    --branch-join: calc(var(--branch-padding) + var(--stage-padding) + var(--stage-art-size) / 2);
     width: 100%;
   }
   .dex-chain li {
@@ -529,17 +533,37 @@
   }
   .dex-chain ul {
     margin-left: 0.7rem;
-    padding-left: 1rem;
-    border-left: 2px solid #83d4cb;
+    padding-left: calc(1rem + 2px);
+  }
+  .dex-chain ul > li {
+    padding-block: var(--branch-padding);
   }
   .dex-chain ul > li::before {
+    top: calc(var(--branch-join) - 1px);
     width: 1rem;
+  }
+  .dex-chain ul > li::after {
+    top: calc(var(--branch-join) - 4px);
   }
   .dex-chain ul > li:not(:only-child) > .dex-stage::before {
     display: none;
   }
+  .dex-chain ul > li > .dex-stage::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(-1rem - 2px);
+    width: 2px;
+    background: #83d4cb;
+  }
+  .dex-chain ul > li:last-child > .dex-stage::after {
+    bottom: auto;
+    height: var(--branch-join);
+  }
   .dex-stage {
-    grid-template-columns: 3rem minmax(0, 1fr);
+    grid-template-columns: var(--stage-art-size) minmax(0, 1fr);
+    padding: var(--stage-padding);
     width: 100%;
     justify-items: start;
     align-items: center;
@@ -547,8 +571,9 @@
     column-gap: 0.6rem;
   }
   .dex-stage-art {
-    width: 3rem;
+    width: var(--stage-art-size);
     grid-row: 1 / span 3;
+    align-self: start;
   }
   .dex-stage > :not(.dex-stage-art) {
     grid-column: 2;
