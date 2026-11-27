@@ -4,6 +4,6 @@ dist/
 .env*
 .dev.vars*
 *.log
-.openai/local*
+/.openai/
 
 .vercel/
