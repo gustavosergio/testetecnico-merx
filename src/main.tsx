@@ -103,7 +103,9 @@ function App() {
             <a
               href="#pokedex"
               aria-current={
-                !['#comunidade', '#treinadores', '#tipos'].includes(page)
+                !['#comunidade', '#treinadores', '#tipos', '#sobre'].includes(
+                  page,
+                )
                   ? 'page'
                   : undefined
               }
@@ -134,6 +136,13 @@ function App() {
             </a>
           </nav>
           <div className="mast-controls">
+            <a
+              className="about-link"
+              href="#sobre"
+              aria-current={page === '#sobre' ? 'page' : undefined}
+            >
+              Sobre o projeto
+            </a>
             <ThemeSwitch />
             <button className="identity" onClick={openTrainer}>
               <>
@@ -154,7 +163,7 @@ function App() {
         </div>
       </header>
       <main id="conteudo" className="main-wrap">
-        {page === '#tipos' ? (
+        {page === '#sobre' ? null : page === '#tipos' ? (
           <TypeMatchups />
         ) : page === '#treinadores' ? (
           <Trainers />
