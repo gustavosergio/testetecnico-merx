@@ -41,14 +41,8 @@
   :is(
     .mast,
     .skip,
-    .identity,
-    .community:not(.trainer-directory, .type-matchups, .community-stadium),
-    .trainer-dialog,
     .dex-detail,
     .dex-card,
-    .ranking-empty,
-    .starter-picker,
-    .podium-place,
     .dex-detail-img
   ) {
   background: var(--night-panel);
@@ -63,7 +57,7 @@
   color: var(--night-text);
 }
 [data-theme='dark']
-  :is(.brand span, .mast nav a[aria-current], .trainer-error) {
+  :is(.brand span, .mast nav a[aria-current]) {
   color: #ff9ead;
 }
 [data-theme='dark']
@@ -71,10 +65,7 @@
     .dex-catalog-head p,
     .dex-card-number,
     .dex-detail-info > small,
-    .dex-choices summary span,
-    .trainer-dialog small,
-    .podium-place > span:last-child,
-    .ranking-rest li > span
+    .dex-choices summary span
   ) {
   color: var(--night-muted);
 }
@@ -85,24 +76,13 @@
     .dex-options label,
     .dex-pages button,
     .dex-message button,
-    .dex-close,
-    .trainer-dialog input,
-    .trainer-dialog textarea,
-    .trainer-actions button,
-    .auth-tabs button,
-    .starter-grid button
+    .dex-close
   ) {
   background: var(--night-input);
   color: var(--night-text);
   border-color: #53737c;
 }
-[data-theme='dark']
-  :is(
-    .dex-options label:has(:checked),
-    .auth-tabs button[aria-pressed='true'],
-    .starter-grid button[aria-pressed='true'],
-    .trainer-primary
-  ) {
+[data-theme='dark'] .dex-options label:has(:checked) {
   background: #23545c;
   color: #f0ffff;
 }
@@ -114,9 +94,4 @@
 }
 [data-theme='dark'] .dex-heart[aria-pressed='true'] {
   color: #a2213b;
-}
-@media (max-width: 740px) {
-  .mast-controls .identity {
-    max-width: none;
-  }
 }

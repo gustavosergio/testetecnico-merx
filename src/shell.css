@@ -82,8 +82,7 @@ select:focus-visible {
   align-self: stretch;
   gap: 30px;
 }
-.mast nav a,
-.identity {
+.mast nav a {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -120,17 +119,6 @@ select:focus-visible {
 .about-link[aria-current='page'] {
   text-decoration: underline;
   text-underline-offset: 0.2em;
-}
-.identity {
-  margin-left: auto;
-  background: #fff;
-  border: 1px solid #cdd1ce;
-  border-radius: 8px;
-  padding: 10px 16px;
-  overflow-wrap: anywhere;
-}
-.identity:hover {
-  background: #f6f5f1;
 }
 .main-wrap {
   padding-top: 28px;
@@ -280,10 +268,6 @@ select:focus-visible {
   }
   .console {
     margin-top: 22px;
-  }
-  .identity {
-    max-width: 58%;
-    padding: 7px 10px;
   }
   .brand {
     font-size: 1.45rem;

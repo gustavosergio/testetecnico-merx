@@ -6,47 +6,12 @@ import '@fontsource/ibm-plex-mono/latin-500.css'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import Catalog from './Catalog'
-import Community from './Community'
+import { displayName } from './catalog'
 import Device from './Device'
-import Trainers from './Trainers'
 import TypeMatchups from './TypeMatchups'
-import { avatarImage, useTrainer } from './trainer'
 import './shell.css'
 import './theme.css'
 
-type IconName = 'pokedex' | 'community' | 'trainers' | 'types' | 'user'
-function Icon({ name }: { name: IconName }) {
-  if (name === 'pokedex') {
-    return <img src="/art/nav-pokedex.webp" width="16" height="19" alt="" />
-  }
-  if (name === 'trainers') {
-    return <img src="/art/nav-trainers.webp" width="19" height="19" alt="" />
-  }
-  if (name === 'types') {
-    return <img src="/art/nav-types.webp" width="19" height="19" alt="" />
-  }
-  if (name === 'community') {
-    return <img src="/art/nav-community.webp" width="19" height="19" alt="" style={{ objectFit: 'contain' }} />
-  }
-  const paths = {
-    user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4 21a8 8 0 0 1 16 0',
-  }
-  return (
-    <svg
-      aria-hidden="true"
-      width="19"
-      height="19"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinejoin="round"
-      strokeLinecap="round"
-    >
-      <path d={paths[name]} />
-    </svg>
-  )
-}
 function ThemeSwitch() {
   const [dark, setDark] = useState(() => {
     try {
@@ -86,10 +51,8 @@ function ThemeSwitch() {
 }
 
 const mainLinks = [
-  { href: '#pokedex', label: 'Pokédex', icon: 'pokedex' },
-  { href: '#comunidade', label: 'Comunidade', icon: 'community' },
-  { href: '#treinadores', label: 'Treinadores', icon: 'trainers' },
-  { href: '#tipos', label: 'Tipos', icon: 'types' },
+  { href: '#pokedex', label: 'Pokédex', icon: '/art/nav-pokedex.webp' },
+  { href: '#tipos', label: 'Tipos', icon: '/art/nav-types.webp' },
 ] as const
 
 function Navigation({ page, close }: { page: string; close?: () => void }) {
@@ -109,7 +72,7 @@ function Navigation({ page, close }: { page: string; close?: () => void }) {
           aria-current={active === href ? 'page' : undefined}
           onClick={close}
         >
-          <Icon name={icon} />
+          <img src={icon} width="19" height="19" alt="" style={{ objectFit: 'contain' }} />
           {label}
         </a>
       ))}
@@ -165,9 +128,46 @@ function MobileMenu({ page }: { page: string }) {
   )
 }
 
+const favoriteKey = 'merxdex-favorite'
+
+function readFavorite(): { id: number; name: string } | null {
+  try {
+    const saved = JSON.parse(localStorage.getItem(favoriteKey) ?? 'null')
+    if (
+      saved &&
+      Number.isSafeInteger(saved.id) &&
+      saved.id > 0 &&
+      typeof saved.name === 'string'
+    ) {
+      return saved
+    }
+  } catch {
+    // Storage may be unavailable or contain an invalid entry.
+  }
+  return null
+}
+
 function App() {
   const [page, setPage] = useState(location.hash)
-  const { trainer, openTrainer, onFavorite, dialog, revision } = useTrainer()
+  const [favorite, setFavorite] = useState(readFavorite)
+
+  function onFavorite(id: number, name: string) {
+    if (favorite?.id === id) return
+    if (
+      favorite &&
+      !window.confirm(
+        `Trocar ${displayName(favorite.name)} por ${displayName(name)} como favorito?`,
+      )
+    ) return
+
+    const next = { id, name }
+    setFavorite(next)
+    try {
+      localStorage.setItem(favoriteKey, JSON.stringify(next))
+    } catch {
+      // The favorite remains available until the page closes.
+    }
+  }
   useEffect(() => {
     const navigate = () => {
       if (location.hash !== '#conteudo') setPage(location.hash)
@@ -197,21 +197,6 @@ function App() {
               Sobre o projeto
             </a>
             <ThemeSwitch />
-            <button className="identity" onClick={openTrainer}>
-              <>
-                {trainer ? (
-                  <img
-                    width="34"
-                    height="34"
-                    src={avatarImage(trainer.avatar)}
-                    alt=""
-                  />
-                ) : (
-                  <Icon name="user" />
-                )}
-              </>
-              {trainer?.name ?? 'Entrar'}
-            </button>
             <MobileMenu page={page} />
           </div>
         </div>
@@ -219,10 +204,6 @@ function App() {
       <main id="conteudo" className="main-wrap">
         {page === '#sobre' ? null : page === '#tipos' ? (
           <TypeMatchups />
-        ) : page === '#treinadores' ? (
-          <Trainers />
-        ) : page === '#comunidade' ? (
-          <Community revision={revision} />
         ) : (
           <>
             <section className="hero" aria-labelledby="title">
@@ -244,7 +225,7 @@ function App() {
               <div className="vents" aria-hidden="true" />
             </section>
             <Catalog
-              favorite={trainer?.favorite?.id ?? null}
+              favorite={favorite?.id ?? null}
               onFavorite={onFavorite}
             />
           </>
@@ -254,7 +235,6 @@ function App() {
         <span>MerxDex</span>
         <a href="https://pokeapi.co/">Dados da PokéAPI</a>
       </footer>
-      {dialog}
     </>
   )
 }

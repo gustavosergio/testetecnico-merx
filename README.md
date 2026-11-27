@@ -1,20 +1,14 @@
 # MerxDex
 
-Pokédex regional desenvolvida para o [teste de estágio da MERX Energia](https://github.com/Merx-TI/testetecnico). A carcaça vermelha e o visor azul do modelo de Kalos inspiraram o aparelho da tela inicial e a moldura do catálogo.
+Pokédex regional desenvolvida para o [teste de estágio da MERX Energia](https://github.com/Merx-TI/testetecnico). A versão de entrega está na branch `main` e roda inteiramente no navegador. [Abrir a versão de entrega](https://merxdex-frontend.vercel.app/)
 
-[Abrir a Pokédex](https://merxdex.vercel.app)
+## Tecnologias
 
-## Como explorar
-
-O catálogo abre em **Todas as regiões**, com as espécies em ordem de número nacional. Os filtros **Regiões** e **Tipos** aceitam várias escolhas. Por exemplo, marcar Kanto e Kalos junto com Fogo e Água mostra as espécies de qualquer uma dessas regiões que tenham pelo menos um dos dois tipos. Limpar um filtro volta a incluir todas as opções dele. A busca aceita nomes parciais e números como `25` e `#025`. O filtro por tipo combina com a busca. A URL guarda os filtros e a página para que uma consulta possa ser compartilhada.
-
-Abra um cartão para consultar tipos, medidas, descrição da espécie e cadeia evolutiva. Evoluções ramificadas, como as de Eevee, aparecem em ramos separados. A interface sinaliza carregamento, erro e buscas sem resultado. Em caso de falha de rede, é possível repetir a consulta.
-
-O coração do cartão permite escolher um único favorito. Em **Entrar**, use uma conta existente ou escolha **Criar conta**. O cadastro pede um nome de 4 a 20 caracteres sem espaços, três iniciais distintos em uma ordem secreta e um PIN de quatro dígitos. O perfil começa com Pikachu como avatar. Abra o perfil para trocar a foto por nome ou número ou sair da conta. O banco reserva esse nome sem diferenciar maiúsculas e minúsculas. Ao trocar de favorito, a confirmação identifica o Pokémon atual e o novo. A página **Comunidade** destaca os três primeiros no pódio e exibe o quarto e o quinto logo abaixo. Empates seguem a ordem do número nacional. A aba **Treinadores** permite buscar por parte do nome. Cada treinador pode divulgar seu nick do Pokémon GO e uma descrição de até 500 caracteres no perfil. O modo escuro pode ser alternado no cabeçalho.
+React, TypeScript, Vite e CSS. O navegador consulta diretamente a [PokéAPI REST](https://pokeapi.co/docs/v2). O deploy na Vercel publica os arquivos estáticos do Vite.
 
 ## Executar localmente
 
-Requisitos: Git, Node.js 24 e npm. A PokéAPI e as imagens precisam de conexão com a internet.
+Requisitos de desenvolvimento: Git, Node.js 24, npm e conexão com a internet para consultar a PokéAPI.
 
 ```sh
 git clone https://github.com/gustavosergio/testetecnico-merx.git
@@ -23,25 +17,29 @@ npm ci
 npm run dev
 ```
 
-Abra o endereço do Vite no terminal (normalmente http://localhost:5173). O comando aplica as migrações em um banco D1 local e inicia o Worker na porta 8787. O Vite encaminha as chamadas de perfil e ranking ao Worker. O banco de desenvolvimento fica em `.wrangler/`, fora do Git. O desenvolvimento local dispensa credenciais de hospedagem.
+Abra o endereço informado pelo Vite no terminal, normalmente `http://localhost:5173`.
 
 ```sh
 npm test
 npm run build
 ```
 
-Os testes exercitam a combinação de filtros, a árvore de evolução, as regras do cadastro e a troca de votos entre sessões. O build verifica os tipos e gera a aplicação em `dist/client` e o Worker em `dist/server`.
+Os testes automatizados cobrem busca, combinação de filtros e leitura da cadeia evolutiva. O build verifica os tipos e gera o site em `dist/client`.
 
-## Deploy na Vercel
+## Funcionalidades
 
-Importe este repositório na Vercel com a raiz do projeto no diretório do repositório. O arquivo `vercel.json` define o build do Vite e a pasta publicada. As funções em `api/` encaminham cadastro, favoritos e ranking ao Worker existente, que mantém o banco D1 compartilhado. Como a sessão é vinculada ao domínio, mudar de endereço não transfere o cookie do treinador.
+- Catálogo com imagem, nome, número nacional e tipos de cada Pokémon. A paginação mostra até 14 cartões no celular e 15 no desktop.
+- Busca parcial por nome ou busca pelo número nacional, com formatos como `25` e `#025`. Os filtros de região e tipo aceitam múltiplas escolhas e funcionam junto com a busca e a paginação. A URL guarda a consulta e a página.
+- Modal com medidas, descrição da espécie e cadeia evolutiva. A árvore exibe ramos separados e mostra níveis e itens fornecidos pela PokéAPI.
+- Estados de carregamento, ausência de resultados e erro com opção de tentar novamente.
+- Aba Tipos com vantagens de ataque e fraquezas de defesa. O cabeçalho permite alternar entre os temas claro e escuro.
+- Um favorito por navegador. O coração no catálogo salva a escolha localmente e uma confirmação aparece ao trocar de Pokémon.
+- Navegação por teclado com foco visível, rótulos nos controles e fechamento dos diálogos com Escape.
 
-## Tecnologias e decisões
+## Decisões e dificuldades
 
-- **React, TypeScript, Vite e CSS.** A navegação e o consumo REST da PokéAPI acontecem no frontend. Componentes com elementos HTML nativos oferecem navegação por teclado, foco visível e diálogos que fecham com Escape.
-- **Regiões.** O catálogo agrupa as espécies pela geração de estreia e distingue Galar de Hisui, que compartilham a oitava geração. Cada espécie aparece uma vez, com sua forma padrão e numeração nacional.
-- **Consultas REST.** A PokéAPI distribui informações entre geração, tipo, Pokémon, espécie e cadeia evolutiva. Para combinar busca, tipo e paginação, o frontend cruza os identificadores e só então busca os detalhes dos cartões da página atual: até 14 no celular em duas colunas e até 15 no desktop em cinco colunas. Um cache em memória reaproveita consultas bem-sucedidas. A descrição prioriza português quando disponível e usa inglês como alternativa.
-- **Persistência compartilhada.** Unicidade de nomes e contagem comunitária precisam de uma fonte comum entre navegadores. Um Cloudflare Worker usa D1 para essas duas funcionalidades. A sessão usa um cookie HttpOnly e o banco guarda o hash do token. O treinador continua conectado no mesmo navegador. Para entrar novamente, use o nome, o trio na mesma ordem e o PIN. A senha é derivada com PBKDF2 e salt individual. Após cinco tentativas na janela de cinco minutos, novas entradas ficam temporariamente bloqueadas. Uma nova entrada substitui a sessão anterior. Treinadores cadastrados antes da introdução da senha podem defini-la na sessão original, preservando seus votos.
-- **Votos concorrentes.** Cada registro de treinador contém apenas um favorito. A atualização verifica se o favorito anterior ainda é o que apareceu na confirmação. Assim, uma segunda aba não pode sobrescrever silenciosamente uma escolha mais recente.
+- **Busca, filtros e paginação.** A PokéAPI distribui as informações entre endpoints de espécie, geração, tipo e Pokémon. O catálogo cruza os identificadores antes de paginar e busca os detalhes só dos cartões visíveis. Um cache em memória reaproveita consultas bem-sucedidas.
+- **Regiões e evoluções.** Cada espécie aparece pela geração de estreia, com sua forma padrão. Galar e Hisui são tratados separadamente dentro da oitava geração. As evoluções são renderizadas como árvore porque uma espécie pode ter vários caminhos. A descrição prioriza português e usa inglês quando necessário.
+- **Escopo da entrega.** A `main` usa o armazenamento do navegador para o favorito. A [branch versao-completa](https://github.com/gustavosergio/testetecnico-merx/tree/versao-completa) preserva o projeto anterior, com contas, perfis e ranking comunitário. [Abrir a versão completa](https://merxdex.vercel.app/)
 
-A arte dos Pokémon vem do [repositório de sprites da PokéAPI](https://github.com/PokeAPI/sprites). A ilustração do aparelho foi construída em CSS. Dados obtidos pela [PokéAPI REST](https://pokeapi.co/docs/v2).
+A carcaça e o visor da Pokédex de Kalos inspiraram a ilustração do aparelho em CSS. Os sprites vêm do [repositório de imagens da PokéAPI](https://github.com/PokeAPI/sprites).

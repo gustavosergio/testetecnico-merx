@@ -65,7 +65,7 @@ export default function TypeMatchups() {
 
   return (
     <section
-      className="community type-matchups"
+      className="type-matchups"
       aria-labelledby="matchups-title"
     >
       <div className="scenery-panel">
@@ -96,7 +96,7 @@ export default function TypeMatchups() {
                 <p>Não foi possível consultar esse tipo.</p>
                 <button
                   type="button"
-                  className="trainer-primary"
+                  className="matchup-retry"
                   onClick={() => setAttempt(attempt + 1)}
                 >
                   Tentar novamente

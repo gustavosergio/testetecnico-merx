@@ -1,7 +1,0 @@
-{
-  "name": "kalos-dex",
-  "main": "server/index.ts",
-  "compatibility_date": "2025-11-01",
-  "assets": {"directory":"./dist/client","binding":"ASSETS"},
-  "d1_databases": [{"binding":"DB","database_name":"kalos-trainers","database_id":"00000000-0000-0000-0000-000000000001","migrations_dir":"drizzle"}]
-}
