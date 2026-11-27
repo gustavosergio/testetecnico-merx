@@ -176,7 +176,7 @@ function MobileMenu({ page, favoriteId }: { page: string; favoriteId?: number })
 
 type SavedPokemon = Pick<Pokemon, 'id' | 'name'>
 type FavoriteCandidate = SavedPokemon & Pick<Pokemon, 'image'>
-type Selection = { pokemon: FavoriteCandidate; action: 'like' | 'favorite' }
+type Selection = { pokemon: FavoriteCandidate; action: 'like' | 'unlike' | 'favorite' }
 
 const favoriteKey = 'merxdex-favorite'
 const likesKey = 'merxdex-likes'
@@ -222,10 +222,10 @@ function readLikes(): SavedPokemon[] {
 
 function LikedList({
   likes,
-  onLike,
+  onUnlike,
 }: {
   likes: SavedPokemon[]
-  onLike: (pokemon: SavedPokemon) => void
+  onUnlike: (pokemon: SavedPokemon) => void
 }) {
   return (
     <section className="dex-detail favorite-page" aria-labelledby="likes-title">
@@ -251,7 +251,7 @@ function LikedList({
                   className="dex-like"
                   type="button"
                   aria-label={`Descurtir ${name}`}
-                  onClick={() => onLike(pokemon)}
+                  onClick={() => onUnlike(pokemon)}
                 >
                   <LoveBall />
                 </button>
@@ -269,6 +269,10 @@ function LikedList({
   )
 }
 
+function officialArtwork(id: number) {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
+}
+
 function FavoritePage({
   favorite,
   likedIds,
@@ -280,9 +284,7 @@ function FavoritePage({
   onLike: (pokemon: SavedPokemon) => void
   onFavorite: (pokemon: FavoriteCandidate) => void
 }) {
-  const image = favorite
-    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${favorite.id}.png`
-    : null
+  const image = favorite ? officialArtwork(favorite.id) : null
 
   return (
     <section className="dex-detail favorite-page" aria-labelledby="favorite-page-title">
@@ -324,10 +326,11 @@ function App() {
   const [selection, setSelection] = useState<Selection | null>(null)
   const removing = selection?.action === 'favorite' && selection.pokemon.id === favorite?.id
 
-  function saveLike({ id, name }: SavedPokemon) {
-    const next = likedIds.has(id)
-      ? likes.filter((pokemon) => pokemon.id !== id)
-      : [...likes, { id, name }]
+  function saveLike({ id, name }: SavedPokemon, liked: boolean) {
+    if (likedIds.has(id) === liked) return
+    const next = liked
+      ? [...likes, { id, name }]
+      : likes.filter((pokemon) => pokemon.id !== id)
     setLikes(next)
     try {
       localStorage.setItem(likesKey, JSON.stringify(next))
@@ -338,10 +341,17 @@ function App() {
 
   function toggleLike(pokemon: SavedPokemon & { image?: string | null }) {
     if (likedIds.has(pokemon.id)) {
-      saveLike(pokemon)
+      saveLike(pokemon, false)
       return
     }
     setSelection({ pokemon: { ...pokemon, image: pokemon.image ?? null }, action: 'like' })
+  }
+
+  function askUnlike(pokemon: SavedPokemon) {
+    setSelection({
+      pokemon: { ...pokemon, image: officialArtwork(pokemon.id) },
+      action: 'unlike',
+    })
   }
 
   function askFavorite(pokemon: FavoriteCandidate) {
@@ -416,7 +426,7 @@ function App() {
         {page === '#sobre' ? <PersonalStory /> : page === '#tipos' ? (
           <TypeMatchups />
         ) : page === '#curtidos' ? (
-          <LikedList likes={likes} onLike={toggleLike} />
+          <LikedList likes={likes} onUnlike={askUnlike} />
         ) : page === '#favorito' ? (
           <FavoritePage
             favorite={favorite}
@@ -457,10 +467,10 @@ function App() {
         <FavoritePrompt
           pokemon={selection.pokemon}
           currentName={favorite?.name}
-          action={selection.action === 'like' ? 'like' : removing ? 'remove' : 'favorite'}
+          action={removing ? 'remove' : selection.action}
           onConfirm={() => {
-            if (selection.action === 'like') saveLike(selection.pokemon)
-            else saveFavorite(selection.pokemon)
+            if (selection.action === 'favorite') saveFavorite(selection.pokemon)
+            else saveLike(selection.pokemon, selection.action === 'like')
           }}
           onClose={() => setSelection(null)}
         />

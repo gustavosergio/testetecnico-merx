@@ -6,7 +6,7 @@ import './favorite-prompt.css'
 type Props = {
   pokemon: Pick<Pokemon, 'id' | 'name' | 'image'>
   currentName?: string
-  action: 'favorite' | 'remove' | 'like'
+  action: 'favorite' | 'remove' | 'like' | 'unlike'
   onConfirm: () => void
   onClose: () => void
 }
@@ -29,11 +29,13 @@ export default function FavoritePrompt({
     favorite: 'Você quer me escolher como Pokémon favorito?',
     remove: 'Se você me remover, vai ficar sem nenhum Pokémon favorito. Quer continuar?',
     like: 'Você quer me adicionar à sua lista de curtidos?',
+    unlike: 'Você quer me remover da sua lista de curtidos?',
   }[action]
   const confirmLabel = {
     favorite: `Escolher ${name}`,
     remove: 'Remover favorito',
     like: `Curtir ${name}`,
+    unlike: `Remover ${name} dos curtidos`,
   }[action]
   const replacing = action === 'favorite' && currentName
   return (
