@@ -3,7 +3,6 @@ import {
   useEffect,
   useRef,
   useState,
-  useSyncExternalStore,
 } from 'react'
 import type { Evolution, Pokemon } from './catalog'
 import {
@@ -27,13 +26,8 @@ type Filters = {
   types: string[]
   search: string
   page: number
-  rows: 2 | 3
 }
-const wideCatalog = matchMedia('(min-width: 1000px)')
-function watchCatalogWidth(listener: () => void) {
-  wideCatalog.addEventListener('change', listener)
-  return () => wideCatalog.removeEventListener('change', listener)
-}
+const pageSize = 15
 
 function readFilters(): Filters {
   const url = new URLSearchParams(location.search)
@@ -44,7 +38,6 @@ function readFilters(): Filters {
     regions: regions.map(([key]) => key).filter((key) => validRegions.has(key)),
     types: Object.keys(typeLabels).filter((key) => validTypes.has(key)),
     search: url.get('busca') || '',
-    rows: url.get('linhas') === '3' ? 3 : 2,
     page: Number.isSafeInteger(page) && page > 0 ? page : 1,
   }
 }
@@ -364,20 +357,6 @@ function FilterChoices({
 export default function Catalog({ favorite, onFavorite }: Props) {
   const [filters, setFilters] = useState(readFilters)
   const [detail, setDetail] = useState<Pokemon | null>(null)
-  const wide = useSyncExternalStore(
-    watchCatalogWidth,
-    () => wideCatalog.matches,
-  )
-  const [showResizeHint, setShowResizeHint] = useState(() => {
-    try {
-      return localStorage.getItem('merxdex-grid-resize-used') !== '1'
-    } catch {
-      return true
-    }
-  })
-  const dragged = useRef(false)
-  const dragStart = useRef<{ id: number; y: number } | null>(null)
-  const pageSize = wide ? filters.rows * 5 : 12
   const listStart = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const sync = () => setFilters(readFilters())
@@ -388,8 +367,8 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     const next = { ...filters, page: 1, ...patch }
     setFilters(next)
     const url = new URL(location.href)
+    url.searchParams.delete('linhas')
     const params = {
-      linhas: next.rows === 3 ? ['3'] : [],
       regiao: next.regions,
       tipo: next.types,
       busca: next.search ? [next.search] : [],
@@ -417,17 +396,6 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     .slice((page - 1) * pageSize, page * pageSize)
     .map((p) => p.id)
     .join(',')
-  const resize = (rows: 2 | 3) => {
-    if (rows === filters.rows) return
-    setShowResizeHint(false)
-    try {
-      localStorage.setItem('merxdex-grid-resize-used', '1')
-    } catch {
-      // The hint still closes when browser storage is unavailable.
-    }
-    const firstVisible = (page - 1) * pageSize
-    update({ rows, page: Math.floor(firstVisible / (rows * 5)) + 1 })
-  }
   const move = (target: number) => {
     update({ page: target })
     listStart.current?.scrollIntoView({ block: 'start' })
@@ -532,11 +500,6 @@ export default function Catalog({ favorite, onFavorite }: Props) {
             </button>
           </nav>
         )}
-        {wide && showResizeHint && filters.rows === 2 && entries.length > 0 && (
-          <p id="dex-resize-hint" className="dex-resize-hint">
-            Puxe para baixo para ver mais Pokémon.
-          </p>
-        )}
         {detail && (
           <Details
             pokemon={detail}
@@ -546,52 +509,8 @@ export default function Catalog({ favorite, onFavorite }: Props) {
           />
         )}
       </section>
-      <div className="rail rail-bottom">
-        <i aria-hidden="true" />
-        {wide && entries.length > 0 && (
-          <button
-            type="button"
-            className="dex-resize"
-            aria-describedby={
-              showResizeHint && filters.rows === 2
-                ? 'dex-resize-hint'
-                : undefined
-            }
-            aria-label={
-              filters.rows === 2
-                ? 'Mostrar terceira linha'
-                : 'Voltar a duas linhas'
-            }
-            title={
-              filters.rows === 2
-                ? 'Arraste para baixo ou clique para mostrar a terceira linha'
-                : 'Arraste para cima ou clique para voltar a duas linhas'
-            }
-            onClick={() => resize(filters.rows === 2 ? 3 : 2)}
-            onPointerDown={(event) => {
-              if (event.button !== 0) return
-              dragged.current = false
-              dragStart.current = { id: event.pointerId, y: event.clientY }
-              event.currentTarget.setPointerCapture(event.pointerId)
-            }}
-            onLostPointerCapture={() => {
-              dragStart.current = null
-            }}
-            onPointerUp={(event) => {
-              const start = dragStart.current
-              dragStart.current = null
-              if (start?.id !== event.pointerId) return
-              const distance = event.clientY - start.y
-              if (Math.abs(distance) < 24) return
-              dragged.current = true
-              resize(distance > 0 ? 3 : 2)
-            }}
-            onClickCapture={(event) => {
-              if (event.detail && dragged.current) event.stopPropagation()
-              dragged.current = false
-            }}
-          />
-        )}
+      <div className="rail rail-bottom" aria-hidden="true">
+        <i />
       </div>
     </div>
   )
