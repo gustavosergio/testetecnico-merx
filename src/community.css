@@ -213,6 +213,36 @@
 .ranking-rest li > span {
   margin-left: auto;
 }
+@media (min-width: 741px) {
+  .community-podium,
+  .ranking-rest {
+    max-width: 46rem;
+    margin-inline: auto;
+  }
+  .community-podium {
+    gap: clamp(0.85rem, 2vw, 1.5rem);
+  }
+  .podium-place {
+    padding-inline: 0.75rem;
+  }
+  .podium-art {
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+    width: min(100%, 8.5rem);
+    height: 7rem;
+  }
+  .podium-art img {
+    min-width: 0;
+    min-height: 0;
+  }
+  .place-1 .podium-art {
+    width: min(100%, 10.5rem);
+    height: 9rem;
+  }
+  .ranking-rest li {
+    padding-inline: 0.85rem;
+  }
+}
+
 .credentials {
   border: 0;
   padding: 0;
