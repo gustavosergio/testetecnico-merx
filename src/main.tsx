@@ -183,7 +183,7 @@ function App() {
       </a>
       <header className="mast">
         <div className="mast-inner">
-          <a className="brand" href="#pokedex" aria-label="MerxDex, início">
+          <a className="brand" href="/" aria-label="MerxDex, início">
             <img src="/dex.svg" alt="" />
             Merx<span>Dex</span>
           </a>
