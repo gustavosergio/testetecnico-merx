@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#221827">
+    <title>Página não encontrada · Kalos Dex</title>
+    <link rel="icon" href="/dex.svg">
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        color: #fff4e9;
+        background: #221827;
+        font: 1rem/1.5 system-ui, sans-serif;
+      }
+      main {
+        min-height: 100svh;
+        display: grid;
+        align-items: center;
+        padding: clamp(1.5rem, 10vw, 10rem);
+        background:
+          linear-gradient(90deg, #211624f2, #211624a8 46%, #21162424),
+          url('/art/404-volcanic.webp') 62% center / cover no-repeat,
+          linear-gradient(150deg, #211624, #694259);
+      }
+      .message { max-width: 32rem; }
+      .status { margin: 0; font: 700 clamp(4rem, 11vw, 8rem)/.95 system-ui; color: #ffc896; letter-spacing: -.08em; }
+      h1 { font-size: clamp(2rem, 5vw, 3.7rem); line-height: 1.05; margin: .75rem 0; }
+      p { max-width: 36ch; }
+      a {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: .75rem 1.15rem;
+        border-radius: .6rem;
+        background: #ffc896;
+        color: #291b29;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      a:hover { background: #ffe0c3; }
+      a:focus-visible { outline: 3px solid #fff4e9; outline-offset: 4px; }
+      @media (max-width: 600px) {
+        main { align-items: end; padding-bottom: max(3rem, 10vh); background-image: linear-gradient(0deg, #211624, #211624a8 52%, #21162420), url('/art/404-volcanic.webp'), linear-gradient(150deg, #211624, #694259); }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="message">
+        <p class="status">404</p>
+        <h1>Página não encontrada</h1>
+        <p>Este caminho não leva a uma página da Pokédex.</p>
+        <a href="/">Voltar à Pokédex</a>
+      </div>
+    </main>
+  </body>
+</html>
