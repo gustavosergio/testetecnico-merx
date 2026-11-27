@@ -1,3 +1,17 @@
+.mast-links {
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  gap: 0.5rem;
+}
+@media (max-width: 950px) {
+  .mast-links {
+    margin-left: auto;
+  }
+  .mast-inner .mast-controls {
+    margin-left: 0;
+  }
+}
 .mast-controls {
   display: flex;
   align-items: center;

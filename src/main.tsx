@@ -187,7 +187,10 @@ function App() {
             <img src="/dex.svg" alt="" />
             Merx<span>Dex</span>
           </a>
-          <Navigation page={page} />
+          <div className="mast-links">
+            <Navigation page={page} />
+            <ThemeSwitch />
+          </div>
           <div className="mast-controls">
             <a
               className="about-link"
@@ -196,7 +199,6 @@ function App() {
             >
               Sobre o projeto
             </a>
-            <ThemeSwitch />
             <MobileMenu page={page} />
           </div>
         </div>
