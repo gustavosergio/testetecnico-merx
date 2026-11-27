@@ -5,18 +5,28 @@
   margin-left: auto;
   min-width: 0;
 }
-.theme-switch {
-  font: inherit;
-  color: inherit;
-  background: transparent;
-  border: 1px solid #87959b;
-  border-radius: 0.5rem;
-  padding: 0.55rem;
-  cursor: pointer;
-  white-space: nowrap;
+:root[data-theme='light'] {
+  background: #fff;
+  color-scheme: light;
 }
-.theme-switch[aria-pressed='true'] {
-  background: #23545c;
+.theme-switch {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.theme-switch:hover {
+  border-color: #87959b;
+}
+.theme-switch img {
+  display: block;
+  image-rendering: pixelated;
 }
 [data-theme='dark'] {
   color-scheme: dark;

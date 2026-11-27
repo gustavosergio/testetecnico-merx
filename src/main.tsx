@@ -43,7 +43,7 @@ function ThemeSwitch() {
       const saved = localStorage.getItem('merxdex-theme')
       if (saved === 'light' || saved === 'dark') return saved === 'dark'
     } catch {}
-    return matchMedia('(prefers-color-scheme: dark)').matches
+    return false
   })
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? 'dark' : 'light'
@@ -52,7 +52,12 @@ function ThemeSwitch() {
     <button
       className="theme-switch"
       type="button"
-      aria-pressed={dark}
+      aria-label={dark ? 'Ativar tema claro' : 'Ativar tema escuro'}
+      title={
+        dark
+          ? 'Ativar tema claro · Quick Ball'
+          : 'Ativar tema escuro · Dusk Ball'
+      }
       onClick={() => {
         try {
           localStorage.setItem('merxdex-theme', dark ? 'light' : 'dark')
@@ -60,7 +65,12 @@ function ThemeSwitch() {
         setDark(!dark)
       }}
     >
-      Modo escuro
+      <img
+        src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${dark ? 'quick' : 'dusk'}-ball.png`}
+        width="42"
+        height="42"
+        alt=""
+      />
     </button>
   )
 }
