@@ -3,6 +3,7 @@ import { avatarImage, communityRequest } from './trainer'
 import { displayName } from './catalog'
 
 type PublicTrainer = {
+  description: string | null
   goNick: string | null
   name: string
   avatar: number
@@ -30,28 +31,65 @@ export default function Trainers() {
   }
 
   return (
-    <section className="community trainer-directory" aria-labelledby="trainer-directory-title">
+    <section
+      className="community trainer-directory"
+      aria-labelledby="trainer-directory-title"
+    >
       <h2 id="trainer-directory-title">Pesquisar treinadores</h2>
-      <form onSubmit={event => { event.preventDefault(); void search() }}>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault()
+          void search()
+        }}
+      >
         <label htmlFor="trainer-search">Nome de treinador</label>
         <div className="trainer-search-row">
-          <input id="trainer-search" type="search" required maxLength={40} value={query}
-            onChange={event => setQuery(event.target.value)} />
-          <button className="trainer-primary" disabled={busy || !query.trim()}>Pesquisar</button>
+          <input
+            id="trainer-search"
+            type="search"
+            required
+            maxLength={40}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+          <button className="trainer-primary" disabled={busy || !query.trim()}>
+            Pesquisar
+          </button>
         </div>
       </form>
       {busy && <p role="status">Buscando treinadores…</p>}
-      {error && <p role="alert">Não foi possível buscar treinadores. Tente novamente.</p>}
-      {results?.length === 0 && <p role="status">Nenhum treinador encontrado.</p>}
-      {!!results?.length && <ul className="trainer-results">
-        {results.map(profile => <li key={profile.name}>
-          <img src={avatarImage(profile.avatar)} alt="" width="66" height="66" />
-          <div><strong>{profile.name}</strong>
-          {profile.favorite && <p>Favorito: {displayName(profile.favorite.name)}</p>}
-          {profile.goNick && <p>Pokémon GO: {profile.goNick}</p>}
-          </div>
-        </li>)}
-      </ul>}
+      {error && (
+        <p role="alert">
+          Não foi possível buscar treinadores. Tente novamente.
+        </p>
+      )}
+      {results?.length === 0 && (
+        <p role="status">Nenhum treinador encontrado.</p>
+      )}
+      {!!results?.length && (
+        <ul className="trainer-results">
+          {results.map((profile) => (
+            <li key={profile.name}>
+              <img
+                src={avatarImage(profile.avatar)}
+                alt=""
+                width="66"
+                height="66"
+              />
+              <div>
+                <strong>{profile.name}</strong>
+                {profile.favorite && (
+                  <p>Favorito: {displayName(profile.favorite.name)}</p>
+                )}
+                {profile.goNick && <p>Pokémon GO: {profile.goNick}</p>}
+                {profile.description && (
+                  <p className="public-bio">{profile.description}</p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }

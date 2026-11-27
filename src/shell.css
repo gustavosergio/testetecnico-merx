@@ -344,5 +344,14 @@ select:focus-visible {
   transform: rotate(180deg);
 }
 
-.mast nav { flex-wrap: wrap; }
-@media (max-width: 740px) { .mast nav { gap: .9rem; } .mast nav svg { display: none; } }
+.mast nav {
+  flex-wrap: wrap;
+}
+@media (max-width: 740px) {
+  .mast nav {
+    gap: 0.9rem;
+  }
+  .mast nav svg {
+    display: none;
+  }
+}

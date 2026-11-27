@@ -5,6 +5,7 @@ import { displayName } from './catalog'
 
 type Pokemon = { id: number; name: string }
 type Trainer = {
+  description: string | null
   goNick: string | null
   avatar: number
   needsSetup: boolean
@@ -190,19 +191,51 @@ function Credentials({
   )
 }
 
-function ProfileField({label,initial,multiline,limit,busy,save}: {
-  label:string; initial:string; multiline:boolean; limit:number; busy:boolean; save:(value:string)=>Promise<void>
+function ProfileField({
+  label,
+  initial,
+  multiline,
+  limit,
+  busy,
+  save,
+}: {
+  label: string
+  initial: string
+  multiline: boolean
+  limit: number
+  busy: boolean
+  save: (value: string) => Promise<void>
 }) {
-  const [value,setValue]=useState(initial)
-  const length=Array.from(value).length
-  const field={value,onChange:(e:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=>setValue(e.target.value)}
-  return <form className="profile-field" onSubmit={e=>{e.preventDefault();if(length<=limit) void save(value)}}>
-    <label>{label} <small>Opcional · visível na busca</small>
-      {multiline ? <textarea rows={4} {...field}/> : <input {...field}/>}
-    </label>
-    <small aria-live="polite">{length}/{limit} caracteres</small>
-    <button className="trainer-primary" disabled={busy || value === initial || length > limit}>Salvar {multiline ? 'descrição' : 'nick'}</button>
-  </form>
+  const [value, setValue] = useState(initial)
+  const length = Array.from(value).length
+  const field = {
+    value,
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setValue(e.target.value),
+  }
+  return (
+    <form
+      className="profile-field"
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (length <= limit) void save(value)
+      }}
+    >
+      <label>
+        {label} <small>Opcional · visível na busca</small>
+        {multiline ? <textarea rows={4} {...field} /> : <input {...field} />}
+      </label>
+      <small aria-live="polite">
+        {length}/{limit} caracteres
+      </small>
+      <button
+        className="trainer-primary"
+        disabled={busy || value === initial || length > limit}
+      >
+        Salvar {multiline ? 'descrição' : 'nick'}
+      </button>
+    </form>
+  )
 }
 
 export function useTrainer() {
@@ -416,7 +449,26 @@ export function useTrainer() {
                   Salvar foto
                 </button>
               </form>
-              <ProfileField key={'goNick' + (trainer.goNick ?? '')} label="Nick do Pokémon GO" initial={trainer.goNick ?? ''} multiline={false} limit={32} busy={busy} save={value => accountAction({action:'goNick',value})} />
+              <ProfileField
+                key={'goNick' + (trainer.goNick ?? '')}
+                label="Nick do Pokémon GO"
+                initial={trainer.goNick ?? ''}
+                multiline={false}
+                limit={32}
+                busy={busy}
+                save={(value) => accountAction({ action: 'goNick', value })}
+              />
+              <ProfileField
+                key={'description' + (trainer.description ?? '')}
+                label="Descrição do perfil"
+                initial={trainer.description ?? ''}
+                multiline={true}
+                limit={500}
+                busy={busy}
+                save={(value) =>
+                  accountAction({ action: 'description', value })
+                }
+              />
               <div className="trainer-actions">
                 <button
                   disabled={busy}

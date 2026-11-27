@@ -10,6 +10,7 @@ interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> }
 }
 interface TrainerRow {
+  description: string | null
   go_nick: string | null
   avatar_id: number
   password_hash: string | null
@@ -32,7 +33,9 @@ function trainerDTO(row: TrainerRow | null) {
   if (!row) return null
   return {
     name: row.name,
-    avatar: row.avatar_id, goNick:row.go_nick,
+    avatar: row.avatar_id,
+    description: row.description,
+    goNick: row.go_nick,
     needsSetup: !row.password_hash,
     favorite: row.favorite_id
       ? { id: row.favorite_id, name: row.favorite_name }
@@ -51,15 +54,27 @@ async function digest(token: string) {
 async function handleAPI(req: Request, env: Env, url: URL) {
   const path = url.pathname
   if (path === '/api/trainers' && req.method === 'GET') {
-    const query = (url.searchParams.get('q') ?? '').normalize('NFKC').trim().toLowerCase()
+    const query = (url.searchParams.get('q') ?? '')
+      .normalize('NFKC')
+      .trim()
+      .toLowerCase()
     if (!query || query.length > 40) return json([])
     const { results } = await env.DB.prepare(
-      'SELECT name, avatar_id, go_nick, favorite_id, favorite_name FROM trainers WHERE instr(name_key, ?) > 0 ORDER BY name_key LIMIT 30',
-    ).bind(query).all<TrainerRow>()
-    return json(results.map(row => ({
-      name: row.name, avatar: row.avatar_id, goNick:row.go_nick,
-      favorite: row.favorite_id ? { id: row.favorite_id, name: row.favorite_name } : null,
-    })))
+      'SELECT name, avatar_id, description, go_nick, favorite_id, favorite_name FROM trainers WHERE instr(name_key, ?) > 0 ORDER BY name_key LIMIT 30',
+    )
+      .bind(query)
+      .all<TrainerRow>()
+    return json(
+      results.map((row) => ({
+        name: row.name,
+        avatar: row.avatar_id,
+        description: row.description,
+        goNick: row.go_nick,
+        favorite: row.favorite_id
+          ? { id: row.favorite_id, name: row.favorite_name }
+          : null,
+      })),
+    )
   }
   if (path === '/api/ranking' && req.method === 'GET') {
     const { results } = await env.DB.prepare(
@@ -74,7 +89,7 @@ async function handleAPI(req: Request, env: Env, url: URL) {
   const current = async () =>
     hash
       ? await env.DB.prepare(
-          'SELECT name, avatar_id, go_nick, password_hash, favorite_id, favorite_name FROM trainers WHERE session_hash = ?',
+          'SELECT name, avatar_id, description, go_nick, password_hash, favorite_id, favorite_name FROM trainers WHERE session_hash = ?',
         )
           .bind(hash)
           .first<TrainerRow>()
@@ -122,8 +137,22 @@ async function handleAPI(req: Request, env: Env, url: URL) {
     }
     if (action === 'goNick' && trainer) {
       const value = typeof body.value === 'string' ? body.value.trim() : null
-      if (value === null || Array.from(value).length > 32) return json({error:'Use até 32 caracteres.'},400)
-      await env.DB.prepare('UPDATE trainers SET go_nick=? WHERE session_hash=?').bind(value || null, hash).run()
+      if (value === null || Array.from(value).length > 32)
+        return json({ error: 'Use até 32 caracteres.' }, 400)
+      await env.DB.prepare('UPDATE trainers SET go_nick=? WHERE session_hash=?')
+        .bind(value || null, hash)
+        .run()
+      return json(trainerDTO(await current()))
+    }
+    if (action === 'description' && trainer) {
+      const value = typeof body.value === 'string' ? body.value.trim() : null
+      if (value === null || Array.from(value).length > 500)
+        return json({ error: 'Use até 500 caracteres.' }, 400)
+      await env.DB.prepare(
+        'UPDATE trainers SET description=? WHERE session_hash=?',
+      )
+        .bind(value || null, hash)
+        .run()
       return json(trainerDTO(await current()))
     }
     if (action === 'avatar' && trainer) {
@@ -266,7 +295,14 @@ async function handleAPI(req: Request, env: Env, url: URL) {
         409,
       )
     return json(
-      { name, avatar: 25, needsSetup: false, goNick:null, favorite: null },
+      {
+        name,
+        avatar: 25,
+        needsSetup: false,
+        goNick: null,
+        description: null,
+        favorite: null,
+      },
       201,
       sessionHeaders(secret),
     )

@@ -279,11 +279,56 @@
   background: #e6efef;
 }
 
-.trainer-directory form { max-width: 30rem; }
-.trainer-search-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
-.trainer-search-row input { flex: 1 1 10rem; min-width: 0; border-radius: .5rem; padding: .65rem; font: inherit; border: 1px solid #668b94; }
-.trainer-results { display: grid; list-style: none; gap: .55rem; padding: 0; }
-.trainer-results li { display: flex; align-items: flex-start; gap: .8rem; border: 1px solid #668b94; border-radius: .7rem; padding: .65rem; overflow-wrap: anywhere; }
-.trainer-results p { margin: .2rem 0; }
+.trainer-directory form {
+  max-width: 30rem;
+}
+.trainer-search-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+.trainer-search-row input {
+  flex: 1 1 10rem;
+  min-width: 0;
+  border-radius: 0.5rem;
+  padding: 0.65rem;
+  font: inherit;
+  border: 1px solid #668b94;
+}
+.trainer-results {
+  display: grid;
+  list-style: none;
+  gap: 0.55rem;
+  padding: 0;
+}
+.trainer-results li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  border: 1px solid #668b94;
+  border-radius: 0.7rem;
+  padding: 0.65rem;
+  overflow-wrap: anywhere;
+}
+.trainer-results p {
+  margin: 0.2rem 0;
+}
 
-.profile-field button { margin-top: .35rem; }
+.profile-field button {
+  margin-top: 0.35rem;
+}
+
+.profile-field textarea {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0.75rem;
+  resize: vertical;
+  font: inherit;
+  border: 1px solid #668b94;
+  border-radius: 0.5rem;
+}
+.public-bio {
+  white-space: pre-wrap;
+}

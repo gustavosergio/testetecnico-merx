@@ -48,10 +48,21 @@ function ThemeSwitch() {
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? 'dark' : 'light'
   }, [dark])
-  return <button className="theme-switch" type="button" aria-pressed={dark} onClick={() => {
-    try { localStorage.setItem('merxdex-theme', dark ? 'light' : 'dark') } catch {}
-    setDark(!dark)
-  }}>Modo escuro</button>
+  return (
+    <button
+      className="theme-switch"
+      type="button"
+      aria-pressed={dark}
+      onClick={() => {
+        try {
+          localStorage.setItem('merxdex-theme', dark ? 'light' : 'dark')
+        } catch {}
+        setDark(!dark)
+      }}
+    >
+      Modo escuro
+    </button>
+  )
 }
 
 function App() {
@@ -77,41 +88,56 @@ function App() {
             Kalos<span>Dex</span>
           </a>
           <nav aria-label="Navegação principal">
-            <a href="#pokedex" aria-current={page !== '#comunidade' && page !== '#treinadores' ? 'page' : undefined}>
+            <a
+              href="#pokedex"
+              aria-current={
+                page !== '#comunidade' && page !== '#treinadores'
+                  ? 'page'
+                  : undefined
+              }
+            >
               <Icon name="book" />
               Pokédex
             </a>
-            <a href="#comunidade" aria-current={page === '#comunidade' ? 'page' : undefined}>
+            <a
+              href="#comunidade"
+              aria-current={page === '#comunidade' ? 'page' : undefined}
+            >
               <Icon name="trophy" />
               Comunidade
             </a>
-            <a href="#treinadores" aria-current={page === '#treinadores' ? 'page' : undefined}>
+            <a
+              href="#treinadores"
+              aria-current={page === '#treinadores' ? 'page' : undefined}
+            >
               <Icon name="user" />
               Treinadores
             </a>
           </nav>
           <div className="mast-controls">
-          <ThemeSwitch />
-          <button className="identity" onClick={openTrainer}>
-            <>
-              {trainer ? (
-                <img
-                  width="34"
-                  height="34"
-                  src={avatarImage(trainer.avatar)}
-                  alt=""
-                />
-              ) : (
-                <Icon name="user" />
-              )}
-            </>
-            {trainer?.name ?? 'Entrar'}
-          </button>
+            <ThemeSwitch />
+            <button className="identity" onClick={openTrainer}>
+              <>
+                {trainer ? (
+                  <img
+                    width="34"
+                    height="34"
+                    src={avatarImage(trainer.avatar)}
+                    alt=""
+                  />
+                ) : (
+                  <Icon name="user" />
+                )}
+              </>
+              {trainer?.name ?? 'Entrar'}
+            </button>
           </div>
         </div>
       </header>
       <main id="conteudo" className="main-wrap">
-        {page === '#treinadores' ? <Trainers /> : page === '#comunidade' ? (
+        {page === '#treinadores' ? (
+          <Trainers />
+        ) : page === '#comunidade' ? (
           <Community revision={revision} />
         ) : (
           <>

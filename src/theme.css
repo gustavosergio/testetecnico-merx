@@ -1,6 +1,23 @@
-.mast-controls { display: flex; align-items: center; gap: .5rem; margin-left: auto; min-width: 0; }
-.theme-switch { font: inherit; color: inherit; background: transparent; border: 1px solid #87959b; border-radius: .5rem; padding: .55rem; cursor: pointer; white-space: nowrap; }
-.theme-switch[aria-pressed='true'] { background: #23545c; }
+.mast-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  min-width: 0;
+}
+.theme-switch {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid #87959b;
+  border-radius: 0.5rem;
+  padding: 0.55rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.theme-switch[aria-pressed='true'] {
+  background: #23545c;
+}
 [data-theme='dark'] {
   color-scheme: dark;
   background: #111b22;
@@ -10,22 +27,86 @@
   --night-text: #e0efef;
   --night-muted: #adc7cc;
 }
-[data-theme='dark'] :is(.mast,.skip,.identity,.community,.trainer-dialog,.dex-detail,.dex-card,.ranking-empty,.starter-picker,.podium-place,.dex-detail-img) {
+[data-theme='dark']
+  :is(
+    .mast,
+    .skip,
+    .identity,
+    .community,
+    .trainer-dialog,
+    .dex-detail,
+    .dex-card,
+    .ranking-empty,
+    .starter-picker,
+    .podium-place,
+    .dex-detail-img
+  ) {
   background: var(--night-panel);
   color: var(--night-text);
   border-color: #53737c;
 }
-[data-theme='dark'] .console-screen { background: linear-gradient(115deg, #263d44, #172a32); border-color: #435f68; }
-[data-theme='dark'] :is(.brand,.mast nav a,.dex-catalog,.foot) { color: var(--night-text); }
-[data-theme='dark'] :is(.brand span,.mast nav a[aria-current],.trainer-error) { color: #ff9ead; }
-[data-theme='dark'] :is(.dex-catalog-head p,.dex-card-number,.dex-detail-info > small,.dex-choices summary span,.trainer-dialog small,.podium-place > span:last-child,.ranking-rest li > span) { color: var(--night-muted); }
-[data-theme='dark'] :is(.dex-choices,.dex-search,.dex-options label,.dex-pages button,.dex-message button,.dex-close,.trainer-dialog input,.trainer-dialog textarea,.trainer-actions button,.auth-tabs button,.starter-grid button) {
-  background: var(--night-input); color: var(--night-text); border-color: #53737c;
+[data-theme='dark'] .console-screen {
+  background: linear-gradient(115deg, #263d44, #172a32);
+  border-color: #435f68;
 }
-[data-theme='dark'] :is(.dex-options label:has(:checked),.auth-tabs button[aria-pressed='true'],.starter-grid button[aria-pressed='true'],.trainer-primary) { background: #23545c; color: #f0ffff; }
-[data-theme='dark'] .dex-search input::placeholder { color: var(--night-muted); }
-[data-theme='dark'] .dex-heart { color: #b0cbd0; }
-[data-theme='dark'] .dex-heart[aria-pressed='true'] { color: #a2213b; }
+[data-theme='dark'] :is(.brand, .mast nav a, .dex-catalog, .foot) {
+  color: var(--night-text);
+}
+[data-theme='dark']
+  :is(.brand span, .mast nav a[aria-current], .trainer-error) {
+  color: #ff9ead;
+}
+[data-theme='dark']
+  :is(
+    .dex-catalog-head p,
+    .dex-card-number,
+    .dex-detail-info > small,
+    .dex-choices summary span,
+    .trainer-dialog small,
+    .podium-place > span:last-child,
+    .ranking-rest li > span
+  ) {
+  color: var(--night-muted);
+}
+[data-theme='dark']
+  :is(
+    .dex-choices,
+    .dex-search,
+    .dex-options label,
+    .dex-pages button,
+    .dex-message button,
+    .dex-close,
+    .trainer-dialog input,
+    .trainer-dialog textarea,
+    .trainer-actions button,
+    .auth-tabs button,
+    .starter-grid button
+  ) {
+  background: var(--night-input);
+  color: var(--night-text);
+  border-color: #53737c;
+}
+[data-theme='dark']
+  :is(
+    .dex-options label:has(:checked),
+    .auth-tabs button[aria-pressed='true'],
+    .starter-grid button[aria-pressed='true'],
+    .trainer-primary
+  ) {
+  background: #23545c;
+  color: #f0ffff;
+}
+[data-theme='dark'] .dex-search input::placeholder {
+  color: var(--night-muted);
+}
+[data-theme='dark'] .dex-heart {
+  color: #b0cbd0;
+}
+[data-theme='dark'] .dex-heart[aria-pressed='true'] {
+  color: #a2213b;
+}
 @media (max-width: 740px) {
-  .mast-controls .identity { max-width: none; }
+  .mast-controls .identity {
+    max-width: none;
+  }
 }
