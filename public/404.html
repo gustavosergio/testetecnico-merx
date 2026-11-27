@@ -17,6 +17,8 @@
       }
       main {
         min-height: 100svh;
+        position: relative;
+        overflow: hidden;
         display: grid;
         align-items: center;
         padding: clamp(1.5rem, 10vw, 10rem);
@@ -25,7 +27,17 @@
           url('/art/404-volcanic.webp') 62% center / cover no-repeat,
           linear-gradient(150deg, #211624, #694259);
       }
-      .message { max-width: 32rem; }
+      .message { position: relative; max-width: 32rem; }
+      .charizard {
+        position: absolute;
+        top: 14%;
+        right: 15%;
+        width: clamp(8rem, 24vw, 22rem);
+        height: auto;
+        transform: rotate(-12deg);
+        filter: drop-shadow(0 .45rem .6rem #2d163466);
+        pointer-events: none;
+      }
       .status { margin: 0; font: 700 clamp(4rem, 11vw, 8rem)/.95 system-ui; color: #ffc896; letter-spacing: -.08em; }
       h1 { font-size: clamp(2rem, 5vw, 3.7rem); line-height: 1.05; margin: .75rem 0; }
       p { max-width: 36ch; }
@@ -42,12 +54,14 @@
       a:hover { background: #ffe0c3; }
       a:focus-visible { outline: 3px solid #fff4e9; outline-offset: 4px; }
       @media (max-width: 600px) {
+        .charizard { top: 9%; right: 15%; width: clamp(9rem, 42vw, 14rem); }
         main { align-items: end; padding-bottom: max(3rem, 10vh); background-image: linear-gradient(0deg, #211624, #211624a8 52%, #21162420), url('/art/404-volcanic.webp'), linear-gradient(150deg, #211624, #694259); }
       }
     </style>
   </head>
   <body>
     <main>
+      <img class="charizard" src="/art/404-charizard.png" alt="" width="475" height="475">
       <div class="message">
         <p class="status">404</p>
         <h1>Página não encontrada</h1>
