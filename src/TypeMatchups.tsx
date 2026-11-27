@@ -105,12 +105,12 @@ export default function TypeMatchups() {
             ) : (
               <>
                 <TypeList
-                  title="Causa dano dobrado contra"
+                  title="Vantagem"
                   types={current.data.strongAgainst}
                   empty="Nenhum tipo recebe dano dobrado desse ataque."
                 />
                 <TypeList
-                  title="Recebe dano dobrado de"
+                  title="Desvantagem"
                   types={current.data.weakAgainst}
                   empty="Nenhum tipo causa dano dobrado contra ele."
                 />
