@@ -87,7 +87,7 @@ function ErrorPanel({ retry }: { retry: () => void }) {
     </div>
   )
 }
-function Heart({ filled }: { filled: boolean }) {
+export function Heart({ filled }: { filled: boolean }) {
   return (
     <svg
       width="18"
@@ -255,12 +255,11 @@ function Details({
           )}
           <button
             className="dex-primary"
-            disabled={favorite === pokemon.id}
             onClick={() => onFavorite(pokemon)}
           >
             <Heart filled={favorite === pokemon.id} />
             {favorite === pokemon.id
-              ? 'Seu favorito'
+              ? 'Remover dos favoritos'
               : 'Escolher como favorito'}
           </button>
         </div>
@@ -303,13 +302,11 @@ function CardGrid({
           <button
             className="dex-heart"
             aria-label={
-              (favorite === p.id ? 'Favorito atual: ' : 'Favoritar ') +
+              (favorite === p.id ? 'Remover dos favoritos: ' : 'Favoritar ') +
               displayName(p.name)
             }
             aria-pressed={favorite === p.id}
-            onClick={() => {
-              if (favorite !== p.id) onFavorite(p)
-            }}
+            onClick={() => onFavorite(p)}
           >
             <Heart filled={favorite === p.id} />
           </button>

@@ -86,3 +86,47 @@
   background: #245762;
   color: #fff;
 }
+
+.favorite-page {
+  max-width: 42rem;
+  margin-inline: auto;
+  padding: clamp(1rem, 4vw, 2rem);
+  border: 1px solid #789fa6;
+  border-radius: 1rem;
+  background: #f6fcfd;
+  text-align: center;
+}
+[data-theme='dark'] .favorite-page {
+  background: var(--night-panel);
+}
+.favorite-page h1,
+.favorite-page h2 {
+  margin: 0;
+}
+.favorite-showcase {
+  display: block;
+  width: min(55%, 13rem);
+  aspect-ratio: 1;
+  object-fit: contain;
+  margin: 1rem auto;
+  border-radius: 50%;
+  background: radial-gradient(circle, #c6efee, #5d8c97);
+}
+.favorite-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.favorite-page-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0.55rem 0.8rem;
+  border-radius: 0.5rem;
+  border: 1px solid #789fa6;
+  color: inherit;
+  background: transparent;
+}

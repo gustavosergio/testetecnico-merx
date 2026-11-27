@@ -5,8 +5,8 @@ import '@fontsource/barlow-condensed/latin-700.css'
 import '@fontsource/ibm-plex-mono/latin-500.css'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import Catalog from './Catalog'
-import type { Pokemon } from './catalog'
+import Catalog, { Heart } from './Catalog'
+import { displayName, numberLabel, type Pokemon } from './catalog'
 import FavoritePrompt from './FavoritePrompt'
 import Device from './Device'
 import TypeMatchups from './TypeMatchups'
@@ -56,6 +56,7 @@ function ThemeSwitch() {
 const mainLinks = [
   { href: '#pokedex', label: 'Pokédex', icon: '/art/nav-pokedex.webp' },
   { href: '#tipos', label: 'Tipos', icon: '/art/nav-types.webp' },
+  { href: '#favorito', label: 'Meu favorito', icon: null },
 ] as const
 
 function Navigation({ page, close }: { page: string; close?: () => void }) {
@@ -75,7 +76,11 @@ function Navigation({ page, close }: { page: string; close?: () => void }) {
           aria-current={active === href ? 'page' : undefined}
           onClick={close}
         >
-          <img src={icon} width="19" height="19" alt="" style={{ objectFit: 'contain' }} />
+          {icon ? (
+            <img src={icon} width="19" height="19" alt="" style={{ objectFit: 'contain' }} />
+          ) : (
+            <Heart filled={false} />
+          )}
           {label}
         </a>
       ))}
@@ -131,9 +136,12 @@ function MobileMenu({ page }: { page: string }) {
   )
 }
 
+type Favorite = Pick<Pokemon, 'id' | 'name'>
+type FavoriteCandidate = Favorite & Pick<Pokemon, 'image'>
+
 const favoriteKey = 'merxdex-favorite'
 
-function readFavorite(): { id: number; name: string } | null {
+function readFavorite(): Favorite | null {
   try {
     const saved = JSON.parse(localStorage.getItem(favoriteKey) ?? 'null')
     if (
@@ -150,17 +158,56 @@ function readFavorite(): { id: number; name: string } | null {
   return null
 }
 
+function FavoritePage({
+  favorite,
+  onRemove,
+}: {
+  favorite: Favorite | null
+  onRemove: (pokemon: FavoriteCandidate) => void
+}) {
+  const image = favorite
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${favorite.id}.png`
+    : null
+
+  return (
+    <section className="favorite-page" aria-labelledby="favorite-page-title">
+      <h1 id="favorite-page-title">Meu favorito</h1>
+      {favorite ? (
+        <>
+          {image && <img className="favorite-showcase" src={image} alt="" />}
+          <h2>{displayName(favorite.name)}</h2>
+          <p>{numberLabel(favorite.id)}</p>
+          <div className="favorite-page-actions">
+            <a href={`/?busca=${favorite.id}#pokedex`}>Ver na Pokédex</a>
+            <button type="button" onClick={() => onRemove({ ...favorite, image })}>
+              <Heart filled />
+              Remover dos favoritos
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p>Você ainda não tem um Pokémon favorito.</p>
+          <a href="/#pokedex">Explorar a Pokédex</a>
+        </>
+      )}
+    </section>
+  )
+}
+
 function App() {
   const [page, setPage] = useState(location.hash)
   const [favorite, setFavorite] = useState(readFavorite)
 
-  const [candidate, setCandidate] = useState<Pokemon | null>(null)
+  const [candidate, setCandidate] = useState<FavoriteCandidate | null>(null)
+  const removing = candidate !== null && candidate.id === favorite?.id
 
-  function saveFavorite({ id, name }: Pokemon) {
-    const next = { id, name }
+  function saveFavorite({ id, name }: FavoriteCandidate) {
+    const next = removing ? null : { id, name }
     setFavorite(next)
     try {
-      localStorage.setItem(favoriteKey, JSON.stringify(next))
+      if (next) localStorage.setItem(favoriteKey, JSON.stringify(next))
+      else localStorage.removeItem(favoriteKey)
     } catch {
       // The favorite remains available until the page closes.
     }
@@ -204,6 +251,8 @@ function App() {
         <TrainerGreeting />
         {page === '#sobre' ? null : page === '#tipos' ? (
           <TypeMatchups />
+        ) : page === '#favorito' ? (
+          <FavoritePage favorite={favorite} onRemove={setCandidate} />
         ) : (
           <>
             <section className="hero" aria-labelledby="title">
@@ -235,6 +284,7 @@ function App() {
         <FavoritePrompt
           pokemon={candidate}
           currentName={favorite?.name}
+          removing={removing}
           onConfirm={() => saveFavorite(candidate)}
           onClose={() => setCandidate(null)}
         />
