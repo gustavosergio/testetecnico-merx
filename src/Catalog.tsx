@@ -3,6 +3,7 @@ import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react'
 import type { Evolution, Pokemon } from './catalog'
 import {
@@ -27,7 +28,14 @@ type Filters = {
   search: string
   page: number
 }
-const pageSize = 15
+const mobileCatalog = matchMedia('(max-width: 650px)')
+function subscribeToCatalogWidth(listener: () => void) {
+  mobileCatalog.addEventListener('change', listener)
+  return () => mobileCatalog.removeEventListener('change', listener)
+}
+function getCatalogPageSize() {
+  return mobileCatalog.matches ? 14 : 15
+}
 
 function readFilters(): Filters {
   const url = new URLSearchParams(location.search)
@@ -390,6 +398,7 @@ export default function Catalog({ favorite, onFavorite }: Props) {
   const entries = index.data
     ? selectEntries(index.data.all, filters.search, index.data.typed)
     : []
+  const pageSize = useSyncExternalStore(subscribeToCatalogWidth, getCatalogPageSize)
   const pages = Math.max(1, Math.ceil(entries.length / pageSize))
   const page = Math.min(filters.page, pages)
   const ids = entries
