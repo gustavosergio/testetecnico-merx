@@ -356,6 +356,28 @@ select:focus-visible {
   touch-action: none;
   user-select: none;
 }
+.rail-bottom .dex-resize::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 14px;
+  height: 1px;
+  transform: translateX(-50%);
+  background: #f0ffff;
+  box-shadow:
+    0 -2px #f0ffff,
+    0 2px #f0ffff;
+}
+.dex-resize-hint {
+  margin: 0.75rem auto 0;
+  width: fit-content;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--dex-line);
+  border-radius: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
 .rail-bottom .dex-resize:hover {
   background: #ffffff22;
 }

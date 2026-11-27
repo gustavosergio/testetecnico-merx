@@ -368,6 +368,13 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     watchCatalogWidth,
     () => wideCatalog.matches,
   )
+  const [showResizeHint, setShowResizeHint] = useState(() => {
+    try {
+      return localStorage.getItem('merxdex-grid-resize-used') !== '1'
+    } catch {
+      return true
+    }
+  })
   const dragged = useRef(false)
   const dragStart = useRef<{ id: number; y: number } | null>(null)
   const pageSize = wide ? filters.rows * 5 : 12
@@ -412,6 +419,12 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     .join(',')
   const resize = (rows: 2 | 3) => {
     if (rows === filters.rows) return
+    setShowResizeHint(false)
+    try {
+      localStorage.setItem('merxdex-grid-resize-used', '1')
+    } catch {
+      // The hint still closes when browser storage is unavailable.
+    }
     const firstVisible = (page - 1) * pageSize
     update({ rows, page: Math.floor(firstVisible / (rows * 5)) + 1 })
   }
@@ -519,6 +532,11 @@ export default function Catalog({ favorite, onFavorite }: Props) {
             </button>
           </nav>
         )}
+        {wide && showResizeHint && filters.rows === 2 && entries.length > 0 && (
+          <p id="dex-resize-hint" className="dex-resize-hint">
+            Puxe para baixo para ver mais Pokémon.
+          </p>
+        )}
         {detail && (
           <Details
             pokemon={detail}
@@ -534,6 +552,11 @@ export default function Catalog({ favorite, onFavorite }: Props) {
           <button
             type="button"
             className="dex-resize"
+            aria-describedby={
+              showResizeHint && filters.rows === 2
+                ? 'dex-resize-hint'
+                : undefined
+            }
             aria-label={
               filters.rows === 2
                 ? 'Mostrar terceira linha'
