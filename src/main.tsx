@@ -175,6 +175,7 @@ function FavoritePage({
       {favorite ? (
         <>
           <FavoriteDetails
+            key={favorite.id}
             id={favorite.id}
             favorite={favorite.id}
             onFavorite={onRemove}
