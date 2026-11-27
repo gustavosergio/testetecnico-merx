@@ -46,6 +46,18 @@ export function avatarImage(id: number) {
   )
 }
 
+const starterRows = [
+  ['Kanto', [1, 4, 7]],
+  ['Johto', [155, 158]],
+  ['Hoenn', [252, 255, 258]],
+  ['Sinnoh', [387, 390, 393]],
+  ['Unova', [495, 498, 501]],
+  ['Kalos', [650, 653, 656]],
+  ['Alola', [722, 725, 728]],
+  ['Galar', [810, 813, 816]],
+  ['Paldea', [906, 909, 912]],
+] as const
+
 function Credentials({
   setup,
   busy,
@@ -66,6 +78,27 @@ function Credentials({
         : prev.length < 3
           ? [...prev, id]
           : prev,
+    )
+  }
+  function renderChoices(ids: readonly number[]) {
+    return (
+      <div className="starter-grid">
+        {ids.map((id) => {
+          const selected = trio.includes(id)
+          return (
+            <button
+              key={id}
+              aria-pressed={selected}
+              disabled={!selected && trio.length === 3}
+              type="button"
+              onClick={() => toggle(id)}
+            >
+              <img src={avatarImage(id)} alt="" loading="lazy" />
+              {starters[id]}
+            </button>
+          )
+        })}
+      </div>
     )
   }
   return (
@@ -116,23 +149,19 @@ function Credentials({
             <li key={i}>{starters[trio[i]] || 'Escolher'}</li>
           ))}
         </ol>
-        <div className="starter-grid">
-          {Object.entries(starters).map(([key, label]) => {
-            const id = Number(key),
-              selected = trio.includes(id)
-            return (
-              <button
-                key={id}
-                aria-pressed={selected}
-                disabled={!selected && trio.length === 3}
-                type="button"
-                onClick={() => toggle(id)}
-              >
-                <img src={avatarImage(id)} alt="" loading="lazy" />
-                {label}
-              </button>
-            )
-          })}
+        <div className="starter-picker">
+          {starterRows.map(([region, ids]) => (
+            <div key={region} role="group" aria-label={region}>
+              <strong>{region}</strong>
+              {renderChoices(ids)}
+            </div>
+          ))}
+          {!setup && mode === 'login' && (
+            <details>
+              <summary>Opções de contas antigas</summary>
+              {renderChoices([25, 133, 152])}
+            </details>
+          )}
         </div>
         <label>
           PIN de 4 dígitos

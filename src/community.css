@@ -249,10 +249,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.35rem;
-  max-height: 15rem;
-  overflow: auto;
-  padding: 0.25rem;
-  background: #e6efef;
+  padding: 0.25rem 0 0.6rem;
 }
 .starter-grid button {
   display: grid;
@@ -272,4 +269,12 @@
 .trainer-dialog {
   max-height: 90dvh;
   overflow: auto;
+}
+
+.starter-picker {
+  max-height: 17rem;
+  overflow: auto;
+  padding: 0.55rem;
+  border-radius: 0.5rem;
+  background: #e6efef;
 }
