@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import type { Evolution, Pokemon } from './catalog'
 import {
   displayName,
@@ -21,8 +27,13 @@ type Filters = {
   types: string[]
   search: string
   page: number
+  rows: 2 | 3
 }
-const pageSize = 12
+const wideCatalog = matchMedia('(min-width: 1000px)')
+function watchCatalogWidth(listener: () => void) {
+  wideCatalog.addEventListener('change', listener)
+  return () => wideCatalog.removeEventListener('change', listener)
+}
 
 function readFilters(): Filters {
   const url = new URLSearchParams(location.search)
@@ -33,6 +44,7 @@ function readFilters(): Filters {
     regions: regions.map(([key]) => key).filter((key) => validRegions.has(key)),
     types: Object.keys(typeLabels).filter((key) => validTypes.has(key)),
     search: url.get('busca') || '',
+    rows: url.get('linhas') === '3' ? 3 : 2,
     page: Number.isSafeInteger(page) && page > 0 ? page : 1,
   }
 }
@@ -352,6 +364,13 @@ function FilterChoices({
 export default function Catalog({ favorite, onFavorite }: Props) {
   const [filters, setFilters] = useState(readFilters)
   const [detail, setDetail] = useState<Pokemon | null>(null)
+  const wide = useSyncExternalStore(
+    watchCatalogWidth,
+    () => wideCatalog.matches,
+  )
+  const dragged = useRef(false)
+  const dragStart = useRef<{ id: number; y: number } | null>(null)
+  const pageSize = wide ? filters.rows * 5 : 12
   const listStart = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const sync = () => setFilters(readFilters())
@@ -363,6 +382,7 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     setFilters(next)
     const url = new URL(location.href)
     const params = {
+      linhas: next.rows === 3 ? ['3'] : [],
       regiao: next.regions,
       tipo: next.types,
       busca: next.search ? [next.search] : [],
@@ -390,6 +410,11 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     .slice((page - 1) * pageSize, page * pageSize)
     .map((p) => p.id)
     .join(',')
+  const resize = (rows: 2 | 3) => {
+    if (rows === filters.rows) return
+    const firstVisible = (page - 1) * pageSize
+    update({ rows, page: Math.floor(firstVisible / (rows * 5)) + 1 })
+  }
   const move = (target: number) => {
     update({ page: target })
     listStart.current?.scrollIntoView({ block: 'start' })
@@ -474,13 +499,50 @@ export default function Catalog({ favorite, onFavorite }: Props) {
           />
         )}
       </div>
+      {wide && entries.length > 0 && (
+        <button
+          type="button"
+          className="dex-resize"
+          aria-expanded={filters.rows === 3}
+          onClick={() => resize(filters.rows === 2 ? 3 : 2)}
+          onPointerDown={(event) => {
+            if (event.button !== 0) return
+            dragged.current = false
+            dragStart.current = { id: event.pointerId, y: event.clientY }
+            event.currentTarget.setPointerCapture(event.pointerId)
+          }}
+          onLostPointerCapture={() => {
+            dragStart.current = null
+          }}
+          onPointerUp={(event) => {
+            const start = dragStart.current
+            dragStart.current = null
+            if (start?.id !== event.pointerId) return
+            const distance = event.clientY - start.y
+            if (Math.abs(distance) < 24) return
+            dragged.current = true
+            resize(distance > 0 ? 3 : 2)
+          }}
+          onClickCapture={(event) => {
+            if (event.detail && dragged.current) event.stopPropagation()
+            dragged.current = false
+          }}
+        >
+          {filters.rows === 2
+            ? 'Mostrar terceira linha'
+            : 'Voltar a duas linhas'}
+        </button>
+      )}
       {entries.length > 0 && (
         <nav className="dex-pages" aria-label="Paginação">
           <button disabled={page <= 1} onClick={() => move(page - 1)}>
             Anterior
           </button>
-          <span>
-            Página {page} de {pages}
+          <span aria-live="polite">
+            Página {page} de {pages} ·{' '}
+            {pages - page === 1
+              ? 'Falta 1 página'
+              : `Faltam ${pages - page} páginas`}
           </span>
           <button disabled={page >= pages} onClick={() => move(page + 1)}>
             Próxima

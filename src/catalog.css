@@ -565,3 +565,35 @@
     transition: none;
   }
 }
+
+@media (min-width: 1000px) {
+  .dex-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.dex-resize {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  width: min(16rem, 100%);
+  margin: 0.75rem auto 0;
+  border: 1px solid var(--dex-line);
+  border-radius: 0.6rem;
+  padding: 0.45rem 0.75rem;
+  background: transparent;
+  color: inherit;
+  touch-action: none;
+  user-select: none;
+}
+.dex-resize::before {
+  content: '';
+  width: 2.25rem;
+  height: 0.25rem;
+  border-radius: 1rem;
+  background: currentColor;
+  opacity: 0.55;
+}
+html body button.dex-resize:not(:disabled) {
+  cursor: ns-resize;
+}
