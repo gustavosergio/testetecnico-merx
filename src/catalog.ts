@@ -29,8 +29,7 @@ type ChainLink = {
 }
 type EvolutionRequirement = {
   level: number | null
-  item: string | null
-  heldItem: string | null
+  items: string[]
 }
 export type Evolution = SpeciesEntry & {
   next: Evolution[]
@@ -219,10 +218,11 @@ function evolution(link: ChainLink): Evolution {
   for (const detail of link.evolution_details ?? []) {
     const requirement = {
       level: detail.min_level ?? null,
-      item: detail.item?.name ?? null,
-      heldItem: detail.held_item?.name ?? null,
+      items: [...new Set([detail.item?.name, detail.held_item?.name])]
+        .filter((name): name is string => Boolean(name))
+        .sort(),
     }
-    if (requirement.level || requirement.item || requirement.heldItem) {
+    if (requirement.level !== null || requirement.items.length) {
       requirements.set(JSON.stringify(requirement), requirement)
     }
   }

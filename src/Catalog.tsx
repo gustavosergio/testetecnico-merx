@@ -120,13 +120,7 @@ function Art({ pokemon }: { pokemon: Pokemon }) {
     <span>Sem imagem</span>
   )
 }
-function EvolutionItem({
-  name,
-  held = false,
-}: {
-  name: string
-  held?: boolean
-}) {
+function EvolutionItem({ name }: { name: string }) {
   return (
     <span className="dex-evolution-item">
       <img
@@ -138,7 +132,6 @@ function EvolutionItem({
           event.currentTarget.hidden = true
         }}
       />
-      {held ? 'Segurando ' : ''}
       {displayName(name)}
     </span>
   )
@@ -153,17 +146,6 @@ function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
         className="dex-stage"
         aria-current={item.id === currentId ? 'true' : undefined}
       >
-        {item.requirements.length > 0 && (
-          <div className="dex-evolution-requirements">
-            {item.requirements.map(({ level, item, heldItem }) => (
-              <div key={JSON.stringify([level, item, heldItem])}>
-                {level !== null && <span>Nível {level}</span>}
-                {item && <EvolutionItem name={item} />}
-                {heldItem && <EvolutionItem name={heldItem} held />}
-              </div>
-            ))}
-          </div>
-        )}
         <div className="dex-stage-art">
           {stage.data ? (
             <Art pokemon={stage.data} />
@@ -174,6 +156,16 @@ function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
         <strong>{displayName(item.name)}</strong>
         <small>{numberLabel(item.id)}</small>
         {stage.data && <Types types={stage.data.types} />}
+        {item.requirements.length > 0 && (
+          <div className="dex-evolution-requirements">
+            {item.requirements.map(({ level, items }) => (
+              <div key={JSON.stringify([level, items])}>
+                {level !== null && <span>Nível {level}</span>}
+                {items.map((name) => <EvolutionItem key={name} name={name} />)}
+              </div>
+            ))}
+          </div>
+        )}
         {stage.error && (
           <button type="button" onClick={stage.retry}>
             Tentar novamente

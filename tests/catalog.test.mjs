@@ -31,7 +31,7 @@ test('preserva os ramos da evolução e usa descrição em inglês se não houve
       species: ref('eevee', 133),
       evolves_to: [
         leaf('jolteon', 135),
-        { ...leaf('vaporeon', 134), evolution_details: [detail, detail] },
+        { ...leaf('vaporeon', 134), evolution_details: [detail, { ...detail, item: null, held_item: stone }] },
       ],
     },
   }
@@ -56,7 +56,7 @@ test('preserva os ramos da evolução e usa descrição em inglês se não houve
     ['jolteon', 'vaporeon'],
   )
   assert.deepEqual(result.tree.next[1].requirements, [
-    { level: null, item: 'water-stone', heldItem: null },
+    { level: null, items: ['water-stone'] },
   ])
 })
 
