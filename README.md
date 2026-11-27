@@ -29,7 +29,7 @@ Os testes automatizados cobrem busca, combinação de filtros e leitura da cadei
 ## Funcionalidades
 
 - Catálogo com imagem, nome, número nacional e tipos de cada Pokémon. A paginação mostra até 14 cartões no celular e 15 no desktop.
-- Busca com debounce de 250 ms por nome parcial ou pelo número nacional, com formatos como `25` e `#025`. Os filtros de região e tipo aceitam múltiplas escolhas e funcionam junto com a busca e a paginação. A URL guarda a consulta e a página.
+- Busca com debounce de 250 ms por nome parcial ou pelo número nacional, com formatos como `25` e `#025`. Os filtros de região e tipo aceitam múltiplas escolhas e funcionam junto com a busca e a paginação. Ative **Dupla tipagem** para exigir os dois tipos selecionados. A URL guarda a consulta e a página.
 - Modal com medidas, descrição da espécie e cadeia evolutiva. A árvore exibe ramos separados, mostra níveis e itens fornecidos pela PokéAPI e permite abrir a ficha de cada evolução pela imagem.
 - Estados de carregamento, ausência de resultados e erro com opção de tentar novamente.
 - Aba Tipos com vantagens de ataque e fraquezas de defesa. O cabeçalho permite alternar entre os temas claro e escuro.

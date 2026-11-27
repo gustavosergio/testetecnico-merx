@@ -70,6 +70,23 @@
   margin-inline-start: 0.65rem;
   color: #49676d;
 }
+.dex-dual-type {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: fit-content;
+  margin: 0.2rem 0.75rem 0.4rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.dex-dual-type input {
+  margin: 0;
+  accent-color: #1a5158;
+}
+.dex-options label:has(:disabled) {
+  opacity: 0.55;
+  cursor: default;
+}
 .dex-options {
   display: flex;
   flex-wrap: wrap;

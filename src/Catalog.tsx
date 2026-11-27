@@ -27,6 +27,7 @@ type Props = {
 type Filters = {
   regions: string[]
   types: string[]
+  dualType: boolean
   search: string
   page: number
 }
@@ -47,6 +48,7 @@ function readFilters(): Filters {
   return {
     regions: regions.map(([key]) => key).filter((key) => validRegions.has(key)),
     types: Object.keys(typeLabels).filter((key) => validTypes.has(key)),
+    dualType: url.get('dupla') === '1',
     search: url.get('busca') || '',
     page: Number.isSafeInteger(page) && page > 0 ? page : 1,
   }
@@ -409,6 +411,8 @@ function FilterChoices({
   unrestricted,
   options,
   showTypeIcons = false,
+  selectionLimit,
+  children,
   selected,
   onChange,
 }: {
@@ -416,6 +420,8 @@ function FilterChoices({
   unrestricted: string
   options: Option[]
   showTypeIcons?: boolean
+  selectionLimit?: number
+  children?: ReactNode
   selected: string[]
   onChange: (values: string[]) => void
 }) {
@@ -428,12 +434,18 @@ function FilterChoices({
         <strong>{label}</strong>
         <span>{labels.join(', ') || unrestricted}</span>
       </summary>
+      {children}
       <div role="group" aria-label={label} className="dex-options">
         {options.map(([key, name]) => (
           <label key={key}>
             <input
               type="checkbox"
               checked={selected.includes(key)}
+              disabled={
+                selectionLimit !== undefined &&
+                selected.length >= selectionLimit &&
+                !selected.includes(key)
+              }
               onChange={(event) =>
                 onChange(
                   event.target.checked
@@ -487,6 +499,7 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     const params = {
       regiao: next.regions,
       tipo: next.types,
+      dupla: next.dualType ? ['1'] : [],
       busca: next.search ? [next.search] : [],
       pagina: next.page === 1 ? [] : [String(next.page)],
     }
@@ -502,13 +515,18 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     const timer = window.setTimeout(() => update({ search: searchDraft }, true), 250)
     return () => window.clearTimeout(timer)
   }, [searchDraft, filters.search, update])
+  const awaitingTypePair = filters.dualType && filters.types.length !== 2
   const index = useRequest(
     useCallback(
-      () => loadCatalogIndex(filters.regions, filters.types),
-      [filters.regions, filters.types],
+      () => loadCatalogIndex(
+        filters.regions,
+        awaitingTypePair ? [] : filters.types,
+        filters.dualType,
+      ),
+      [filters.regions, filters.types, filters.dualType, awaitingTypePair],
     ),
   )
-  const entries = index.data
+  const entries = index.data && !awaitingTypePair
     ? selectEntries(index.data.all, filters.search, index.data.typed)
     : []
   const pageSize = useSyncExternalStore(subscribeToCatalogWidth, getCatalogPageSize)
@@ -536,9 +554,11 @@ export default function Catalog({ favorite, onFavorite }: Props) {
           <div>
             <h2>Catálogo regional</h2>
             <p aria-live="polite">
-              {index.data
-                ? entries.length.toLocaleString('pt-BR') + ' espécies'
-                : 'Consultando espécies…'}
+              {awaitingTypePair
+                ? 'Escolha dois tipos'
+                : index.data
+                  ? entries.length.toLocaleString('pt-BR') + ' espécies'
+                  : 'Consultando espécies…'}
             </p>
           </div>
         </div>
@@ -580,11 +600,25 @@ export default function Catalog({ favorite, onFavorite }: Props) {
             options={typeOptions}
             showTypeIcons
             selected={filters.types}
+            selectionLimit={filters.dualType ? 2 : undefined}
             onChange={(types) => update({ types })}
-          />
+          >
+            <label className="dex-dual-type">
+              <input
+                type="checkbox"
+                checked={filters.dualType}
+                onChange={(event) => update({ dualType: event.target.checked })}
+              />
+              Dupla tipagem
+            </label>
+          </FilterChoices>
         </div>
         <div ref={listStart} tabIndex={-1} className="dex-results">
-          {index.error ? (
+          {awaitingTypePair ? (
+            <div className="dex-message" role="status">
+              Selecione exatamente dois tipos para encontrar Pokémon com ambos.
+            </div>
+          ) : index.error ? (
             <ErrorPanel retry={index.retry} />
           ) : !index.data ? (
             <div className="dex-message" role="status">
@@ -597,7 +631,7 @@ export default function Catalog({ favorite, onFavorite }: Props) {
               <button
                 onClick={() => {
                   setSearchDraft('')
-                  update({ search: '', types: [], regions: [] })
+                  update({ search: '', types: [], regions: [], dualType: false })
                 }}
               >
                 Ver todas as espécies

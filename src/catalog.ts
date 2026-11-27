@@ -160,6 +160,7 @@ export const listType = cached(async (type) => {
 export async function loadCatalogIndex(
   regionKeys: string[],
   typeKeys: string[],
+  requireAllTypes = false,
 ) {
   const [catalogs, typeSets] = await Promise.all([
     Promise.all((regionKeys.length ? regionKeys : ['all']).map(listRegion)),
@@ -168,9 +169,12 @@ export async function loadCatalogIndex(
   const byNumber = new Map<number, SpeciesEntry>()
   for (const species of catalogs.flat()) byNumber.set(species.id, species)
   const all = [...byNumber.values()].sort((a, b) => a.id - b.id)
-  const typed = typeSets.length
-    ? new Set(typeSets.flatMap((ids) => [...ids]))
-    : null
+  const [firstType, ...otherTypes] = typeSets
+  const typed = !firstType
+    ? null
+    : requireAllTypes
+      ? new Set([...firstType].filter((id) => otherTypes.every((ids) => ids.has(id))))
+      : new Set(typeSets.flatMap((ids) => [...ids]))
   return { all, typed }
 }
 function normalize(value: string) {
