@@ -1,0 +1,13 @@
+@media (any-hover: hover) and (any-pointer: fine) {
+  html body {
+    cursor: url('/art/poke-ball-cursor.png') 14 14, auto;
+  }
+
+  html body :is(a[href], button:not(:disabled), summary, select, input[type='checkbox'], input[type='radio']) {
+    cursor: url('/art/poke-ball-cursor.png') 14 14, pointer;
+  }
+
+  html body :is(input[type='search'], input[type='text'], input[type='password'], input:not([type]), textarea) {
+    cursor: text;
+  }
+}
