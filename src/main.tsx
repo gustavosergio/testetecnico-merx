@@ -6,7 +6,8 @@ import '@fontsource/ibm-plex-mono/latin-500.css'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import Catalog from './Catalog'
-import { displayName } from './catalog'
+import type { Pokemon } from './catalog'
+import FavoritePrompt from './FavoritePrompt'
 import Device from './Device'
 import TypeMatchups from './TypeMatchups'
 import TrainerGreeting from './TrainerGreeting'
@@ -153,15 +154,9 @@ function App() {
   const [page, setPage] = useState(location.hash)
   const [favorite, setFavorite] = useState(readFavorite)
 
-  function onFavorite(id: number, name: string) {
-    if (favorite?.id === id) return
-    if (
-      favorite &&
-      !window.confirm(
-        `Trocar ${displayName(favorite.name)} por ${displayName(name)} como favorito?`,
-      )
-    ) return
+  const [candidate, setCandidate] = useState<Pokemon | null>(null)
 
+  function saveFavorite({ id, name }: Pokemon) {
     const next = { id, name }
     setFavorite(next)
     try {
@@ -231,11 +226,19 @@ function App() {
             </section>
             <Catalog
               favorite={favorite?.id ?? null}
-              onFavorite={onFavorite}
+              onFavorite={setCandidate}
             />
           </>
         )}
       </main>
+      {candidate && (
+        <FavoritePrompt
+          pokemon={candidate}
+          currentName={favorite?.name}
+          onConfirm={() => saveFavorite(candidate)}
+          onClose={() => setCandidate(null)}
+        />
+      )}
       <footer className="foot">
         <span>MerxDex</span>
         <a href="https://pokeapi.co/">Dados da PokéAPI</a>

@@ -20,7 +20,7 @@ import './catalog.css'
 
 type Props = {
   favorite: number | null
-  onFavorite: (id: number, name: string) => void
+  onFavorite: (pokemon: Pokemon) => void
 }
 type Filters = {
   regions: string[]
@@ -258,7 +258,7 @@ function Details({
             disabled={favorite === pokemon.id}
             onClick={() => {
               close()
-              onFavorite(pokemon.id, pokemon.name)
+              onFavorite(pokemon)
             }}
           >
             <Heart filled={favorite === pokemon.id} />
@@ -311,7 +311,7 @@ function CardGrid({
             }
             aria-pressed={favorite === p.id}
             onClick={() => {
-              if (favorite !== p.id) onFavorite(p.id, p.name)
+              if (favorite !== p.id) onFavorite(p)
             }}
           >
             <Heart filled={favorite === p.id} />
