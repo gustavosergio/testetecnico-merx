@@ -159,13 +159,6 @@
 .liked-list small {
   display: block;
 }
-.liked-list .dex-heart {
+.liked-list .dex-like {
   flex: 0 0 36px;
-  color: #a2213b;
-}
-[data-theme='dark'] .liked-list .dex-heart {
-  color: #ff9ead;
-}
-[data-theme='dark'] .liked-list .dex-heart:hover {
-  color: #a2213b;
 }

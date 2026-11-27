@@ -93,23 +93,12 @@ function ErrorPanel({ retry }: { retry: () => void }) {
     </div>
   )
 }
-export function Heart({ filled }: { filled: boolean }) {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke="currentColor"
-      strokeWidth="1.7"
-      aria-hidden="true"
-    >
-      <path d="M20.8 4.9a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.3a5.5 5.5 0 0 0 0-7.8Z" />
-    </svg>
-  )
+export function LoveBall() {
+  return <img className="dex-ball-icon" src="/art/love-ball.webp" width="26" height="26" alt="" />
 }
+
 export function MasterBall() {
-  return <img className="dex-master-icon" src="/art/master-ball.png" width="26" height="26" alt="" />
+  return <img className="dex-ball-icon" src="/art/master-ball.png" width="26" height="26" alt="" />
 }
 
 function Types({ types }: { types: string[] }) {
@@ -360,7 +349,7 @@ function Details({
               aria-pressed={liked}
               onClick={() => onLike(pokemon)}
             >
-              <Heart filled={liked} />
+              <LoveBall />
               {liked ? 'Descurtir' : 'Curtir'}
             </button>
             <button
@@ -414,13 +403,13 @@ function CardGrid({
           </button>
           <div className="dex-card-actions">
             <button
-              className="dex-heart"
+              className="dex-like"
               type="button"
               aria-label={(likedIds.has(p.id) ? 'Descurtir ' : 'Curtir ') + displayName(p.name)}
               aria-pressed={likedIds.has(p.id)}
               onClick={() => onLike(p)}
             >
-              <Heart filled={likedIds.has(p.id)} />
+              <LoveBall />
             </button>
             <button
               className="dex-master"

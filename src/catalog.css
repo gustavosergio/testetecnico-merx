@@ -307,7 +307,7 @@
   top: 0.3rem;
   right: 0.3rem;
 }
-.dex-heart,
+.dex-like,
 .dex-master,
 .dex-close {
   display: grid;
@@ -323,7 +323,7 @@
 .dex-close {
   position: absolute;
 }
-.dex-master-icon {
+.dex-ball-icon {
   flex: none;
   object-fit: contain;
   image-rendering: pixelated;
@@ -338,10 +338,12 @@
 .dex-card-actions :focus-visible {
   outline-offset: 0;
 }
-.dex-heart:hover,
-.dex-heart[aria-pressed='true'] {
+.dex-like:hover,
+.dex-like[aria-pressed='true'] {
   background: #feeaed;
-  color: #a2213b;
+}
+.dex-like[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 2px #c85276;
 }
 .dex-pages {
   display: flex;

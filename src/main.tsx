@@ -5,7 +5,7 @@ import '@fontsource/barlow-condensed/latin-700.css'
 import '@fontsource/ibm-plex-mono/latin-500.css'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import Catalog, { FavoriteDetails, Heart, MasterBall } from './Catalog'
+import Catalog, { FavoriteDetails, LoveBall, MasterBall } from './Catalog'
 import { displayName, numberLabel, type Pokemon } from './catalog'
 import FavoritePrompt from './FavoritePrompt'
 import Device from './Device'
@@ -113,7 +113,7 @@ function Navigation({
           {icon ? (
             <img src={icon} width="19" height="19" alt="" style={{ objectFit: 'contain' }} />
           ) : href === '#curtidos' ? (
-            <Heart filled={false} />
+            <LoveBall />
           ) : favoriteId ? (
             <FavoriteIcon key={favoriteId} id={favoriteId} />
           ) : (
@@ -248,12 +248,12 @@ function LikedList({
                   <span>{name} <small>{numberLabel(pokemon.id)}</small></span>
                 </a>
                 <button
-                  className="dex-heart"
+                  className="dex-like"
                   type="button"
                   aria-label={`Descurtir ${name}`}
                   onClick={() => onLike(pokemon)}
                 >
-                  <Heart filled />
+                  <LoveBall />
                 </button>
               </li>
             )

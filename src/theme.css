@@ -114,9 +114,6 @@
 [data-theme='dark'] .dex-search input::placeholder {
   color: var(--night-muted);
 }
-[data-theme='dark'] .dex-heart {
-  color: #b0cbd0;
-}
-[data-theme='dark'] .dex-heart[aria-pressed='true'] {
-  color: #a2213b;
+[data-theme='dark'] .dex-like:is(:hover, [aria-pressed='true']) {
+  background: #52314b;
 }
