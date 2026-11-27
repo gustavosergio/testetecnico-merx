@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#071e31">
+    <title>Erro interno · Kalos Dex</title>
+    <link rel="icon" href="/dex.svg">
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        color: #f1fbff;
+        background: #071e31;
+        font: 1rem/1.5 system-ui, sans-serif;
+      }
+      main {
+        min-height: 100svh;
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        align-items: center;
+        justify-items: start;
+        padding: clamp(1.5rem, 10vw, 10rem);
+        background:
+          linear-gradient(90deg, #071e31f2, #071e31b8 35%, #071e3110 70%),
+          url('/art/500-lugia.png') 62% center / cover no-repeat,
+          linear-gradient(150deg, #071e31, #155872);
+      }
+      .message { position: relative; max-width: 32rem; }
+      .status { margin: 0; font: 700 clamp(4rem, 11vw, 8rem)/.95 system-ui; color: #a9ecff; letter-spacing: -.08em; }
+      h1 { font-size: clamp(2rem, 5vw, 3.7rem); line-height: 1.05; margin: .75rem 0; }
+      p { max-width: 36ch; }
+      a, button {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: .75rem 1.15rem;
+        border-radius: .6rem;
+        background: #a9ecff;
+        color: #082536;
+        font: inherit;
+        font-weight: 700;
+        border: 0;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      a:hover, button:hover { background: #d4f5ff; }
+      a:focus-visible, button:focus-visible { outline: 3px solid #f1fbff; outline-offset: 4px; }
+      @media (max-width: 600px) {
+        main { align-items: end; justify-items: start; background-position: center, 72% center, center; padding-bottom: max(3rem, 10vh); background-image: linear-gradient(0deg, #071e31, #071e31a8 52%, #071e3120), url('/art/500-lugia.png'), linear-gradient(150deg, #071e31, #155872); }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="message">
+        <p class="status">500</p>
+        <h1>Erro interno</h1>
+        <p>Algo deu errado no servidor. Tente novamente em instantes.</p>
+        <button type="button" onclick="location.reload()">Tentar novamente</button>
+        <a href="/">Voltar à Pokédex</a>
+      </div>
+    </main>
+  </body>
+</html>
