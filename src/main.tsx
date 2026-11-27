@@ -5,8 +5,8 @@ import '@fontsource/barlow-condensed/latin-700.css'
 import '@fontsource/ibm-plex-mono/latin-500.css'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import Catalog, { Heart } from './Catalog'
-import { displayName, numberLabel, type Pokemon } from './catalog'
+import Catalog, { FavoriteDetails, Heart } from './Catalog'
+import type { Pokemon } from './catalog'
 import FavoritePrompt from './FavoritePrompt'
 import Device from './Device'
 import TypeMatchups from './TypeMatchups'
@@ -170,13 +170,11 @@ function FavoritePage({
     : null
 
   return (
-    <section className="favorite-page" aria-labelledby="favorite-page-title">
+    <section className="dex-detail favorite-page" aria-labelledby="favorite-page-title">
       <h1 id="favorite-page-title">Meu favorito</h1>
       {favorite ? (
         <>
-          {image && <img className="favorite-showcase" src={image} alt="" />}
-          <h2>{displayName(favorite.name)}</h2>
-          <p>{numberLabel(favorite.id)}</p>
+          <FavoriteDetails id={favorite.id} />
           <div className="favorite-page-actions">
             <a href={`/?busca=${favorite.id}#pokedex`}>Ver na Pokédex</a>
             <button type="button" onClick={() => onRemove({ ...favorite, image })}>
@@ -186,10 +184,10 @@ function FavoritePage({
           </div>
         </>
       ) : (
-        <>
+        <div className="favorite-page-empty">
           <p>Você ainda não tem um Pokémon favorito.</p>
           <a href="/#pokedex">Explorar a Pokédex</a>
-        </>
+        </div>
       )}
     </section>
   )

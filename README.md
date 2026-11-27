@@ -33,7 +33,7 @@ Os testes automatizados cobrem busca, combinação de filtros e leitura da cadei
 - Modal com medidas, descrição da espécie e cadeia evolutiva. A árvore exibe ramos separados e mostra níveis e itens fornecidos pela PokéAPI.
 - Estados de carregamento, ausência de resultados e erro com opção de tentar novamente.
 - Aba Tipos com vantagens de ataque e fraquezas de defesa. O cabeçalho permite alternar entre os temas claro e escuro.
-- Um favorito por navegador. O coração no catálogo salva a escolha localmente. A aba Meu favorito mostra o Pokémon escolhido, e um balão pede confirmação ao escolher, trocar ou remover o favorito.
+- Um favorito por navegador. O coração no catálogo salva a escolha localmente. A aba Meu favorito mostra a ficha completa do Pokémon escolhido, e um balão pede confirmação ao escolher, trocar ou remover o favorito.
 - Saudação opcional na primeira visita. O nome escolhido fica no navegador e aparece no topo do site.
 - Navegação por teclado com foco visível, rótulos nos controles e fechamento dos diálogos com Escape.
 

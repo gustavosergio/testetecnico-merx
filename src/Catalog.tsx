@@ -5,6 +5,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react'
+import type { ReactNode } from 'react'
 import type { Evolution, Pokemon } from './catalog'
 import {
   displayName,
@@ -182,6 +183,68 @@ function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
     </li>
   )
 }
+function PokemonDetails({
+  pokemon,
+  children,
+}: {
+  pokemon: Pokemon
+  children?: ReactNode
+}) {
+  const request = useRequest(
+    useCallback(() => loadDetails(pokemon.speciesUrl), [pokemon.speciesUrl]),
+  )
+  return (
+    <>
+      <div className="dex-detail-img">
+        <Art pokemon={pokemon} />
+      </div>
+      <div className="dex-detail-info">
+        <small>{numberLabel(pokemon.id)}</small>
+        <h2 id="dex-detail-name">{displayName(pokemon.name)}</h2>
+        <Types types={pokemon.types} />
+        <p>
+          {pokemon.height.toLocaleString('pt-BR')} m{' '}
+          <span aria-hidden="true"> · </span>{' '}
+          {pokemon.weight.toLocaleString('pt-BR')} kg
+        </p>
+        {request.error ? (
+          <ErrorPanel retry={request.retry} />
+        ) : !request.data ? (
+          <p role="status">Lendo ficha da espécie…</p>
+        ) : (
+          <>
+            <h3>Descrição da espécie</h3>
+            <p lang={request.data.lang}>
+              {request.data.description || 'Descrição indisponível.'}
+            </p>
+            <section
+              className="dex-evolution"
+              aria-labelledby="dex-evolution-title"
+            >
+              <h3 id="dex-evolution-title">Cadeia de evolução</h3>
+              {request.data.tree ? (
+                <ul className="dex-chain">
+                  <Chain item={request.data.tree} currentId={pokemon.id} />
+                </ul>
+              ) : (
+                <p>Cadeia indisponível.</p>
+              )}
+            </section>
+          </>
+        )}
+        {children}
+      </div>
+    </>
+  )
+}
+
+export function FavoriteDetails({ id }: { id: number }) {
+  const request = useRequest(useCallback(() => loadPokemon(String(id)), [id]))
+  if (request.error) return <ErrorPanel retry={request.retry} />
+  if (!request.data) return <p role="status">Carregando Pokémon favorito…</p>
+  return <PokemonDetails pokemon={request.data} />
+}
+
 function Details({
   pokemon,
   favorite,
@@ -189,9 +252,6 @@ function Details({
   close,
 }: Props & { pokemon: Pokemon; close: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null)
-  const request = useRequest(
-    useCallback(() => loadDetails(pokemon.speciesUrl), [pokemon.speciesUrl]),
-  )
   useEffect(() => {
     const modal = dialog.current
     modal?.showModal()
@@ -216,43 +276,7 @@ function Details({
         >
           ×
         </button>
-        <div className="dex-detail-img">
-          <Art pokemon={pokemon} />
-        </div>
-        <div className="dex-detail-info">
-          <small>{numberLabel(pokemon.id)}</small>
-          <h2 id="dex-detail-name">{displayName(pokemon.name)}</h2>
-          <Types types={pokemon.types} />
-          <p>
-            {pokemon.height.toLocaleString('pt-BR')} m{' '}
-            <span aria-hidden="true"> · </span>{' '}
-            {pokemon.weight.toLocaleString('pt-BR')} kg
-          </p>
-          {request.error ? (
-            <ErrorPanel retry={request.retry} />
-          ) : !request.data ? (
-            <p role="status">Lendo ficha da espécie…</p>
-          ) : (
-            <>
-              <h3>Descrição da espécie</h3>
-              <p lang={request.data.lang}>
-                {request.data.description || 'Descrição indisponível.'}
-              </p>
-              <section
-                className="dex-evolution"
-                aria-labelledby="dex-evolution-title"
-              >
-                <h3 id="dex-evolution-title">Cadeia de evolução</h3>
-                {request.data.tree ? (
-                  <ul className="dex-chain">
-                    <Chain item={request.data.tree} currentId={pokemon.id} />
-                  </ul>
-                ) : (
-                  <p>Cadeia indisponível.</p>
-                )}
-              </section>
-            </>
-          )}
+        <PokemonDetails pokemon={pokemon}>
           <button
             className="dex-primary"
             onClick={() => onFavorite(pokemon)}
@@ -262,7 +286,7 @@ function Details({
               ? 'Remover dos favoritos'
               : 'Escolher como favorito'}
           </button>
-        </div>
+        </PokemonDetails>
       </div>
     </dialog>
   )
