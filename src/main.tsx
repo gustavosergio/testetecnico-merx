@@ -14,16 +14,18 @@ import { avatarImage, useTrainer } from './trainer'
 import './shell.css'
 import './theme.css'
 
-type IconName = 'pokedex' | 'stadium' | 'cap' | 'types' | 'user'
+type IconName = 'pokedex' | 'stadium' | 'trainers' | 'types' | 'user'
 function Icon({ name }: { name: IconName }) {
   if (name === 'pokedex') {
     return <img src="/art/nav-pokedex.webp" width="16" height="19" alt="" />
+  }
+  if (name === 'trainers') {
+    return <img src="/art/nav-trainers.webp" width="19" height="19" alt="" />
   }
   const paths = {
     user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4 21a8 8 0 0 1 16 0',
     stadium:
       'M3 9v7c0 2 4 4 9 4s9-2 9-4V9 M3 9a9 4 0 1 0 18 0 9 4 0 1 0-18 0 M7 12v6m10-6v6m-5-5v7',
-    cap: 'M3 15v-2a7 7 0 0 1 14 0v2 M3 15h14c2 0 4 1 4 2s-2 2-5 2c-3 0-6-1-8-4 M8 11l2-2 2 2',
     types:
       'M12 2 17 7 12 12 7 7 12 2Z M10 17a4 4 0 1 1-8 0 4 4 0 1 1 8 0Z M18 13l4 8h-8l4-8Z',
   }
@@ -84,7 +86,7 @@ function ThemeSwitch() {
 const mainLinks = [
   { href: '#pokedex', label: 'Pokédex', icon: 'pokedex' },
   { href: '#comunidade', label: 'Comunidade', icon: 'stadium' },
-  { href: '#treinadores', label: 'Treinadores', icon: 'cap' },
+  { href: '#treinadores', label: 'Treinadores', icon: 'trainers' },
   { href: '#tipos', label: 'Tipos', icon: 'types' },
 ] as const
 
