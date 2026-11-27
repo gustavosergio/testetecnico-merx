@@ -344,6 +344,29 @@ select:focus-visible {
   transform: rotate(180deg);
 }
 
+.rail-bottom .dex-resize {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 4.5rem;
+  transform: translateX(-50%);
+  padding: 0;
+  border: 0;
+  border-radius: 40% 40% 0 0;
+  background: transparent;
+  touch-action: none;
+  user-select: none;
+}
+.rail-bottom .dex-resize:hover {
+  background: #ffffff22;
+}
+.rail-bottom .dex-resize:focus-visible {
+  outline: 2px solid #e2f5f4;
+  outline-offset: -3px;
+}
+html body .rail-bottom .dex-resize:not(:disabled) {
+  cursor: ns-resize;
+}
+
 .mast nav {
   flex-wrap: wrap;
 }

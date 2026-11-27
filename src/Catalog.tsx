@@ -421,142 +421,155 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     listStart.current?.focus({ preventScroll: true })
   }
   return (
-    <section className="dex-catalog" aria-label="Catálogo regional">
-      <div className="dex-catalog-head">
-        <div>
-          <h2>Catálogo regional</h2>
-          <p aria-live="polite">
-            {index.data
-              ? entries.length.toLocaleString('pt-BR') + ' espécies'
-              : 'Consultando espécies…'}
-          </p>
+    <div className="console">
+      <div className="rail rail-top" aria-hidden="true">
+        <i />
+      </div>
+      <section
+        className="console-screen dex-catalog"
+        aria-label="Catálogo regional"
+      >
+        <div className="dex-catalog-head">
+          <div>
+            <h2>Catálogo regional</h2>
+            <p aria-live="polite">
+              {index.data
+                ? entries.length.toLocaleString('pt-BR') + ' espécies'
+                : 'Consultando espécies…'}
+            </p>
+          </div>
         </div>
-      </div>
-      <div className="dex-filters">
-        <label className="dex-search">
-          <svg
-            width="19"
-            height="19"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            aria-hidden="true"
-          >
-            <circle cx="10" cy="10" r="6.5" />
-            <path d="m15 15 6 6" />
-          </svg>
-          <input
-            autoComplete="off"
-            type="search"
-            placeholder="Buscar por nome ou número"
-            aria-label="Buscar Pokémon por nome ou número"
-            value={filters.search}
-            onChange={(e) => update({ search: e.target.value }, true)}
-          />
-        </label>
-      </div>
-      <div className="dex-filter-groups">
-        <FilterChoices
-          label="Regiões"
-          unrestricted="Todas as regiões"
-          options={regionOptions}
-          selected={filters.regions}
-          onChange={(regions) => update({ regions })}
-        />
-        <FilterChoices
-          label="Tipos"
-          unrestricted="Todos os tipos"
-          options={typeOptions}
-          showTypeIcons
-          selected={filters.types}
-          onChange={(types) => update({ types })}
-        />
-      </div>
-      <div ref={listStart} tabIndex={-1} className="dex-results">
-        {index.error ? (
-          <ErrorPanel retry={index.retry} />
-        ) : !index.data ? (
-          <div className="dex-message" role="status">
-            Carregando catálogo…
-          </div>
-        ) : !entries.length ? (
-          <div className="dex-message" role="status">
-            <strong>Nenhum Pokémon encontrado</strong>
-            <span>Altere a região, o tipo ou o termo de busca.</span>
-            <button
-              onClick={() => update({ search: '', types: [], regions: [] })}
+        <div className="dex-filters">
+          <label className="dex-search">
+            <svg
+              width="19"
+              height="19"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              aria-hidden="true"
             >
-              Ver todas as espécies
+              <circle cx="10" cy="10" r="6.5" />
+              <path d="m15 15 6 6" />
+            </svg>
+            <input
+              autoComplete="off"
+              type="search"
+              placeholder="Buscar por nome ou número"
+              aria-label="Buscar Pokémon por nome ou número"
+              value={filters.search}
+              onChange={(e) => update({ search: e.target.value }, true)}
+            />
+          </label>
+        </div>
+        <div className="dex-filter-groups">
+          <FilterChoices
+            label="Regiões"
+            unrestricted="Todas as regiões"
+            options={regionOptions}
+            selected={filters.regions}
+            onChange={(regions) => update({ regions })}
+          />
+          <FilterChoices
+            label="Tipos"
+            unrestricted="Todos os tipos"
+            options={typeOptions}
+            showTypeIcons
+            selected={filters.types}
+            onChange={(types) => update({ types })}
+          />
+        </div>
+        <div ref={listStart} tabIndex={-1} className="dex-results">
+          {index.error ? (
+            <ErrorPanel retry={index.retry} />
+          ) : !index.data ? (
+            <div className="dex-message" role="status">
+              Carregando catálogo…
+            </div>
+          ) : !entries.length ? (
+            <div className="dex-message" role="status">
+              <strong>Nenhum Pokémon encontrado</strong>
+              <span>Altere a região, o tipo ou o termo de busca.</span>
+              <button
+                onClick={() => update({ search: '', types: [], regions: [] })}
+              >
+                Ver todas as espécies
+              </button>
+            </div>
+          ) : (
+            <CardGrid
+              ids={ids}
+              favorite={favorite}
+              onFavorite={onFavorite}
+              open={setDetail}
+            />
+          )}
+        </div>
+        {entries.length > 0 && (
+          <nav className="dex-pages" aria-label="Paginação">
+            <button disabled={page <= 1} onClick={() => move(page - 1)}>
+              Anterior
             </button>
-          </div>
-        ) : (
-          <CardGrid
-            ids={ids}
+            <span aria-live="polite">
+              Página {page} de {pages}
+            </span>
+            <button disabled={page >= pages} onClick={() => move(page + 1)}>
+              Próxima
+            </button>
+          </nav>
+        )}
+        {detail && (
+          <Details
+            pokemon={detail}
             favorite={favorite}
             onFavorite={onFavorite}
-            open={setDetail}
+            close={() => setDetail(null)}
+          />
+        )}
+      </section>
+      <div className="rail rail-bottom">
+        <i aria-hidden="true" />
+        {wide && entries.length > 0 && (
+          <button
+            type="button"
+            className="dex-resize"
+            aria-label={
+              filters.rows === 2
+                ? 'Mostrar terceira linha'
+                : 'Voltar a duas linhas'
+            }
+            title={
+              filters.rows === 2
+                ? 'Arraste para baixo ou clique para mostrar a terceira linha'
+                : 'Arraste para cima ou clique para voltar a duas linhas'
+            }
+            onClick={() => resize(filters.rows === 2 ? 3 : 2)}
+            onPointerDown={(event) => {
+              if (event.button !== 0) return
+              dragged.current = false
+              dragStart.current = { id: event.pointerId, y: event.clientY }
+              event.currentTarget.setPointerCapture(event.pointerId)
+            }}
+            onLostPointerCapture={() => {
+              dragStart.current = null
+            }}
+            onPointerUp={(event) => {
+              const start = dragStart.current
+              dragStart.current = null
+              if (start?.id !== event.pointerId) return
+              const distance = event.clientY - start.y
+              if (Math.abs(distance) < 24) return
+              dragged.current = true
+              resize(distance > 0 ? 3 : 2)
+            }}
+            onClickCapture={(event) => {
+              if (event.detail && dragged.current) event.stopPropagation()
+              dragged.current = false
+            }}
           />
         )}
       </div>
-      {wide && entries.length > 0 && (
-        <button
-          type="button"
-          className="dex-resize"
-          aria-expanded={filters.rows === 3}
-          onClick={() => resize(filters.rows === 2 ? 3 : 2)}
-          onPointerDown={(event) => {
-            if (event.button !== 0) return
-            dragged.current = false
-            dragStart.current = { id: event.pointerId, y: event.clientY }
-            event.currentTarget.setPointerCapture(event.pointerId)
-          }}
-          onLostPointerCapture={() => {
-            dragStart.current = null
-          }}
-          onPointerUp={(event) => {
-            const start = dragStart.current
-            dragStart.current = null
-            if (start?.id !== event.pointerId) return
-            const distance = event.clientY - start.y
-            if (Math.abs(distance) < 24) return
-            dragged.current = true
-            resize(distance > 0 ? 3 : 2)
-          }}
-          onClickCapture={(event) => {
-            if (event.detail && dragged.current) event.stopPropagation()
-            dragged.current = false
-          }}
-        >
-          {filters.rows === 2
-            ? 'Mostrar terceira linha'
-            : 'Voltar a duas linhas'}
-        </button>
-      )}
-      {entries.length > 0 && (
-        <nav className="dex-pages" aria-label="Paginação">
-          <button disabled={page <= 1} onClick={() => move(page - 1)}>
-            Anterior
-          </button>
-          <span aria-live="polite">
-            Página {page} de {pages} ·{' '}
-            {pages - page === 1
-              ? 'Falta 1 página'
-              : `Faltam ${pages - page} páginas`}
-          </span>
-          <button disabled={page >= pages} onClick={() => move(page + 1)}>
-            Próxima
-          </button>
-        </nav>
-      )}
-      {detail && (
-        <Details
-          pokemon={detail}
-          favorite={favorite}
-          onFavorite={onFavorite}
-          close={() => setDetail(null)}
-        />
-      )}
-    </section>
+    </div>
   )
 }

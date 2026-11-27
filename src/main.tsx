@@ -169,20 +169,10 @@ function App() {
               </div>
               <div className="vents" aria-hidden="true" />
             </section>
-            <section className="console">
-              <div className="rail rail-top" aria-hidden="true">
-                <i />
-              </div>
-              <div className="console-screen">
-                <Catalog
-                  favorite={trainer?.favorite?.id ?? null}
-                  onFavorite={onFavorite}
-                />
-              </div>
-              <div className="rail rail-bottom" aria-hidden="true">
-                <i />
-              </div>
-            </section>
+            <Catalog
+              favorite={trainer?.favorite?.id ?? null}
+              onFavorite={onFavorite}
+            />
           </>
         )}
       </main>
