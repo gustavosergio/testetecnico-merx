@@ -1,5 +1,5 @@
 const communityOrigin = 'https://kalosdex-gustavo-merx.memorablemuffin16.chatgpt.site'
-const endpoints = new Set(['/api/trainer', '/api/favorite', '/api/ranking'])
+const endpoints = new Set(['/api/trainer', '/api/favorite', '/api/ranking', '/api/trainers'])
 
 function error(message: string, status: number) {
   return Response.json({ error: message }, { status, headers: { 'Cache-Control': 'no-store' } })
@@ -21,7 +21,7 @@ export default {
     if (origin) headers.set('Origin', communityOrigin)
 
     try {
-      const response = await fetch(communityOrigin + url.pathname, {
+      const response = await fetch(communityOrigin + url.pathname + url.search, {
         method: request.method,
         headers,
         body: request.method === 'POST' ? await request.text() : undefined,

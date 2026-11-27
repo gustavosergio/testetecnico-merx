@@ -8,6 +8,7 @@ import { createRoot } from 'react-dom/client'
 import Catalog from './Catalog'
 import Community from './Community'
 import Device from './Device'
+import Trainers from './Trainers'
 import { avatarImage, useTrainer } from './trainer'
 import './shell.css'
 import './theme.css'
@@ -54,11 +55,11 @@ function ThemeSwitch() {
 }
 
 function App() {
-  const [community, setCommunity] = useState(location.hash === '#comunidade')
+  const [page, setPage] = useState(location.hash)
   const { trainer, openTrainer, onFavorite, dialog, revision } = useTrainer()
   useEffect(() => {
     const navigate = () => {
-      setCommunity(location.hash === '#comunidade')
+      if (location.hash !== '#conteudo') setPage(location.hash)
       window.scrollTo(0, 0)
     }
     window.addEventListener('hashchange', navigate)
@@ -76,13 +77,17 @@ function App() {
             Kalos<span>Dex</span>
           </a>
           <nav aria-label="Navegação principal">
-            <a href="#pokedex" aria-current={!community ? 'page' : undefined}>
+            <a href="#pokedex" aria-current={page !== '#comunidade' && page !== '#treinadores' ? 'page' : undefined}>
               <Icon name="book" />
               Pokédex
             </a>
-            <a href="#comunidade" aria-current={community ? 'page' : undefined}>
+            <a href="#comunidade" aria-current={page === '#comunidade' ? 'page' : undefined}>
               <Icon name="trophy" />
               Comunidade
+            </a>
+            <a href="#treinadores" aria-current={page === '#treinadores' ? 'page' : undefined}>
+              <Icon name="user" />
+              Treinadores
             </a>
           </nav>
           <div className="mast-controls">
@@ -106,7 +111,7 @@ function App() {
         </div>
       </header>
       <main id="conteudo" className="main-wrap">
-        {community ? (
+        {page === '#treinadores' ? <Trainers /> : page === '#comunidade' ? (
           <Community revision={revision} />
         ) : (
           <>

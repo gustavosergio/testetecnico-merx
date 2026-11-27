@@ -49,6 +49,17 @@ async function digest(token: string) {
 }
 async function handleAPI(req: Request, env: Env, url: URL) {
   const path = url.pathname
+  if (path === '/api/trainers' && req.method === 'GET') {
+    const query = (url.searchParams.get('q') ?? '').normalize('NFKC').trim().toLowerCase()
+    if (!query || query.length > 40) return json([])
+    const { results } = await env.DB.prepare(
+      'SELECT name, avatar_id, favorite_id, favorite_name FROM trainers WHERE instr(name_key, ?) > 0 ORDER BY name_key LIMIT 30',
+    ).bind(query).all<TrainerRow>()
+    return json(results.map(row => ({
+      name: row.name, avatar: row.avatar_id,
+      favorite: row.favorite_id ? { id: row.favorite_id, name: row.favorite_name } : null,
+    })))
+  }
   if (path === '/api/ranking' && req.method === 'GET') {
     const { results } = await env.DB.prepare(
       'SELECT favorite_id AS id, MIN(favorite_name) AS name, COUNT(*) AS votes FROM trainers WHERE favorite_id IS NOT NULL GROUP BY favorite_id ORDER BY votes DESC, favorite_id LIMIT 5',

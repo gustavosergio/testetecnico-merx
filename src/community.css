@@ -278,3 +278,10 @@
   border-radius: 0.5rem;
   background: #e6efef;
 }
+
+.trainer-directory form { max-width: 30rem; }
+.trainer-search-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
+.trainer-search-row input { flex: 1 1 10rem; min-width: 0; border-radius: .5rem; padding: .65rem; font: inherit; border: 1px solid #668b94; }
+.trainer-results { display: grid; list-style: none; gap: .55rem; padding: 0; }
+.trainer-results li { display: flex; align-items: flex-start; gap: .8rem; border: 1px solid #668b94; border-radius: .7rem; padding: .65rem; overflow-wrap: anywhere; }
+.trainer-results p { margin: .2rem 0; }
