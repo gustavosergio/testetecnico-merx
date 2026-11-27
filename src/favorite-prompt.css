@@ -94,8 +94,7 @@
   overflow: hidden;
   box-shadow: none;
 }
-.favorite-page h1,
-.favorite-page .favorite-page-title {
+.favorite-page h1 {
   margin: 0;
   padding: 1rem clamp(0.85rem, 4vw, 1.6rem);
   font-size: 1.35rem;
@@ -126,9 +125,6 @@
   background: transparent;
 }
 
-.likes-page {
-  margin-bottom: 1.1rem;
-}
 .liked-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));

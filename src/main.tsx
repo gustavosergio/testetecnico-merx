@@ -58,12 +58,13 @@ const mainLinks = [
   { href: '#pokedex', label: 'Pokédex', icon: '/art/nav-pokedex.webp' },
   { href: '#tipos', label: 'Tipos', icon: '/art/nav-types.webp' },
   { href: '#curtidos', label: 'Curtidos', icon: null },
+  { href: '#favorito', label: 'Meu favorito', icon: null },
 ] as const
 
 function FavoriteIcon({ id }: { id: number }) {
   const [portraitFailed, setPortraitFailed] = useState(false)
   const [spriteFailed, setSpriteFailed] = useState(false)
-  if (spriteFailed) return <Heart filled={false} />
+  if (spriteFailed) return <MasterBall />
 
   const portraitId = String(id).padStart(4, '0')
   const src = portraitFailed
@@ -111,10 +112,12 @@ function Navigation({
         >
           {icon ? (
             <img src={icon} width="19" height="19" alt="" style={{ objectFit: 'contain' }} />
+          ) : href === '#curtidos' ? (
+            <Heart filled={false} />
           ) : favoriteId ? (
             <FavoriteIcon key={favoriteId} id={favoriteId} />
           ) : (
-            <Heart filled={false} />
+            <MasterBall />
           )}
           {label}
         </a>
@@ -216,10 +219,6 @@ function readLikes(): SavedPokemon[] {
   return []
 }
 
-function readPage() {
-  return location.hash === '#favorito' ? '#curtidos' : location.hash
-}
-
 function LikedList({
   likes,
   onLike,
@@ -228,7 +227,7 @@ function LikedList({
   onLike: (pokemon: SavedPokemon) => void
 }) {
   return (
-    <section className="dex-detail favorite-page likes-page" aria-labelledby="likes-title">
+    <section className="dex-detail favorite-page" aria-labelledby="likes-title">
       <h1 id="likes-title">Curtidos</h1>
       {likes.length ? (
         <ul className="liked-list">
@@ -286,7 +285,7 @@ function FavoritePage({
 
   return (
     <section className="dex-detail favorite-page" aria-labelledby="favorite-page-title">
-      <h2 className="favorite-page-title" id="favorite-page-title">Meu favorito</h2>
+      <h1 id="favorite-page-title">Meu favorito</h1>
       {favorite ? (
         <>
           <FavoriteDetails
@@ -316,7 +315,7 @@ function FavoritePage({
 }
 
 function App() {
-  const [page, setPage] = useState(readPage)
+  const [page, setPage] = useState(location.hash)
   const main = useRef<HTMLElement>(null)
   const [favorite, setFavorite] = useState(readFavorite)
   const [likes, setLikes] = useState(readLikes)
@@ -359,7 +358,7 @@ function App() {
   }
   useEffect(() => {
     const navigate = () => {
-      if (location.hash !== '#conteudo') setPage(readPage())
+      if (location.hash !== '#conteudo') setPage(location.hash)
       window.scrollTo(0, 0)
     }
     window.addEventListener('hashchange', navigate)
@@ -405,15 +404,14 @@ function App() {
         {page === '#sobre' ? <PersonalStory /> : page === '#tipos' ? (
           <TypeMatchups />
         ) : page === '#curtidos' ? (
-          <>
-            <LikedList likes={likes} onLike={toggleLike} />
-            <FavoritePage
-              favorite={favorite}
-              likedIds={likedIds}
-              onLike={toggleLike}
-              onFavorite={setCandidate}
-            />
-          </>
+          <LikedList likes={likes} onLike={toggleLike} />
+        ) : page === '#favorito' ? (
+          <FavoritePage
+            favorite={favorite}
+            likedIds={likedIds}
+            onLike={toggleLike}
+            onFavorite={setCandidate}
+          />
         ) : (
           <>
             <section className="hero" aria-labelledby="title">
