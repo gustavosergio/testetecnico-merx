@@ -176,6 +176,7 @@ function MobileMenu({ page, favoriteId }: { page: string; favoriteId?: number })
 
 type SavedPokemon = Pick<Pokemon, 'id' | 'name'>
 type FavoriteCandidate = SavedPokemon & Pick<Pokemon, 'image'>
+type Selection = { pokemon: FavoriteCandidate; action: 'like' | 'favorite' }
 
 const favoriteKey = 'merxdex-favorite'
 const likesKey = 'merxdex-likes'
@@ -320,8 +321,10 @@ function App() {
   const [favorite, setFavorite] = useState(readFavorite)
   const [likes, setLikes] = useState(readLikes)
   const likedIds = new Set(likes.map(({ id }) => id))
+  const [selection, setSelection] = useState<Selection | null>(null)
+  const removing = selection?.action === 'favorite' && selection.pokemon.id === favorite?.id
 
-  function toggleLike({ id, name }: SavedPokemon) {
+  function saveLike({ id, name }: SavedPokemon) {
     const next = likedIds.has(id)
       ? likes.filter((pokemon) => pokemon.id !== id)
       : [...likes, { id, name }]
@@ -333,8 +336,17 @@ function App() {
     }
   }
 
-  const [candidate, setCandidate] = useState<FavoriteCandidate | null>(null)
-  const removing = candidate !== null && candidate.id === favorite?.id
+  function toggleLike(pokemon: SavedPokemon & { image?: string | null }) {
+    if (likedIds.has(pokemon.id)) {
+      saveLike(pokemon)
+      return
+    }
+    setSelection({ pokemon: { ...pokemon, image: pokemon.image ?? null }, action: 'like' })
+  }
+
+  function askFavorite(pokemon: FavoriteCandidate) {
+    setSelection({ pokemon, action: 'favorite' })
+  }
 
   useEffect(() => {
     try {
@@ -410,7 +422,7 @@ function App() {
             favorite={favorite}
             likedIds={likedIds}
             onLike={toggleLike}
-            onFavorite={setCandidate}
+            onFavorite={askFavorite}
           />
         ) : (
           <>
@@ -436,18 +448,21 @@ function App() {
               favorite={favorite?.id ?? null}
               likedIds={likedIds}
               onLike={toggleLike}
-              onFavorite={setCandidate}
+              onFavorite={askFavorite}
             />
           </>
         )}
       </main>
-      {candidate && (
+      {selection && (
         <FavoritePrompt
-          pokemon={candidate}
+          pokemon={selection.pokemon}
           currentName={favorite?.name}
-          removing={removing}
-          onConfirm={() => saveFavorite(candidate)}
-          onClose={() => setCandidate(null)}
+          action={selection.action === 'like' ? 'like' : removing ? 'remove' : 'favorite'}
+          onConfirm={() => {
+            if (selection.action === 'like') saveLike(selection.pokemon)
+            else saveFavorite(selection.pokemon)
+          }}
+          onClose={() => setSelection(null)}
         />
       )}
       <footer className="foot">
