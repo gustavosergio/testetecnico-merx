@@ -22,6 +22,8 @@ import './catalog.css'
 
 type Props = {
   favorite: number | null
+  likedIds: ReadonlySet<number>
+  onLike: (pokemon: Pick<Pokemon, 'id' | 'name'>) => void
   onFavorite: (pokemon: Pokemon) => void
 }
 type Filters = {
@@ -106,6 +108,10 @@ export function Heart({ filled }: { filled: boolean }) {
     </svg>
   )
 }
+export function MasterBall() {
+  return <img className="dex-master-icon" src="/art/master-ball.png" width="26" height="26" alt="" />
+}
+
 function Types({ types }: { types: string[] }) {
   return (
     <span className="dex-types">
@@ -280,7 +286,7 @@ function PokemonDetails({
   )
 }
 
-export function FavoriteDetails({ id, favorite, onFavorite }: Props & { id: number }) {
+export function FavoriteDetails({ id, ...actions }: Props & { id: number }) {
   const [detail, setDetail] = useState<Pokemon | null>(null)
   const request = useRequest(useCallback(() => loadPokemon(String(id)), [id]))
   if (request.error) return <ErrorPanel retry={request.retry} />
@@ -291,8 +297,7 @@ export function FavoriteDetails({ id, favorite, onFavorite }: Props & { id: numb
       {detail && (
         <Details
           pokemon={detail}
-          favorite={favorite}
-          onFavorite={onFavorite}
+          {...actions}
           close={() => setDetail(null)}
         />
       )}
@@ -303,10 +308,14 @@ export function FavoriteDetails({ id, favorite, onFavorite }: Props & { id: numb
 function Details({
   pokemon: initialPokemon,
   favorite,
+  likedIds,
+  onLike,
   onFavorite,
   close,
 }: Props & { pokemon: Pokemon; close: () => void }) {
   const [pokemon, setPokemon] = useState(initialPokemon)
+  const liked = likedIds.has(pokemon.id)
+  const isFavorite = favorite === pokemon.id
   const nameId = useId()
   const closeButton = useRef<HTMLButtonElement>(null)
   const dialog = useRef<HTMLDialogElement>(null)
@@ -344,15 +353,26 @@ function Details({
             closeButton.current?.focus({ preventScroll: true })
           }}
         >
-          <button
-            className="dex-primary"
-            onClick={() => onFavorite(pokemon)}
-          >
-            <Heart filled={favorite === pokemon.id} />
-            {favorite === pokemon.id
-              ? 'Remover dos favoritos'
-              : 'Escolher como favorito'}
-          </button>
+          <div className="dex-detail-actions">
+            <button
+              className="dex-primary"
+              type="button"
+              aria-pressed={liked}
+              onClick={() => onLike(pokemon)}
+            >
+              <Heart filled={liked} />
+              {liked ? 'Descurtir' : 'Curtir'}
+            </button>
+            <button
+              className="dex-primary"
+              type="button"
+              aria-pressed={isFavorite}
+              onClick={() => onFavorite(pokemon)}
+            >
+              <MasterBall />
+              {isFavorite ? 'Remover dos favoritos' : 'Escolher como favorito'}
+            </button>
+          </div>
         </PokemonDetails>
       </div>
     </dialog>
@@ -361,6 +381,8 @@ function Details({
 function CardGrid({
   ids,
   favorite,
+  likedIds,
+  onLike,
   onFavorite,
   open,
 }: Props & { ids: string; open: (p: Pokemon) => void }) {
@@ -390,17 +412,27 @@ function CardGrid({
             <strong>{displayName(p.name)}</strong>
             <Types types={p.types} />
           </button>
-          <button
-            className="dex-heart"
-            aria-label={
-              (favorite === p.id ? 'Remover dos favoritos: ' : 'Favoritar ') +
-              displayName(p.name)
-            }
-            aria-pressed={favorite === p.id}
-            onClick={() => onFavorite(p)}
-          >
-            <Heart filled={favorite === p.id} />
-          </button>
+          <div className="dex-card-actions">
+            <button
+              className="dex-heart"
+              type="button"
+              aria-label={(likedIds.has(p.id) ? 'Descurtir ' : 'Curtir ') + displayName(p.name)}
+              aria-pressed={likedIds.has(p.id)}
+              onClick={() => onLike(p)}
+            >
+              <Heart filled={likedIds.has(p.id)} />
+            </button>
+            <button
+              className="dex-master"
+              type="button"
+              aria-label={(favorite === p.id ? 'Remover favorito: ' : 'Favoritar ') + displayName(p.name)}
+              title={favorite === p.id ? 'Remover favorito' : 'Escolher como favorito'}
+              aria-pressed={favorite === p.id}
+              onClick={() => onFavorite(p)}
+            >
+              <MasterBall />
+            </button>
+          </div>
         </article>
       ))}
     </div>
@@ -483,7 +515,7 @@ function FilterChoices({
     </details>
   )
 }
-export default function Catalog({ favorite, onFavorite }: Props) {
+export default function Catalog(actions: Props) {
   const [filters, setFilters] = useState(readFilters)
   const [searchDraft, setSearchDraft] = useState(filters.search)
   const [detail, setDetail] = useState<Pokemon | null>(null)
@@ -646,8 +678,7 @@ export default function Catalog({ favorite, onFavorite }: Props) {
           ) : (
             <CardGrid
               ids={ids}
-              favorite={favorite}
-              onFavorite={onFavorite}
+              {...actions}
               open={setDetail}
             />
           )}
@@ -668,8 +699,7 @@ export default function Catalog({ favorite, onFavorite }: Props) {
         {detail && (
           <Details
             pokemon={detail}
-            favorite={favorite}
-            onFavorite={onFavorite}
+            {...actions}
             close={() => setDetail(null)}
           />
         )}

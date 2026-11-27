@@ -5,8 +5,8 @@ import '@fontsource/barlow-condensed/latin-700.css'
 import '@fontsource/ibm-plex-mono/latin-500.css'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import Catalog, { FavoriteDetails, Heart } from './Catalog'
-import type { Pokemon } from './catalog'
+import Catalog, { FavoriteDetails, Heart, MasterBall } from './Catalog'
+import { displayName, numberLabel, type Pokemon } from './catalog'
 import FavoritePrompt from './FavoritePrompt'
 import Device from './Device'
 import TypeMatchups from './TypeMatchups'
@@ -57,7 +57,7 @@ function ThemeSwitch() {
 const mainLinks = [
   { href: '#pokedex', label: 'Pokédex', icon: '/art/nav-pokedex.webp' },
   { href: '#tipos', label: 'Tipos', icon: '/art/nav-types.webp' },
-  { href: '#favorito', label: 'Meu favorito', icon: null },
+  { href: '#curtidos', label: 'Curtidos', icon: null },
 ] as const
 
 function FavoriteIcon({ id }: { id: number }) {
@@ -171,34 +171,114 @@ function MobileMenu({ page, favoriteId }: { page: string; favoriteId?: number })
   )
 }
 
-type Favorite = Pick<Pokemon, 'id' | 'name'>
-type FavoriteCandidate = Favorite & Pick<Pokemon, 'image'>
+type SavedPokemon = Pick<Pokemon, 'id' | 'name'>
+type FavoriteCandidate = SavedPokemon & Pick<Pokemon, 'image'>
 
 const favoriteKey = 'merxdex-favorite'
+const likesKey = 'merxdex-likes'
 
-function readFavorite(): Favorite | null {
+function isSavedPokemon(value: unknown): value is SavedPokemon {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    typeof value.id === 'number' &&
+    Number.isSafeInteger(value.id) &&
+    value.id > 0 &&
+    'name' in value &&
+    typeof value.name === 'string'
+  )
+}
+
+function readFavorite(): SavedPokemon | null {
   try {
-    const saved = JSON.parse(localStorage.getItem(favoriteKey) ?? 'null')
-    if (
-      saved &&
-      Number.isSafeInteger(saved.id) &&
-      saved.id > 0 &&
-      typeof saved.name === 'string'
-    ) {
-      return saved
+    const saved: unknown = JSON.parse(localStorage.getItem(favoriteKey) ?? 'null')
+    return isSavedPokemon(saved) ? saved : null
+  } catch {
+    return null
+  }
+}
+
+function readLikes(): SavedPokemon[] {
+  try {
+    const stored = localStorage.getItem(likesKey)
+    if (stored === null) {
+      const previousFavorite = readFavorite()
+      return previousFavorite ? [previousFavorite] : []
+    }
+    const saved: unknown = JSON.parse(stored)
+    if (Array.isArray(saved)) {
+      return [...new Map(saved.filter(isSavedPokemon).map((pokemon) => [pokemon.id, pokemon])).values()]
     }
   } catch {
     // Storage may be unavailable or contain an invalid entry.
   }
-  return null
+  return []
+}
+
+function readPage() {
+  return location.hash === '#favorito' ? '#curtidos' : location.hash
+}
+
+function LikedList({
+  likes,
+  onLike,
+}: {
+  likes: SavedPokemon[]
+  onLike: (pokemon: SavedPokemon) => void
+}) {
+  return (
+    <section className="dex-detail favorite-page likes-page" aria-labelledby="likes-title">
+      <h1 id="likes-title">Curtidos</h1>
+      {likes.length ? (
+        <ul className="liked-list">
+          {likes.map((pokemon) => {
+            const name = displayName(pokemon.name)
+            return (
+              <li key={pokemon.id}>
+                <a href={`/?busca=${pokemon.id}#pokedex`}>
+                  <img
+                    src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`}
+                    alt=""
+                    width="42"
+                    height="42"
+                    loading="lazy"
+                    onError={(event) => { event.currentTarget.hidden = true }}
+                  />
+                  <span>{name} <small>{numberLabel(pokemon.id)}</small></span>
+                </a>
+                <button
+                  className="dex-heart"
+                  type="button"
+                  aria-label={`Descurtir ${name}`}
+                  onClick={() => onLike(pokemon)}
+                >
+                  <Heart filled />
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      ) : (
+        <div className="favorite-page-empty">
+          <p>Você ainda não curtiu nenhum Pokémon.</p>
+          <a href="/#pokedex">Explorar a Pokédex</a>
+        </div>
+      )}
+    </section>
+  )
 }
 
 function FavoritePage({
   favorite,
-  onRemove,
+  likedIds,
+  onLike,
+  onFavorite,
 }: {
-  favorite: Favorite | null
-  onRemove: (pokemon: FavoriteCandidate) => void
+  favorite: SavedPokemon | null
+  likedIds: ReadonlySet<number>
+  onLike: (pokemon: SavedPokemon) => void
+  onFavorite: (pokemon: FavoriteCandidate) => void
 }) {
   const image = favorite
     ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${favorite.id}.png`
@@ -206,19 +286,21 @@ function FavoritePage({
 
   return (
     <section className="dex-detail favorite-page" aria-labelledby="favorite-page-title">
-      <h1 id="favorite-page-title">Meu favorito</h1>
+      <h2 className="favorite-page-title" id="favorite-page-title">Meu favorito</h2>
       {favorite ? (
         <>
           <FavoriteDetails
             key={favorite.id}
             id={favorite.id}
             favorite={favorite.id}
-            onFavorite={onRemove}
+            likedIds={likedIds}
+            onLike={onLike}
+            onFavorite={onFavorite}
           />
           <div className="favorite-page-actions">
             <a href={`/?busca=${favorite.id}#pokedex`}>Ver na Pokédex</a>
-            <button type="button" onClick={() => onRemove({ ...favorite, image })}>
-              <Heart filled />
+            <button type="button" onClick={() => onFavorite({ ...favorite, image })}>
+              <MasterBall />
               Remover dos favoritos
             </button>
           </div>
@@ -234,12 +316,36 @@ function FavoritePage({
 }
 
 function App() {
-  const [page, setPage] = useState(location.hash)
+  const [page, setPage] = useState(readPage)
   const main = useRef<HTMLElement>(null)
   const [favorite, setFavorite] = useState(readFavorite)
+  const [likes, setLikes] = useState(readLikes)
+  const likedIds = new Set(likes.map(({ id }) => id))
+
+  function toggleLike({ id, name }: SavedPokemon) {
+    const next = likedIds.has(id)
+      ? likes.filter((pokemon) => pokemon.id !== id)
+      : [...likes, { id, name }]
+    setLikes(next)
+    try {
+      localStorage.setItem(likesKey, JSON.stringify(next))
+    } catch {
+      // Likes remain available until the page closes.
+    }
+  }
 
   const [candidate, setCandidate] = useState<FavoriteCandidate | null>(null)
   const removing = candidate !== null && candidate.id === favorite?.id
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(likesKey) === null) {
+        localStorage.setItem(likesKey, JSON.stringify(likes))
+      }
+    } catch {
+      // Likes remain available until the page closes.
+    }
+  }, [likes])
 
   function saveFavorite({ id, name }: FavoriteCandidate) {
     const next = removing ? null : { id, name }
@@ -253,7 +359,7 @@ function App() {
   }
   useEffect(() => {
     const navigate = () => {
-      if (location.hash !== '#conteudo') setPage(location.hash)
+      if (location.hash !== '#conteudo') setPage(readPage())
       window.scrollTo(0, 0)
     }
     window.addEventListener('hashchange', navigate)
@@ -298,8 +404,16 @@ function App() {
         <TrainerGreeting />
         {page === '#sobre' ? <PersonalStory /> : page === '#tipos' ? (
           <TypeMatchups />
-        ) : page === '#favorito' ? (
-          <FavoritePage favorite={favorite} onRemove={setCandidate} />
+        ) : page === '#curtidos' ? (
+          <>
+            <LikedList likes={likes} onLike={toggleLike} />
+            <FavoritePage
+              favorite={favorite}
+              likedIds={likedIds}
+              onLike={toggleLike}
+              onFavorite={setCandidate}
+            />
+          </>
         ) : (
           <>
             <section className="hero" aria-labelledby="title">
@@ -322,6 +436,8 @@ function App() {
             </section>
             <Catalog
               favorite={favorite?.id ?? null}
+              likedIds={likedIds}
+              onLike={toggleLike}
               onFavorite={setCandidate}
             />
           </>

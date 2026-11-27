@@ -33,7 +33,7 @@ Os testes automatizados cobrem busca, combinação de filtros e leitura da cadei
 - Modal com medidas, descrição da espécie e cadeia evolutiva. A árvore exibe ramos separados, mostra níveis e itens fornecidos pela PokéAPI e permite abrir a ficha de cada evolução pela imagem.
 - Estados de carregamento, ausência de resultados e erro com opção de tentar novamente.
 - Aba Tipos com vantagens de ataque e fraquezas de defesa. O cabeçalho permite alternar entre os temas claro e escuro.
-- Um favorito por navegador. O coração no catálogo salva a escolha localmente. A aba Meu favorito mostra a ficha completa do Pokémon escolhido, e um balão pede confirmação ao escolher, trocar ou remover o favorito.
+- O coração adiciona ou remove Pokémon da lista de curtidos. A Master Ball marca um único favorito, com confirmação ao escolher, trocar ou remover. A aba Curtidos reúne a lista e a ficha completa do favorito. As duas escolhas são independentes e ficam salvas no navegador.
 - Saudação opcional na primeira visita. O nome escolhido fica no navegador e aparece no topo do site.
 - Navegação por teclado com foco visível, rótulos nos controles e fechamento dos diálogos com Escape.
 
@@ -41,7 +41,7 @@ Os testes automatizados cobrem busca, combinação de filtros e leitura da cadei
 
 - **Busca, filtros e paginação.** A PokéAPI distribui as informações entre endpoints de espécie, geração, tipo e Pokémon. O catálogo cruza os identificadores antes de paginar e busca os detalhes só dos cartões visíveis. Um cache em memória reaproveita consultas bem-sucedidas.
 - **Regiões e evoluções.** Cada espécie aparece pela geração de estreia, com sua forma padrão. Galar e Hisui são tratados separadamente dentro da oitava geração. As evoluções são renderizadas como árvore porque uma espécie pode ter vários caminhos. A descrição prioriza português e usa inglês quando necessário.
-- **Escopo da entrega.** A `main` usa o armazenamento do navegador para o favorito. A [branch versao-completa](https://github.com/gustavosergio/testetecnico-merx/tree/versao-completa) preserva o projeto anterior, com contas, perfis e ranking comunitário. [Abrir a versão completa](https://merxdex.vercel.app/)
+- **Escopo da entrega.** A `main` usa o armazenamento do navegador para curtidas e favorito. A [branch versao-completa](https://github.com/gustavosergio/testetecnico-merx/tree/versao-completa) preserva o projeto anterior, com contas, perfis e ranking comunitário. [Abrir a versão completa](https://merxdex.vercel.app/)
 
 A carcaça e o visor da Pokédex de Kalos inspiraram a ilustração do aparelho em CSS. Os sprites vêm do [repositório de imagens da PokéAPI](https://github.com/PokeAPI/sprites).
 
