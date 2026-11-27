@@ -141,7 +141,7 @@ function Credentials({
               />
             </label>
             {mode === 'signup' && (
-              <small>De 8 a 20 caracteres, sem espaços.</small>
+              <small>De 4 a 20 caracteres, sem espaços.</small>
             )}
           </>
         )}

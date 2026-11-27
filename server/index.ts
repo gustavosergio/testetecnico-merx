@@ -243,11 +243,11 @@ async function handleAPI(req: Request, env: Env, url: URL) {
     const name =
       typeof body.name === 'string' ? body.name.normalize('NFKC') : ''
     if (
-      Array.from(name).length < 8 ||
+      Array.from(name).length < 4 ||
       Array.from(name).length > 20 ||
       /[\s\p{C}]/u.test(name)
     ) {
-      return json({ error: 'Use entre 8 e 20 caracteres, sem espaços.' }, 400)
+      return json({ error: 'Use entre 4 e 20 caracteres, sem espaços.' }, 400)
     }
     const secret = Array.from(crypto.getRandomValues(new Uint8Array(32)), (n) =>
       n.toString(16).padStart(2, '0'),

@@ -84,7 +84,7 @@ test('nomes únicos, sessão protegida, troca condicional e ranking compartilhad
     (await call('favorite', { id: 1, previous: null }, session)).status,
     200,
   )
-  const other = (await call('trainer', { name: 'TreinadorB' })).headers
+  const other = (await call('trainer', { name: 'Beto' })).headers
     .get('set-cookie')
     .split(';')[0]
   await call('favorite', { id: 1, previous: null }, other)
