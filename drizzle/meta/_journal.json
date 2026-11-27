@@ -15,6 +15,13 @@
       "when": 1795746826366,
       "tag": "0001_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1795747162450,
+      "tag": "0002_remove_legacy_trainers",
+      "breakpoints": true
     }
   ]
 }
