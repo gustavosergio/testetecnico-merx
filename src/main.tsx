@@ -9,13 +9,15 @@ import Catalog from './Catalog'
 import Community from './Community'
 import Device from './Device'
 import Trainers from './Trainers'
+import TypeMatchups from './TypeMatchups'
 import { avatarImage, useTrainer } from './trainer'
 import './shell.css'
 import './theme.css'
 
-type IconName = 'book' | 'trophy' | 'user'
+type IconName = 'book' | 'trophy' | 'user' | 'types'
 function Icon({ name }: { name: IconName }) {
   const paths = {
+    types: 'M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z',
     book: 'M3 4h6q2 0 3 2 1-2 3-2h6v15h-6q-2 0-3 2-1-2-3-2H3z M12 6v15',
     trophy:
       'M7 3h10v6a5 5 0 0 1-10 0z M7 5H3v2q0 5 5 5 M17 5h4v2q0 5-5 5 M12 14v5 M8 21h8 M10 19h4',
@@ -101,7 +103,7 @@ function App() {
             <a
               href="#pokedex"
               aria-current={
-                page !== '#comunidade' && page !== '#treinadores'
+                !['#comunidade', '#treinadores', '#tipos'].includes(page)
                   ? 'page'
                   : undefined
               }
@@ -122,6 +124,13 @@ function App() {
             >
               <Icon name="user" />
               Treinadores
+            </a>
+            <a
+              href="#tipos"
+              aria-current={page === '#tipos' ? 'page' : undefined}
+            >
+              <Icon name="types" />
+              Tipos
             </a>
           </nav>
           <div className="mast-controls">
@@ -145,7 +154,9 @@ function App() {
         </div>
       </header>
       <main id="conteudo" className="main-wrap">
-        {page === '#treinadores' ? (
+        {page === '#tipos' ? (
+          <TypeMatchups />
+        ) : page === '#treinadores' ? (
           <Trainers />
         ) : page === '#comunidade' ? (
           <Community revision={revision} />

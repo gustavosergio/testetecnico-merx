@@ -128,6 +128,16 @@ export const listRegion = cached(async (key) => {
   if (key === 'galar') entries = entries.filter((p) => p.id < 899)
   return [...entries].sort((a, b) => a.id - b.id)
 })
+export const loadTypeMatchups = cached(async (type) => {
+  const { damage_relations } = await read<{
+    damage_relations: { double_damage_to: Ref[]; double_damage_from: Ref[] }
+  }>('type/' + type)
+  return {
+    strongAgainst: damage_relations.double_damage_to.map(({ name }) => name),
+    weakAgainst: damage_relations.double_damage_from.map(({ name }) => name),
+  }
+})
+
 export const listType = cached(async (type) => {
   const data = await read<{ pokemon: { pokemon: Ref }[] }>('type/' + type)
   return new Set(data.pokemon.map(({ pokemon }) => idFromUrl(pokemon.url)))
