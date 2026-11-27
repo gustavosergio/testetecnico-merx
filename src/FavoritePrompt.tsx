@@ -1,3 +1,4 @@
+import '@fontsource/pixelify-sans/latin-400.css'
 import { useEffect, useRef } from 'react'
 import { displayName, type Pokemon } from './catalog'
 import './favorite-prompt.css'

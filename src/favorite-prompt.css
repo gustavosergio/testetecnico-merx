@@ -43,6 +43,7 @@
   border: 1px solid var(--favorite-border);
   border-radius: 0.75rem;
   background: var(--favorite-bubble);
+  font-family: 'Pixelify Sans', 'IBM Plex Mono', monospace;
   overflow-wrap: anywhere;
 }
 .favorite-bubble::before {
@@ -59,11 +60,13 @@
 }
 .favorite-bubble h2 {
   margin: 0;
-  font-size: clamp(1.05rem, 3.8vw, 1.35rem);
+  font-size: clamp(1.1rem, 4.5vw, 1.4rem);
+  font-weight: 400;
   line-height: 1.2;
 }
 .favorite-bubble p {
   margin: 0.45rem 0 0;
+  line-height: 1.35;
 }
 .favorite-prompt-actions {
   display: flex;
