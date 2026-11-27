@@ -415,7 +415,7 @@
 }
 
 .community.trainer-directory {
-  --scenery-image: url('/art/trainer-landscape.png');
+  --scenery-image: url('/art/trainer-landscape.webp');
   --scenery-base: #283950;
   min-height: clamp(26rem, 49vw, 38rem);
 }
