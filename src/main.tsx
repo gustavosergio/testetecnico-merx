@@ -27,7 +27,7 @@ function ThemeSwitch() {
     <button
       className="theme-switch"
       type="button"
-      aria-label={dark ? 'Ativar tema claro' : 'Ativar tema escuro'}
+      aria-label={dark ? 'Alterar tema para claro' : 'Alterar tema para escuro'}
       title={
         dark
           ? 'Ativar tema claro · Quick Ball'
@@ -46,6 +46,7 @@ function ThemeSwitch() {
         height="42"
         alt=""
       />
+      <span>Alterar tema</span>
     </button>
   )
 }
