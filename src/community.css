@@ -416,7 +416,7 @@
 
 .community.trainer-directory {
   min-height: clamp(26rem, 49vw, 38rem);
-  background: #283950 url('/art/trainer-directory.png') center / cover no-repeat;
+  background: #283950 url('/art/trainer-landscape.png') center / cover no-repeat;
 }
 .trainer-directory-panel {
   width: min(100%, 32rem);
