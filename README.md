@@ -34,6 +34,7 @@ Os testes automatizados cobrem busca, combinação de filtros e leitura da cadei
 - Estados de carregamento, ausência de resultados e erro com opção de tentar novamente.
 - Aba Tipos com vantagens de ataque e fraquezas de defesa. O cabeçalho permite alternar entre os temas claro e escuro.
 - Um favorito por navegador. O coração no catálogo salva a escolha localmente e uma confirmação aparece ao trocar de Pokémon.
+- Saudação opcional na primeira visita. O nome escolhido fica no navegador e aparece no topo do site.
 - Navegação por teclado com foco visível, rótulos nos controles e fechamento dos diálogos com Escape.
 
 ## Decisões e dificuldades

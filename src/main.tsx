@@ -9,6 +9,7 @@ import Catalog from './Catalog'
 import { displayName } from './catalog'
 import Device from './Device'
 import TypeMatchups from './TypeMatchups'
+import TrainerGreeting from './TrainerGreeting'
 import './shell.css'
 import './theme.css'
 
@@ -205,6 +206,7 @@ function App() {
         </div>
       </header>
       <main id="conteudo" className="main-wrap">
+        <TrainerGreeting />
         {page === '#sobre' ? null : page === '#tipos' ? (
           <TypeMatchups />
         ) : (
