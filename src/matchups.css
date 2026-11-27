@@ -47,3 +47,31 @@
     grid-template-columns: 1fr;
   }
 }
+
+.community.type-matchups {
+  min-height: clamp(25rem, 49vw, 38rem);
+  background: #164f42 url('/art/type-matchups.png') center / cover no-repeat;
+}
+.matchups-panel {
+  width: min(100%, 36rem);
+  color: #132d39;
+  background: #f6fcfd;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px #17213744;
+}
+[data-theme='dark'] .matchups-panel {
+  color: var(--night-text);
+  background: var(--night-panel);
+}
+@media (max-width: 620px) {
+  .community.type-matchups {
+    min-height: 0;
+    padding: clamp(8rem, 42vw, 15rem) 0.75rem 0.75rem;
+    background-size: 100% auto;
+    background-position: center top;
+  }
+  .matchups-panel {
+    margin-inline: auto;
+  }
+}

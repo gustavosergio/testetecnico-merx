@@ -68,55 +68,57 @@ export default function TypeMatchups() {
       className="community type-matchups"
       aria-labelledby="matchups-title"
     >
-      <h2 id="matchups-title">Vantagens e fraquezas</h2>
-      <p>
-        Escolha um tipo para conferir suas vantagens no ataque e fraquezas na
-        defesa.
-      </p>
-      <div className="matchup-picker" role="group" aria-label="Escolher tipo">
-        {options.map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            aria-pressed={type === key}
-            onClick={() => setType(key)}
-          >
-            <TypeIcon type={key} />
-            {label}
-          </button>
-        ))}
-      </div>
-      {type && (
-        <div className="matchup-results" aria-live="polite">
-          {!current ? (
-            <p>Consultando {typeLabels[type]}…</p>
-          ) : !current.data ? (
-            <div>
-              <p>Não foi possível consultar esse tipo.</p>
-              <button
-                type="button"
-                className="trainer-primary"
-                onClick={() => setAttempt(attempt + 1)}
-              >
-                Tentar novamente
-              </button>
-            </div>
-          ) : (
-            <>
-              <TypeList
-                title="Causa dano dobrado contra"
-                types={current.data.strongAgainst}
-                empty="Nenhum tipo recebe dano dobrado desse ataque."
-              />
-              <TypeList
-                title="Recebe dano dobrado de"
-                types={current.data.weakAgainst}
-                empty="Nenhum tipo causa dano dobrado contra ele."
-              />
-            </>
-          )}
+      <div className="matchups-panel">
+        <h2 id="matchups-title">Vantagens e fraquezas</h2>
+        <p>
+          Escolha um tipo para conferir suas vantagens no ataque e fraquezas na
+          defesa.
+        </p>
+        <div className="matchup-picker" role="group" aria-label="Escolher tipo">
+          {options.map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={type === key}
+              onClick={() => setType(key)}
+            >
+              <TypeIcon type={key} />
+              {label}
+            </button>
+          ))}
         </div>
-      )}
+        {type && (
+          <div className="matchup-results" aria-live="polite">
+            {!current ? (
+              <p>Consultando {typeLabels[type]}…</p>
+            ) : !current.data ? (
+              <div>
+                <p>Não foi possível consultar esse tipo.</p>
+                <button
+                  type="button"
+                  className="trainer-primary"
+                  onClick={() => setAttempt(attempt + 1)}
+                >
+                  Tentar novamente
+                </button>
+              </div>
+            ) : (
+              <>
+                <TypeList
+                  title="Causa dano dobrado contra"
+                  types={current.data.strongAgainst}
+                  empty="Nenhum tipo recebe dano dobrado desse ataque."
+                />
+                <TypeList
+                  title="Recebe dano dobrado de"
+                  types={current.data.weakAgainst}
+                  empty="Nenhum tipo causa dano dobrado contra ele."
+                />
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </section>
   )
 }
