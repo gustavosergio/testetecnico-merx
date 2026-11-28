@@ -33,7 +33,7 @@ Os testes automatizados cobrem busca, combinação de filtros e leitura da cadei
 - Modal com medidas, descrição da espécie e cadeia evolutiva. Na Pokédex, o botão Shiny alterna a imagem quando essa versão está disponível. A árvore exibe ramos separados, mostra níveis e itens fornecidos pela PokéAPI e permite abrir a ficha de cada evolução pela imagem.
 - Estados de carregamento, ausência de resultados e erro com opção de tentar novamente.
 - Aba Tipos com vantagens de ataque e fraquezas de defesa. O cabeçalho permite alternar entre os temas claro e escuro.
-- A Love Ball adiciona ou remove Pokémon da lista de curtidos após confirmação no balão de fala, no catálogo, nas fichas e na aba Curtidos. A Master Ball marca um único favorito, com confirmação ao escolher, trocar ou remover. A aba Curtidos mostra a lista, e Meu favorito exibe a ficha completa do Pokémon escolhido. As duas escolhas são independentes e ficam salvas no navegador.
+- A Love Ball adiciona ou remove Pokémon da lista de curtidos após confirmação no balão de fala, no catálogo, nas fichas e na aba Curtidos. A Master Ball marca um único favorito, com confirmação ao escolher, trocar ou remover. A aba Curtidos mostra a lista, e Meu favorito exibe a ficha completa do Pokémon escolhido, com as imagens normal e shiny lado a lado quando disponíveis. As duas escolhas são independentes e ficam salvas no navegador.
 - Saudação opcional na primeira visita. O nome escolhido fica no navegador e aparece no topo do site.
 - Navegação por teclado com foco visível, rótulos nos controles e fechamento dos diálogos com Escape.
 

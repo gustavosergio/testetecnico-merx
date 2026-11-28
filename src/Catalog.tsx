@@ -216,12 +216,14 @@ function PokemonDetails({
   children,
   nameId,
   allowShiny = false,
+  artwork,
   onOpenEvolution,
 }: {
   pokemon: Pokemon
   children?: ReactNode
   nameId?: string
   allowShiny?: boolean
+  artwork?: ReactNode
   onOpenEvolution: (pokemon: Pokemon) => void
 }) {
   const [showShiny, setShowShiny] = useState(false)
@@ -231,19 +233,21 @@ function PokemonDetails({
   )
   return (
     <>
-      <div className="dex-detail-img">
-        <Art image={showShiny ? pokemon.shinyImage : pokemon.image} />
-        {allowShiny && pokemon.shinyImage && (
-          <button
-            type="button"
-            className="dex-shiny-toggle"
-            aria-pressed={showShiny}
-            onClick={() => setShowShiny(!showShiny)}
-          >
-            <span aria-hidden="true">✦</span> Shiny
-          </button>
-        )}
-      </div>
+      {artwork ?? (
+        <div className="dex-detail-img">
+          <Art image={showShiny ? pokemon.shinyImage : pokemon.image} />
+          {allowShiny && pokemon.shinyImage && (
+            <button
+              type="button"
+              className="dex-shiny-toggle"
+              aria-pressed={showShiny}
+              onClick={() => setShowShiny(!showShiny)}
+            >
+              <span aria-hidden="true">✦</span> Shiny
+            </button>
+          )}
+        </div>
+      )}
       <div className="dex-detail-info">
         <small>{numberLabel(pokemon.id)}</small>
         <h2 id={nameId}>{displayName(pokemon.name)}</h2>
@@ -295,7 +299,28 @@ export function FavoriteDetails({ id, ...actions }: Props & { id: number }) {
   if (!request.data) return <p role="status">Carregando Pokémon favorito…</p>
   return (
     <>
-      <PokemonDetails pokemon={request.data} onOpenEvolution={setDetail} />
+      <PokemonDetails
+        pokemon={request.data}
+        onOpenEvolution={setDetail}
+        artwork={
+          <div className="favorite-artwork">
+            <figure>
+              <div className="dex-detail-img">
+                <Art image={request.data.image} />
+              </div>
+              <figcaption>Normal</figcaption>
+            </figure>
+            {request.data.shinyImage && (
+              <figure>
+                <div className="dex-detail-img">
+                  <Art image={request.data.shinyImage} />
+                </div>
+                <figcaption>✦ Shiny</figcaption>
+              </figure>
+            )}
+          </div>
+        }
+      />
       {detail && (
         <Details
           pokemon={detail}
