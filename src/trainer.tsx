@@ -194,7 +194,6 @@ function Credentials({
 
 export function useTrainer() {
   const [trainer, setTrainer] = useState<Trainer | null>(null)
-  const [sessionReady, setSessionReady] = useState(false)
   const [visible, setVisible] = useState(false)
   const [checking, setChecking] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
@@ -226,9 +225,7 @@ export function useTrainer() {
   }, [])
   useEffect(() => {
     const controller = new AbortController()
-    void refresh(controller.signal).catch(() => {}).finally(() => {
-      if (!controller.signal.aborted) setSessionReady(true)
-    })
+    void refresh(controller.signal).catch(() => {})
     return () => controller.abort()
   }, [refresh])
   useEffect(() => {
@@ -490,7 +487,6 @@ export function useTrainer() {
   )
   return {
     trainer,
-    sessionReady,
     revision,
     dialog,
     openTrainer: () => open(null),

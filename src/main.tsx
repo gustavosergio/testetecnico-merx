@@ -13,8 +13,8 @@ import Trainers from './Trainers'
 import { avatarImage, useTrainer } from './trainer'
 import Device from './Device'
 import TypeMatchups from './TypeMatchups'
-import TrainerGreeting from './TrainerGreeting'
-import PersonalStory from './PersonalStory'
+import './trainer-greeting.css'
+import AboutProject from './AboutProject'
 import './shell.css'
 import './theme.css'
 
@@ -133,7 +133,7 @@ function Navigation({
           aria-current={active === '#sobre' ? 'page' : undefined}
           onClick={close}
         >
-          Relato pessoal
+          Sobre o projeto
         </a>
       )}
     </nav>
@@ -308,7 +308,7 @@ function FavoritePage({
 }
 
 function Site({ account }: { account: ReturnType<typeof useTrainer> }) {
-  const { trainer, sessionReady, openTrainer, onFavorite: askFavorite, revision } = account
+  const { trainer, openTrainer, onFavorite: askFavorite, revision } = account
   const favorite = trainer?.favorite ?? null
   const likesKey = trainer ? 'energdex-likes:trainer:' + trainer.name.toLowerCase() : 'energdex-likes:guest'
   const [page, setPage] = useState(location.hash)
@@ -373,7 +373,7 @@ function Site({ account }: { account: ReturnType<typeof useTrainer> }) {
               href="#sobre"
               aria-current={page === '#sobre' ? 'page' : undefined}
             >
-              Relato pessoal
+              Sobre o projeto
             </a>
             <button className="identity" type="button" onClick={openTrainer}>
               {trainer && <img src={avatarImage(trainer.avatar)} width="32" height="32" alt="" />}
@@ -384,8 +384,8 @@ function Site({ account }: { account: ReturnType<typeof useTrainer> }) {
         </div>
       </header>
       <main ref={main} id="conteudo" className="main-wrap" tabIndex={-1}>
-        {trainer ? <p className="trainer-greeting">Olá, <strong>{trainer.name}</strong>!</p> : sessionReady && <TrainerGreeting />}
-        {page === '#sobre' ? <PersonalStory /> : page === '#tipos' ? (
+        {trainer ? <p className="trainer-greeting">Olá, <strong>{trainer.name}</strong>!</p> : null}
+        {page === '#sobre' ? <AboutProject /> : page === '#tipos' ? (
           <TypeMatchups />
         ) : page === '#comunidade' ? (
           <Community revision={revision} />
