@@ -53,6 +53,10 @@ export default function PersonalStory() {
         E eu quis guardar a versão completa porque, sinceramente, ainda acho que
         ficou um baita projeto!
       </p>
+      <p>
+        <strong>P.S.</strong> Depois que escrevi este relato, o projeto mudou
+        de nome. O MerxDex passou a se chamar EnergDex.
+      </p>
     </article>
   )
 }
