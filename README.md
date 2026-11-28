@@ -28,11 +28,12 @@ Os testes automatizados cobrem busca, combinação de filtros e leitura da cadei
 
 ## Funcionalidades
 
-- Catálogo com imagem, nome, número nacional e tipos de cada Pokémon. A paginação mostra até 14 cartões no celular e 15 no desktop, com atalhos para voltar ou avançar 1, 2 ou 3 páginas.
-- Busca com debounce de 250 ms por nome parcial ou pelo número nacional, com formatos como `25` e `#025`. Os filtros de região e tipo aceitam múltiplas escolhas e funcionam junto com a busca e a paginação. Ative **Dupla tipagem** para exigir os dois tipos selecionados. A URL guarda a consulta e a página.
-- Modal com medidas, descrição da espécie e cadeia evolutiva. Na Pokédex, o botão Shiny alterna a imagem quando essa versão está disponível. A árvore exibe ramos separados, mostra níveis e itens fornecidos pela PokéAPI e permite abrir a ficha de cada evolução pela imagem.
+- Catálogo com imagem, nome, número da Pokédex e tipos de cada Pokémon. A paginação mostra até 14 cartões no celular e 15 no desktop, com atalhos para voltar ou avançar 1, 2 ou 3 páginas.
+- Busca com debounce de 250 ms por nome parcial ou pelo número da Pokédex, com formatos como `25` e `#025`. Os filtros de região e tipo aceitam múltiplas escolhas e funcionam junto com a busca e a paginação. Ative **Dupla tipagem** para exigir os dois tipos selecionados. A URL guarda a consulta e a página.
+- Janela de detalhes com altura, peso, descrição da espécie e cadeia evolutiva. Na Pokédex, o botão Shiny alterna a imagem quando essa versão está disponível. A árvore exibe ramos separados, mostra níveis e itens fornecidos pela PokéAPI e permite abrir a ficha de cada evolução pela imagem.
 - Estados de carregamento, ausência de resultados e erro com opção de tentar novamente.
-- Aba Tipos com vantagens de ataque e fraquezas de defesa. O cabeçalho permite alternar entre os temas claro e escuro.
+- Aba Tipos com vantagens de ataque e fraquezas de defesa.
+- **Temas com Pokébolas.** Clique na **Dusk Ball** para entrar no modo escuro e na **Quick Ball** para voltar ao modo claro. O navegador lembra sua escolha.
 - A Love Ball adiciona ou remove Pokémon da lista de curtidos após confirmação no balão de fala, no catálogo, nas fichas e na aba Curtidos. A Master Ball marca um único favorito, com confirmação ao escolher, trocar ou remover. A aba Curtidos mostra a lista, e Meu favorito exibe a ficha completa do Pokémon escolhido, com as imagens normal e shiny lado a lado quando disponíveis. As duas escolhas são independentes e ficam salvas no navegador.
 - Saudação opcional na primeira visita. O nome escolhido fica no navegador e aparece no topo do site.
 - Navegação por teclado com foco visível, rótulos nos controles e fechamento dos diálogos com Escape.
