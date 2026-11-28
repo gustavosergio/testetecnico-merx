@@ -112,11 +112,11 @@ function Types({ types }: { types: string[] }) {
     </span>
   )
 }
-function Art({ pokemon }: { pokemon: Pokemon }) {
+function Art({ image }: { image: string | null }) {
   const [failedImage, setFailedImage] = useState<string | null>(null)
-  return pokemon.image && pokemon.image !== failedImage ? (
+  return image && image !== failedImage ? (
     <img
-      src={pokemon.image}
+      src={image}
       alt=""
       decoding="async"
       onError={(event) => setFailedImage(event.currentTarget.getAttribute('src'))}
@@ -155,7 +155,7 @@ function Chain({
   )
   const pokemon = stage.data
   const art = pokemon ? (
-    <Art pokemon={pokemon} />
+    <Art image={pokemon.image} />
   ) : (
     <span aria-hidden="true">{numberLabel(item.id)}</span>
   )
@@ -215,13 +215,16 @@ function PokemonDetails({
   pokemon,
   children,
   nameId,
+  allowShiny = false,
   onOpenEvolution,
 }: {
   pokemon: Pokemon
   children?: ReactNode
   nameId?: string
+  allowShiny?: boolean
   onOpenEvolution: (pokemon: Pokemon) => void
 }) {
+  const [showShiny, setShowShiny] = useState(false)
   const evolutionTitleId = useId()
   const request = useRequest(
     useCallback(() => loadDetails(pokemon.speciesUrl), [pokemon.speciesUrl]),
@@ -229,7 +232,17 @@ function PokemonDetails({
   return (
     <>
       <div className="dex-detail-img">
-        <Art pokemon={pokemon} />
+        <Art image={showShiny ? pokemon.shinyImage : pokemon.image} />
+        {allowShiny && pokemon.shinyImage && (
+          <button
+            type="button"
+            className="dex-shiny-toggle"
+            aria-pressed={showShiny}
+            onClick={() => setShowShiny(!showShiny)}
+          >
+            <span aria-hidden="true">✦</span> Shiny
+          </button>
+        )}
       </div>
       <div className="dex-detail-info">
         <small>{numberLabel(pokemon.id)}</small>
@@ -301,7 +314,8 @@ function Details({
   onLike,
   onFavorite,
   close,
-}: Props & { pokemon: Pokemon; close: () => void }) {
+  allowShiny = false,
+}: Props & { pokemon: Pokemon; close: () => void; allowShiny?: boolean }) {
   const [pokemon, setPokemon] = useState(initialPokemon)
   const liked = likedIds.has(pokemon.id)
   const isFavorite = favorite === pokemon.id
@@ -334,8 +348,10 @@ function Details({
           ×
         </button>
         <PokemonDetails
+          key={pokemon.id}
           pokemon={pokemon}
           nameId={nameId}
+          allowShiny={allowShiny}
           onOpenEvolution={(next) => {
             setPokemon(next)
             if (dialog.current) dialog.current.scrollTop = 0
@@ -396,7 +412,7 @@ function CardGrid({
           >
             <span className="dex-card-number">{numberLabel(p.id)}</span>
             <span className="dex-art">
-              <Art pokemon={p} />
+              <Art image={p.image} />
             </span>
             <strong>{displayName(p.name)}</strong>
             <Types types={p.types} />
@@ -718,6 +734,7 @@ export default function Catalog(actions: Props) {
         {detail && (
           <Details
             pokemon={detail}
+            allowShiny
             {...actions}
             close={() => setDetail(null)}
           />

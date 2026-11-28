@@ -10,7 +10,8 @@ type PokemonResponse = {
   types: { slot: number; type: Ref }[]
   sprites: {
     front_default: string | null
-    other: { 'official-artwork': { front_default: string | null } }
+    front_shiny: string | null
+    other: { 'official-artwork': { front_default: string | null; front_shiny: string | null } }
   }
 }
 type SpeciesResponse = {
@@ -37,6 +38,7 @@ export type Evolution = SpeciesEntry & {
 }
 export type Pokemon = SpeciesEntry & {
   image: string | null
+  shinyImage: string | null
   types: string[]
   speciesUrl: string
   height: number
@@ -211,6 +213,10 @@ export const loadPokemon = cached(async (id) => {
     image:
       p.sprites.other['official-artwork'].front_default ??
       p.sprites.front_default,
+    shinyImage:
+      p.sprites.other['official-artwork'].front_shiny ??
+      p.sprites.front_shiny ??
+      null,
     types: p.types.sort((a, b) => a.slot - b.slot).map((t) => t.type.name),
     speciesUrl: p.species.url,
     height: p.height / 10,

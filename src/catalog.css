@@ -429,6 +429,22 @@
   height: 11rem;
   background: #e4f3f1;
 }
+.dex-shiny-toggle {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  min-height: 44px;
+  padding: 0.35rem 0.6rem;
+  color: #624214;
+  background: #fff3d3;
+  border: 1px solid #ae853e;
+  border-radius: 0.55rem;
+}
+.dex-shiny-toggle[aria-pressed='true'] {
+  color: #fff7df;
+  background: #754719;
+  border-color: #e5b668;
+}
 .dex-detail-info {
   padding: 1.3rem 1.6rem 1.6rem;
 }
