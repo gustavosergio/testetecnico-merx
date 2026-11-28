@@ -47,7 +47,9 @@ export default function PersonalStory() {
         <code>versao-completa</code> e segui desenvolvendo na <code>main</code> a
         versão só de frontend, que é a que estou entregando à MERX. Assim, quem
         estiver vendo o projeto pode explorar a versão do desafio e, se bater a
-        curiosidade, conferir também como ele era antes.
+        curiosidade,{' '}
+        <a href="https://energdex.vercel.app/">abrir o EnergDex com backend</a>
+        {' '}para experimentar as contas e o pódio da Comunidade.
       </p>
       <p>
         E eu quis guardar a versão completa porque, sinceramente, ainda acho que
