@@ -111,6 +111,9 @@
   background: #23545c;
   color: #f0ffff;
 }
+[data-theme='dark'] .dex-search input {
+  color: var(--night-text);
+}
 [data-theme='dark'] .dex-search input::placeholder {
   color: var(--night-muted);
 }
