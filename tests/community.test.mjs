@@ -175,3 +175,30 @@ test('nomes únicos, sessão protegida, troca condicional e ranking compartilhad
     403,
   )
 })
+
+test('ranking detalhado conta votos fora do top 10 e lista só nomes públicos', async () => {
+  const env = { DB: database() }
+  const request = () => worker.fetch(
+    new Request('https://kalos.test/api/ranking?details=1'), env,
+  )
+  assert.deepEqual(await (await request()).json(), {
+    totalVotes: 0, distinctPokemon: 0, entries: [],
+  })
+
+  const insert = env.DB.prepare(
+    'INSERT INTO trainers (name_key, name, session_hash, favorite_id, favorite_name) VALUES (?, ?, ?, ?, ?)',
+  )
+  for (let id = 1; id <= 11; id++) {
+    await insert.bind('treinador' + id, 'Treinador' + id, 'sessao' + id, id, 'pokemon' + id).run()
+  }
+  await insert.bind('aline', 'Aline', 'extra', 1, 'pokemon1').run()
+  await insert.bind('semvoto', 'SemVoto', 'semvoto', null, null).run()
+
+  const ranking = await (await request()).json()
+  assert.equal(ranking.totalVotes, 12)
+  assert.equal(ranking.distinctPokemon, 11)
+  assert.deepEqual(ranking.entries.map(({ id }) => id), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+  assert.deepEqual(ranking.entries[0], {
+    id: 1, name: 'pokemon1', votes: 2, voters: ['Aline', 'Treinador1'],
+  })
+})

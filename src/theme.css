@@ -98,7 +98,7 @@
     .dex-detail-info > small,
     .dex-choices summary span,
     .trainer-dialog small,
-    .podium-place > span:last-child,
+    .podium-place > .ranking-count,
     .ranking-rest li > span
   ) {
   color: var(--night-muted);

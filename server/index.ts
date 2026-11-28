@@ -77,6 +77,30 @@ async function handleAPI(req: Request, env: Env, url: URL) {
     )
   }
   if (path === '/api/ranking' && req.method === 'GET') {
+    if (url.searchParams.get('details') === '1') {
+      const { results } = await env.DB.prepare(
+        `WITH favorites AS (
+          SELECT favorite_id AS id, MIN(favorite_name) AS name, COUNT(*) AS votes
+          FROM trainers WHERE favorite_id IS NOT NULL GROUP BY favorite_id
+        ), ranked AS (
+          SELECT *, SUM(votes) OVER () AS totalVotes, COUNT(*) OVER () AS distinctPokemon
+          FROM favorites ORDER BY votes DESC, id LIMIT 10
+        )
+        SELECT ranked.*, (
+          SELECT json_group_array(name) FROM (
+            SELECT name FROM trainers WHERE favorite_id = ranked.id ORDER BY name_key
+          )
+        ) AS voters
+        FROM ranked ORDER BY votes DESC, id`,
+      ).all<{ id: number; name: string; votes: number; totalVotes: number; distinctPokemon: number; voters: string }>()
+      return json({
+        totalVotes: results[0]?.totalVotes ?? 0,
+        distinctPokemon: results[0]?.distinctPokemon ?? 0,
+        entries: results.map(({ id, name, votes, voters }) => ({
+          id, name, votes, voters: JSON.parse(voters) as string[],
+        })),
+      })
+    }
     const { results } = await env.DB.prepare(
       'SELECT favorite_id AS id, MIN(favorite_name) AS name, COUNT(*) AS votes FROM trainers WHERE favorite_id IS NOT NULL GROUP BY favorite_id ORDER BY votes DESC, favorite_id LIMIT 10',
     ).all()
