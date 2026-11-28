@@ -1,5 +1,4 @@
-const communityOrigin =
-  'https://kalosdex-gustavo-merx.memorablemuffin16.chatgpt.site'
+const communityOrigin = process.env.COMMUNITY_API_ORIGIN
 const endpoints = new Set([
   '/api/trainer',
   '/api/favorite',
@@ -18,6 +17,8 @@ export default {
   async fetch(request: Request) {
     const url = new URL(request.url)
     if (!endpoints.has(url.pathname)) return error('Rota inexistente.', 404)
+
+    if (!communityOrigin) return error('Serviço da comunidade indisponível.', 503)
 
     const origin = request.headers.get('Origin')
     if (origin && origin !== url.origin)

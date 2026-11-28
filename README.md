@@ -41,7 +41,7 @@ Os testes exercitam a combinação de filtros, a árvore de evolução, as regra
 
 ## Deploy na Vercel
 
-Importe este repositório na Vercel com a raiz do projeto no diretório do repositório. O arquivo `vercel.json` define o build do Vite e a pasta publicada. As funções em `api/` encaminham cadastro, favoritos e ranking ao Worker existente, que mantém o banco D1 compartilhado. Como a sessão é vinculada ao domínio, mudar de endereço não transfere o cookie do treinador.
+Importe este repositório na Vercel com a raiz do projeto no diretório do repositório. O arquivo `vercel.json` define o build do Vite e a pasta publicada. Na Vercel, configure `COMMUNITY_API_ORIGIN` com a origem HTTPS do Worker, sem barra final. As funções em `api/` usam essa origem para encaminhar cadastro, favoritos e ranking ao Worker, que mantém o banco D1 compartilhado. Como a sessão é vinculada ao domínio, mudar de endereço não transfere o cookie do treinador.
 
 ## Tecnologias e decisões
 
