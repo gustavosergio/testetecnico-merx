@@ -39,7 +39,7 @@ export default function PersonalStory() {
         formada por uma sequência de três Pokémon iniciais e um PIN de quatro
         dígitos. Também tinha a aba <strong>Favoritos da comunidade</strong>,
         onde cada pessoa podia dar um coração ao seu Pokémon favorito e conferir
-        o top 5 dos mais votados.
+        o ranking dos mais votados, que hoje vai até o top 10 na versão completa.
       </p>
       <p>
         Fiquei triste de tirar essa parte da entrega, até que pensei: por que
