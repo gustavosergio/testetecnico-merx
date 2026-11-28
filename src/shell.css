@@ -1,6 +1,5 @@
 :root {
   color: #222934;
-  background: #f5f5f2;
   font-family: 'Barlow', system-ui, sans-serif;
   font-synthesis: none;
 }
@@ -57,7 +56,7 @@ select:focus-visible {
   display: flex;
   align-items: center;
   height: 72px;
-  gap: 64px;
+  gap: 1rem;
 }
 .brand {
   display: flex;
@@ -80,10 +79,9 @@ select:focus-visible {
 .mast nav {
   display: flex;
   align-self: stretch;
-  gap: 30px;
+  gap: 1rem;
 }
-.mast nav a,
-.identity {
+.mast nav a {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,6 +93,11 @@ select:focus-visible {
 .mast nav a {
   position: relative;
   color: #53606a;
+}
+.favorite-nav-icon {
+  flex: 0 0 22px;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 .mast nav a[aria-current] {
   color: #af2034;
@@ -120,17 +123,6 @@ select:focus-visible {
 .about-link[aria-current='page'] {
   text-decoration: underline;
   text-underline-offset: 0.2em;
-}
-.identity {
-  margin-left: auto;
-  background: #fff;
-  border: 1px solid #cdd1ce;
-  border-radius: 8px;
-  padding: 10px 16px;
-  overflow-wrap: anywhere;
-}
-.identity:hover {
-  background: #f6f5f1;
 }
 .main-wrap {
   padding-top: 28px;
@@ -281,10 +273,6 @@ select:focus-visible {
   .console {
     margin-top: 22px;
   }
-  .identity {
-    max-width: 58%;
-    padding: 7px 10px;
-  }
   .brand {
     font-size: 1.45rem;
   }
@@ -351,7 +339,7 @@ select:focus-visible {
 .mast-menu {
   display: none;
 }
-@media (max-width: 950px) {
+@media (max-width: 1210px) {
   .mast-inner {
     min-height: 64px;
     height: auto;
@@ -413,4 +401,26 @@ select:focus-visible {
   .mast-controls .identity {
     min-width: 0;
   }
+}
+
+.identity {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  min-height: 44px;
+  max-width: 11rem;
+  padding: .25rem .6rem;
+  color: inherit;
+  background: transparent;
+  border: 1px solid #78959c;
+  border-radius: .5rem;
+}
+.identity span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 620px) {
+  .theme-switch span { display: none; }
+  .mast-inner .mast-controls { max-width: 52%; }
 }

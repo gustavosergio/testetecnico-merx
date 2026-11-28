@@ -1,3 +1,17 @@
+.mast-links {
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  gap: 0.5rem;
+}
+@media (max-width: 1210px) {
+  .mast-links {
+    margin-left: auto;
+  }
+  .mast-inner .mast-controls {
+    margin-left: 0;
+  }
+}
 .mast-controls {
   display: flex;
   align-items: center;
@@ -5,20 +19,30 @@
   margin-left: auto;
   min-width: 0;
 }
-:root[data-theme='light'] {
-  background: #fff;
+:root {
+  --page-ground: #fbf7f7;
+  --pokeball-line: #e9d4d8;
   color-scheme: light;
+  background-color: var(--page-ground);
+  background-image:
+    radial-gradient(circle at center, var(--pokeball-line) 1.5px, transparent 2.5px),
+    radial-gradient(circle at center, var(--page-ground) 3.5px, var(--pokeball-line) 4px 5px, transparent 6px),
+    radial-gradient(ellipse 20px 1.5px at center, var(--pokeball-line) 85%, transparent 100%),
+    radial-gradient(circle at center, transparent 18px, var(--pokeball-line) 19px 20px, transparent 21px);
+  background-size: 104px 104px;
 }
 .theme-switch {
-  display: grid;
-  place-items: center;
-  flex: 0 0 44px;
-  width: 44px;
-  height: 44px;
-  padding: 0;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.55rem 0 0;
+  color: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  white-space: nowrap;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 50%;
+  border-radius: 8px;
   cursor: pointer;
 }
 .theme-switch:hover {
@@ -28,9 +52,10 @@
   display: block;
   image-rendering: pixelated;
 }
-[data-theme='dark'] {
+:root[data-theme='dark'] {
+  --page-ground: #111b22;
+  --pokeball-line: #273640;
   color-scheme: dark;
-  background: #111b22;
   color: #e0efef;
   --night-panel: #20333b;
   --night-input: #172830;
@@ -106,17 +131,12 @@
   background: #23545c;
   color: #f0ffff;
 }
+[data-theme='dark'] .dex-search input {
+  color: var(--night-text);
+}
 [data-theme='dark'] .dex-search input::placeholder {
   color: var(--night-muted);
 }
-[data-theme='dark'] .dex-heart {
-  color: #b0cbd0;
-}
-[data-theme='dark'] .dex-heart[aria-pressed='true'] {
-  color: #a2213b;
-}
-@media (max-width: 740px) {
-  .mast-controls .identity {
-    max-width: none;
-  }
+[data-theme='dark'] .dex-like:is(:hover, [aria-pressed='true']) {
+  background: #52314b;
 }

@@ -103,6 +103,13 @@ test('nomes únicos, sessão protegida, troca condicional e ranking compartilhad
     { id: 1, name: 'bulbasaur', votes: 1 },
     { id: 4, name: 'charmander', votes: 1 },
   ])
+  assert.equal((await call('favorite', { id: null, previous: 1 }, session)).status, 409)
+  const removed = await call('favorite', { id: null, previous: 4 }, session)
+  assert.equal(removed.status, 200)
+  assert.equal((await removed.json()).favorite, null)
+  assert.deepEqual(await (await call('ranking')).json(), [
+    { id: 1, name: 'bulbasaur', votes: 1 },
+  ])
   assert.equal(
     (await call('trainer', { action: 'avatar', pokemon: '4' }, session)).status,
     200,

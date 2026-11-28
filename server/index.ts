@@ -310,7 +310,7 @@ async function handleAPI(req: Request, env: Env, url: URL) {
   if (!trainer)
     return json({ error: 'Identifique seu treinador para votar.' }, 401)
   const { id, previous } = body
-  if (typeof id !== 'number' || !Number.isSafeInteger(id) || id < 1) {
+  if (id !== null && (typeof id !== 'number' || !Number.isSafeInteger(id) || id < 1)) {
     return json({ error: 'Pokémon inválido.' }, 400)
   }
   const conflict = () =>
@@ -322,26 +322,30 @@ async function handleAPI(req: Request, env: Env, url: URL) {
     )
   if (trainer.favorite_id !== previous) return conflict()
   if (id === previous) return json(trainerDTO(trainer))
-  const species = await fetch(
-    `https://pokeapi.co/api/v2/pokemon-species/${id}/`,
-    { signal: AbortSignal.timeout(12000) },
-  )
-  if (!species.ok)
-    return json(
-      { error: 'Não foi possível verificar a espécie na PokéAPI.' },
-      species.status === 404 ? 400 : 502,
+  let name: string | null = null
+  if (id !== null) {
+    const species = await fetch(
+      `https://pokeapi.co/api/v2/pokemon-species/${id}/`,
+      { signal: AbortSignal.timeout(12000) },
     )
-  const data = (await species.json()) as { id: number; name: string }
-  if (data.id !== id || !data.name)
-    return json({ error: 'Espécie desconhecida.' }, 502)
+    if (!species.ok)
+      return json(
+        { error: 'Não foi possível verificar a espécie na PokéAPI.' },
+        species.status === 404 ? 400 : 502,
+      )
+    const data = (await species.json()) as { id: number; name: string }
+    if (data.id !== id || !data.name)
+      return json({ error: 'Espécie desconhecida.' }, 502)
+    name = data.name
+  }
   const result = await env.DB.prepare(
     'UPDATE trainers SET favorite_id = ?, favorite_name = ? WHERE session_hash = ? AND favorite_id IS ?',
   )
-    .bind(id, data.name, hash, previous)
+    .bind(id, name, hash, previous)
     .run()
   if (!result.meta.changes) return conflict()
   return json(
-    trainerDTO({ ...trainer, favorite_id: id, favorite_name: data.name }),
+    trainerDTO({ ...trainer, favorite_id: id, favorite_name: name }),
   )
 }
 export default {

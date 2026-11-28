@@ -1,10 +1,12 @@
 import {
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
   useSyncExternalStore,
 } from 'react'
+import type { ReactNode } from 'react'
 import type { Evolution, Pokemon } from './catalog'
 import {
   displayName,
@@ -20,11 +22,14 @@ import './catalog.css'
 
 type Props = {
   favorite: number | null
-  onFavorite: (id: number, name: string) => void
+  likedIds: ReadonlySet<number>
+  onLike: (pokemon: Pick<Pokemon, 'id' | 'name'>) => void
+  onFavorite: (pokemon: Pokemon) => void
 }
 type Filters = {
   regions: string[]
   types: string[]
+  dualType: boolean
   search: string
   page: number
 }
@@ -45,6 +50,7 @@ function readFilters(): Filters {
   return {
     regions: regions.map(([key]) => key).filter((key) => validRegions.has(key)),
     types: Object.keys(typeLabels).filter((key) => validTypes.has(key)),
+    dualType: url.get('dupla') === '1',
     search: url.get('busca') || '',
     page: Number.isSafeInteger(page) && page > 0 ? page : 1,
   }
@@ -87,21 +93,14 @@ function ErrorPanel({ retry }: { retry: () => void }) {
     </div>
   )
 }
-function Heart({ filled }: { filled: boolean }) {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke="currentColor"
-      strokeWidth="1.7"
-      aria-hidden="true"
-    >
-      <path d="M20.8 4.9a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.3a5.5 5.5 0 0 0 0-7.8Z" />
-    </svg>
-  )
+export function LoveBall() {
+  return <img className="dex-ball-icon" src="/art/love-ball.webp" width="26" height="26" alt="" />
 }
+
+export function MasterBall() {
+  return <img className="dex-ball-icon" src="/art/master-ball.png" width="26" height="26" alt="" />
+}
+
 function Types({ types }: { types: string[] }) {
   return (
     <span className="dex-types">
@@ -113,20 +112,20 @@ function Types({ types }: { types: string[] }) {
     </span>
   )
 }
-function Art({ pokemon }: { pokemon: Pokemon }) {
-  return pokemon.image ? (
-    <img src={pokemon.image} alt="" decoding="async" />
+function Art({ image }: { image: string | null }) {
+  const [failedImage, setFailedImage] = useState<string | null>(null)
+  return image && image !== failedImage ? (
+    <img
+      src={image}
+      alt=""
+      decoding="async"
+      onError={(event) => setFailedImage(event.currentTarget.getAttribute('src'))}
+    />
   ) : (
     <span>Sem imagem</span>
   )
 }
-function EvolutionItem({
-  name,
-  held = false,
-}: {
-  name: string
-  held?: boolean
-}) {
+function EvolutionItem({ name }: { name: string }) {
   return (
     <span className="dex-evolution-item">
       <img
@@ -138,14 +137,27 @@ function EvolutionItem({
           event.currentTarget.hidden = true
         }}
       />
-      {held ? 'Segurando ' : ''}
       {displayName(name)}
     </span>
   )
 }
-function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
+function Chain({
+  item,
+  currentId,
+  onOpenEvolution,
+}: {
+  item: Evolution
+  currentId: number
+  onOpenEvolution: (pokemon: Pokemon) => void
+}) {
   const stage = useRequest(
     useCallback(() => loadPokemon(String(item.id)), [item.id]),
+  )
+  const pokemon = stage.data
+  const art = pokemon ? (
+    <Art image={pokemon.image} />
+  ) : (
+    <span aria-hidden="true">{numberLabel(item.id)}</span>
   )
   return (
     <li>
@@ -153,27 +165,31 @@ function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
         className="dex-stage"
         aria-current={item.id === currentId ? 'true' : undefined}
       >
+        {pokemon && item.id !== currentId ? (
+          <button
+            className="dex-stage-art"
+            type="button"
+            aria-label={'Ver ficha de ' + displayName(item.name)}
+            onClick={() => onOpenEvolution(pokemon)}
+          >
+            {art}
+          </button>
+        ) : (
+          <div className="dex-stage-art">{art}</div>
+        )}
+        <strong>{displayName(item.name)}</strong>
+        <small>{numberLabel(item.id)}</small>
+        {stage.data && <Types types={stage.data.types} />}
         {item.requirements.length > 0 && (
           <div className="dex-evolution-requirements">
-            {item.requirements.map(({ level, item, heldItem }) => (
-              <div key={JSON.stringify([level, item, heldItem])}>
+            {item.requirements.map(({ level, items }) => (
+              <div key={JSON.stringify([level, items])}>
                 {level !== null && <span>Nível {level}</span>}
-                {item && <EvolutionItem name={item} />}
-                {heldItem && <EvolutionItem name={heldItem} held />}
+                {items.map((name) => <EvolutionItem key={name} name={name} />)}
               </div>
             ))}
           </div>
         )}
-        <div className="dex-stage-art">
-          {stage.data ? (
-            <Art pokemon={stage.data} />
-          ) : (
-            <span aria-hidden="true">{numberLabel(item.id)}</span>
-          )}
-        </div>
-        <strong>{displayName(item.name)}</strong>
-        <small>{numberLabel(item.id)}</small>
-        {stage.data && <Types types={stage.data.types} />}
         {stage.error && (
           <button type="button" onClick={stage.retry}>
             Tentar novamente
@@ -183,23 +199,154 @@ function Chain({ item, currentId }: { item: Evolution; currentId: number }) {
       {item.next.length > 0 && (
         <ul>
           {item.next.map((child) => (
-            <Chain key={child.id} item={child} currentId={currentId} />
+            <Chain
+              key={child.id}
+              item={child}
+              currentId={currentId}
+              onOpenEvolution={onOpenEvolution}
+            />
           ))}
         </ul>
       )}
     </li>
   )
 }
-function Details({
+function PokemonDetails({
   pokemon,
-  favorite,
-  onFavorite,
-  close,
-}: Props & { pokemon: Pokemon; close: () => void }) {
-  const dialog = useRef<HTMLDialogElement>(null)
+  children,
+  nameId,
+  allowShiny = false,
+  artwork,
+  onOpenEvolution,
+}: {
+  pokemon: Pokemon
+  children?: ReactNode
+  nameId?: string
+  allowShiny?: boolean
+  artwork?: ReactNode
+  onOpenEvolution: (pokemon: Pokemon) => void
+}) {
+  const [showShiny, setShowShiny] = useState(false)
+  const evolutionTitleId = useId()
   const request = useRequest(
     useCallback(() => loadDetails(pokemon.speciesUrl), [pokemon.speciesUrl]),
   )
+  return (
+    <>
+      {artwork ?? (
+        <div className="dex-detail-img">
+          <Art image={showShiny ? pokemon.shinyImage : pokemon.image} />
+          {allowShiny && pokemon.shinyImage && (
+            <button
+              type="button"
+              className="dex-shiny-toggle"
+              aria-pressed={showShiny}
+              onClick={() => setShowShiny(!showShiny)}
+            >
+              <span aria-hidden="true">✦</span> Shiny
+            </button>
+          )}
+        </div>
+      )}
+      <div className="dex-detail-info">
+        <small>{numberLabel(pokemon.id)}</small>
+        <h2 id={nameId}>{displayName(pokemon.name)}</h2>
+        <Types types={pokemon.types} />
+        <p>
+          {pokemon.height.toLocaleString('pt-BR')} m{' '}
+          <span aria-hidden="true"> · </span>{' '}
+          {pokemon.weight.toLocaleString('pt-BR')} kg
+        </p>
+        {request.error ? (
+          <ErrorPanel retry={request.retry} />
+        ) : !request.data ? (
+          <p role="status">Lendo ficha da espécie…</p>
+        ) : (
+          <>
+            <h3>Descrição da espécie</h3>
+            <p lang={request.data.lang}>
+              {request.data.description || 'Descrição indisponível.'}
+            </p>
+            <section
+              className="dex-evolution"
+              aria-labelledby={evolutionTitleId}
+            >
+              <h3 id={evolutionTitleId}>Cadeia de evolução</h3>
+              {request.data.tree ? (
+                <ul className="dex-chain">
+                  <Chain
+                    item={request.data.tree}
+                    currentId={pokemon.id}
+                    onOpenEvolution={onOpenEvolution}
+                  />
+                </ul>
+              ) : (
+                <p>Cadeia indisponível.</p>
+              )}
+            </section>
+          </>
+        )}
+        {children}
+      </div>
+    </>
+  )
+}
+
+export function FavoriteDetails({ id, ...actions }: Props & { id: number }) {
+  const [detail, setDetail] = useState<Pokemon | null>(null)
+  const request = useRequest(useCallback(() => loadPokemon(String(id)), [id]))
+  if (request.error) return <ErrorPanel retry={request.retry} />
+  if (!request.data) return <p role="status">Carregando Pokémon favorito…</p>
+  return (
+    <>
+      <PokemonDetails
+        pokemon={request.data}
+        onOpenEvolution={setDetail}
+        artwork={
+          <div className="favorite-artwork">
+            <figure>
+              <div className="dex-detail-img">
+                <Art image={request.data.image} />
+              </div>
+              <figcaption>Normal</figcaption>
+            </figure>
+            {request.data.shinyImage && (
+              <figure>
+                <div className="dex-detail-img">
+                  <Art image={request.data.shinyImage} />
+                </div>
+                <figcaption>✦ Shiny</figcaption>
+              </figure>
+            )}
+          </div>
+        }
+      />
+      {detail && (
+        <Details
+          pokemon={detail}
+          {...actions}
+          close={() => setDetail(null)}
+        />
+      )}
+    </>
+  )
+}
+
+function Details({
+  pokemon: initialPokemon,
+  favorite,
+  likedIds,
+  onLike,
+  onFavorite,
+  close,
+  allowShiny = false,
+}: Props & { pokemon: Pokemon; close: () => void; allowShiny?: boolean }) {
+  const [pokemon, setPokemon] = useState(initialPokemon)
+  const liked = likedIds.has(pokemon.id)
+  const isFavorite = favorite === pokemon.id
+  const nameId = useId()
+  const closeButton = useRef<HTMLButtonElement>(null)
+  const dialog = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     const modal = dialog.current
     modal?.showModal()
@@ -209,7 +356,7 @@ function Details({
     <dialog
       className="dex-detail"
       ref={dialog}
-      aria-labelledby="dex-detail-name"
+      aria-labelledby={nameId}
       onCancel={close}
       onClick={(e) => {
         if (e.target === e.currentTarget) close()
@@ -220,61 +367,43 @@ function Details({
           className="dex-close"
           type="button"
           aria-label="Fechar detalhes"
+          ref={closeButton}
           onClick={close}
         >
           ×
         </button>
-        <div className="dex-detail-img">
-          <Art pokemon={pokemon} />
-        </div>
-        <div className="dex-detail-info">
-          <small>{numberLabel(pokemon.id)}</small>
-          <h2 id="dex-detail-name">{displayName(pokemon.name)}</h2>
-          <Types types={pokemon.types} />
-          <p>
-            {pokemon.height.toLocaleString('pt-BR')} m{' '}
-            <span aria-hidden="true"> · </span>{' '}
-            {pokemon.weight.toLocaleString('pt-BR')} kg
-          </p>
-          {request.error ? (
-            <ErrorPanel retry={request.retry} />
-          ) : !request.data ? (
-            <p role="status">Lendo ficha da espécie…</p>
-          ) : (
-            <>
-              <h3>Descrição da espécie</h3>
-              <p lang={request.data.lang}>
-                {request.data.description || 'Descrição indisponível.'}
-              </p>
-              <section
-                className="dex-evolution"
-                aria-labelledby="dex-evolution-title"
-              >
-                <h3 id="dex-evolution-title">Cadeia de evolução</h3>
-                {request.data.tree ? (
-                  <ul className="dex-chain">
-                    <Chain item={request.data.tree} currentId={pokemon.id} />
-                  </ul>
-                ) : (
-                  <p>Cadeia indisponível.</p>
-                )}
-              </section>
-            </>
-          )}
-          <button
-            className="dex-primary"
-            disabled={favorite === pokemon.id}
-            onClick={() => {
-              close()
-              onFavorite(pokemon.id, pokemon.name)
-            }}
-          >
-            <Heart filled={favorite === pokemon.id} />
-            {favorite === pokemon.id
-              ? 'Seu favorito'
-              : 'Escolher como favorito'}
-          </button>
-        </div>
+        <PokemonDetails
+          key={pokemon.id}
+          pokemon={pokemon}
+          nameId={nameId}
+          allowShiny={allowShiny}
+          onOpenEvolution={(next) => {
+            setPokemon(next)
+            if (dialog.current) dialog.current.scrollTop = 0
+            closeButton.current?.focus({ preventScroll: true })
+          }}
+        >
+          <div className="dex-detail-actions">
+            <button
+              className="dex-primary"
+              type="button"
+              aria-pressed={liked}
+              onClick={() => onLike(pokemon)}
+            >
+              <LoveBall />
+              {liked ? 'Descurtir' : 'Curtir'}
+            </button>
+            <button
+              className="dex-primary"
+              type="button"
+              aria-pressed={isFavorite}
+              onClick={() => onFavorite(pokemon)}
+            >
+              <MasterBall />
+              {isFavorite ? 'Remover dos favoritos' : 'Escolher como favorito'}
+            </button>
+          </div>
+        </PokemonDetails>
       </div>
     </dialog>
   )
@@ -282,6 +411,8 @@ function Details({
 function CardGrid({
   ids,
   favorite,
+  likedIds,
+  onLike,
   onFavorite,
   open,
 }: Props & { ids: string; open: (p: Pokemon) => void }) {
@@ -306,24 +437,32 @@ function CardGrid({
           >
             <span className="dex-card-number">{numberLabel(p.id)}</span>
             <span className="dex-art">
-              <Art pokemon={p} />
+              <Art image={p.image} />
             </span>
             <strong>{displayName(p.name)}</strong>
             <Types types={p.types} />
           </button>
-          <button
-            className="dex-heart"
-            aria-label={
-              (favorite === p.id ? 'Favorito atual: ' : 'Favoritar ') +
-              displayName(p.name)
-            }
-            aria-pressed={favorite === p.id}
-            onClick={() => {
-              if (favorite !== p.id) onFavorite(p.id, p.name)
-            }}
-          >
-            <Heart filled={favorite === p.id} />
-          </button>
+          <div className="dex-card-actions">
+            <button
+              className="dex-like"
+              type="button"
+              aria-label={(likedIds.has(p.id) ? 'Descurtir ' : 'Curtir ') + displayName(p.name)}
+              aria-pressed={likedIds.has(p.id)}
+              onClick={() => onLike(p)}
+            >
+              <LoveBall />
+            </button>
+            <button
+              className="dex-master"
+              type="button"
+              aria-label={(favorite === p.id ? 'Remover favorito: ' : 'Favoritar ') + displayName(p.name)}
+              title={favorite === p.id ? 'Remover favorito' : 'Escolher como favorito'}
+              aria-pressed={favorite === p.id}
+              onClick={() => onFavorite(p)}
+            >
+              <MasterBall />
+            </button>
+          </div>
         </article>
       ))}
     </div>
@@ -340,6 +479,8 @@ function FilterChoices({
   unrestricted,
   options,
   showTypeIcons = false,
+  selectionLimit,
+  children,
   selected,
   onChange,
 }: {
@@ -347,6 +488,8 @@ function FilterChoices({
   unrestricted: string
   options: Option[]
   showTypeIcons?: boolean
+  selectionLimit?: number
+  children?: ReactNode
   selected: string[]
   onChange: (values: string[]) => void
 }) {
@@ -359,12 +502,18 @@ function FilterChoices({
         <strong>{label}</strong>
         <span>{labels.join(', ') || unrestricted}</span>
       </summary>
+      {children}
       <div role="group" aria-label={label} className="dex-options">
         {options.map(([key, name]) => (
           <label key={key}>
             <input
               type="checkbox"
               checked={selected.includes(key)}
+              disabled={
+                selectionLimit !== undefined &&
+                selected.length >= selectionLimit &&
+                !selected.includes(key)
+              }
               onChange={(event) =>
                 onChange(
                   event.target.checked
@@ -396,16 +545,61 @@ function FilterChoices({
     </details>
   )
 }
-export default function Catalog({ favorite, onFavorite }: Props) {
+function Pagination({
+  page,
+  pages,
+  onMove,
+}: {
+  page: number
+  pages: number
+  onMove: (page: number) => void
+}) {
+  const jumps = (steps: number[]) =>
+    steps.map((step) => {
+      const distance = Math.abs(step)
+      const target = page + step
+      const back = step < 0
+      const label = `${back ? 'Voltar' : 'Avançar'} ${distance} ${distance === 1 ? 'página' : 'páginas'}`
+      return (
+        <button
+          key={step}
+          type="button"
+          aria-label={label}
+          title={label}
+          disabled={target < 1 || target > pages}
+          onClick={() => onMove(target)}
+        >
+          {back ? `← ${distance}` : `${distance} →`}
+        </button>
+      )
+    })
+
+  return (
+    <nav className="dex-pages" aria-label="Paginação">
+      <div className="dex-page-steps dex-page-back">{jumps([-3, -2, -1])}</div>
+      <span className="dex-page-count" aria-live="polite">
+        Página {page} de {pages}
+      </span>
+      <div className="dex-page-steps dex-page-forward">{jumps([1, 2, 3])}</div>
+    </nav>
+  )
+}
+
+export default function Catalog(actions: Props) {
   const [filters, setFilters] = useState(readFilters)
+  const [searchDraft, setSearchDraft] = useState(filters.search)
   const [detail, setDetail] = useState<Pokemon | null>(null)
   const listStart = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    const sync = () => setFilters(readFilters())
+    const sync = () => {
+      const next = readFilters()
+      setFilters(next)
+      setSearchDraft(next.search)
+    }
     window.addEventListener('popstate', sync)
     return () => window.removeEventListener('popstate', sync)
   }, [])
-  const update = (patch: Partial<Filters>, replace = false) => {
+  const update = useCallback((patch: Partial<Filters>, replace = false) => {
     const next = { ...filters, page: 1, ...patch }
     setFilters(next)
     const url = new URL(location.href)
@@ -413,6 +607,7 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     const params = {
       regiao: next.regions,
       tipo: next.types,
+      dupla: next.dualType ? ['1'] : [],
       busca: next.search ? [next.search] : [],
       pagina: next.page === 1 ? [] : [String(next.page)],
     }
@@ -422,14 +617,24 @@ export default function Catalog({ favorite, onFavorite }: Props) {
     }
     if (replace) history.replaceState(history.state, '', url)
     else history.pushState(history.state, '', url)
-  }
+  }, [filters])
+  useEffect(() => {
+    if (searchDraft === filters.search) return
+    const timer = window.setTimeout(() => update({ search: searchDraft }, true), 250)
+    return () => window.clearTimeout(timer)
+  }, [searchDraft, filters.search, update])
+  const awaitingTypePair = filters.dualType && filters.types.length !== 2
   const index = useRequest(
     useCallback(
-      () => loadCatalogIndex(filters.regions, filters.types),
-      [filters.regions, filters.types],
+      () => loadCatalogIndex(
+        filters.regions,
+        awaitingTypePair ? [] : filters.types,
+        filters.dualType,
+      ),
+      [filters.regions, filters.types, filters.dualType, awaitingTypePair],
     ),
   )
-  const entries = index.data
+  const entries = index.data && !awaitingTypePair
     ? selectEntries(index.data.all, filters.search, index.data.typed)
     : []
   const pageSize = useSyncExternalStore(subscribeToCatalogWidth, getCatalogPageSize)
@@ -457,9 +662,11 @@ export default function Catalog({ favorite, onFavorite }: Props) {
           <div>
             <h2>Catálogo regional</h2>
             <p aria-live="polite">
-              {index.data
-                ? entries.length.toLocaleString('pt-BR') + ' espécies'
-                : 'Consultando espécies…'}
+              {awaitingTypePair
+                ? 'Escolha dois tipos'
+                : index.data
+                  ? entries.length.toLocaleString('pt-BR') + ' espécies'
+                  : 'Consultando espécies…'}
             </p>
           </div>
         </div>
@@ -482,8 +689,8 @@ export default function Catalog({ favorite, onFavorite }: Props) {
               type="search"
               placeholder="Buscar por nome ou número"
               aria-label="Buscar Pokémon por nome ou número"
-              value={filters.search}
-              onChange={(e) => update({ search: e.target.value }, true)}
+              value={searchDraft}
+              onChange={(e) => setSearchDraft(e.target.value)}
             />
           </label>
         </div>
@@ -501,11 +708,25 @@ export default function Catalog({ favorite, onFavorite }: Props) {
             options={typeOptions}
             showTypeIcons
             selected={filters.types}
+            selectionLimit={filters.dualType ? 2 : undefined}
             onChange={(types) => update({ types })}
-          />
+          >
+            <label className="dex-dual-type">
+              <input
+                type="checkbox"
+                checked={filters.dualType}
+                onChange={(event) => update({ dualType: event.target.checked })}
+              />
+              Dupla tipagem
+            </label>
+          </FilterChoices>
         </div>
         <div ref={listStart} tabIndex={-1} className="dex-results">
-          {index.error ? (
+          {awaitingTypePair ? (
+            <div className="dex-message" role="status">
+              Selecione exatamente dois tipos para encontrar Pokémon com ambos.
+            </div>
+          ) : index.error ? (
             <ErrorPanel retry={index.retry} />
           ) : !index.data ? (
             <div className="dex-message" role="status">
@@ -516,7 +737,10 @@ export default function Catalog({ favorite, onFavorite }: Props) {
               <strong>Nenhum Pokémon encontrado</strong>
               <span>Altere a região, o tipo ou o termo de busca.</span>
               <button
-                onClick={() => update({ search: '', types: [], regions: [] })}
+                onClick={() => {
+                  setSearchDraft('')
+                  update({ search: '', types: [], regions: [], dualType: false })
+                }}
               >
                 Ver todas as espécies
               </button>
@@ -524,30 +748,19 @@ export default function Catalog({ favorite, onFavorite }: Props) {
           ) : (
             <CardGrid
               ids={ids}
-              favorite={favorite}
-              onFavorite={onFavorite}
+              {...actions}
               open={setDetail}
             />
           )}
         </div>
         {entries.length > 0 && (
-          <nav className="dex-pages" aria-label="Paginação">
-            <button disabled={page <= 1} onClick={() => move(page - 1)}>
-              Anterior
-            </button>
-            <span aria-live="polite">
-              Página {page} de {pages}
-            </span>
-            <button disabled={page >= pages} onClick={() => move(page + 1)}>
-              Próxima
-            </button>
-          </nav>
+          <Pagination page={page} pages={pages} onMove={move} />
         )}
         {detail && (
           <Details
             pokemon={detail}
-            favorite={favorite}
-            onFavorite={onFavorite}
+            allowShiny
+            {...actions}
             close={() => setDetail(null)}
           />
         )}

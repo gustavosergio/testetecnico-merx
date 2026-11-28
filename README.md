@@ -6,11 +6,17 @@ Pokédex regional desenvolvida para o [teste de estágio da MERX Energia](https:
 
 ## Como explorar
 
-O catálogo abre em **Todas as regiões**, com as espécies em ordem de número nacional. Os filtros **Regiões** e **Tipos** aceitam várias escolhas. Por exemplo, marcar Kanto e Kalos junto com Fogo e Água mostra as espécies de qualquer uma dessas regiões que tenham pelo menos um dos dois tipos. Limpar um filtro volta a incluir todas as opções dele. A busca aceita nomes parciais e números como `25` e `#025`. O filtro por tipo combina com a busca. A URL guarda os filtros e a página para que uma consulta possa ser compartilhada.
+- Catálogo com imagem, nome, número da Pokédex e tipos de cada Pokémon. A paginação mostra até 14 cartões no celular e 15 no desktop, com atalhos para voltar ou avançar 1, 2 ou 3 páginas.
+- Busca com debounce de 250 ms por nome parcial ou pelo número da Pokédex, com formatos como `25` e `#025`. Os filtros de região e tipo aceitam múltiplas escolhas e funcionam junto com a busca e a paginação. Ative **Dupla tipagem** para exigir os dois tipos selecionados. A URL guarda a consulta e a página.
+- Janela de detalhes com altura, peso, descrição da espécie e cadeia evolutiva. Na Pokédex, o botão Shiny alterna a imagem quando essa versão está disponível. A árvore exibe ramos separados, mostra níveis e itens fornecidos pela PokéAPI e permite abrir a ficha de cada evolução pela imagem.
+- Estados de carregamento, ausência de resultados e erro com opção de tentar novamente.
+- Aba Tipos com vantagens de ataque e fraquezas de defesa.
+- **Temas com Pokébolas.** Clique na **Dusk Ball** para entrar no modo escuro e na **Quick Ball** para voltar ao modo claro. O navegador lembra sua escolha.
+- A Love Ball adiciona ou remove Pokémon da lista de curtidos após confirmação no balão de fala, no catálogo, nas fichas e na aba Curtidos. A Master Ball marca um único favorito, com confirmação ao escolher, trocar ou remover. A aba Curtidos mostra a lista, e Meu favorito exibe a ficha completa do Pokémon escolhido, com as imagens normal e shiny lado a lado quando disponíveis. As curtidas ficam neste navegador, separadas por conta e por visitante. O favorito é salvo na conta e conta como voto no ranking.
+- Saudação opcional na primeira visita. Quem entra na conta passa a ver o nome do perfil.
+- Navegação por teclado com foco visível, rótulos nos controles e fechamento dos diálogos com Escape.
 
-Abra um cartão para consultar tipos, medidas, descrição da espécie e cadeia evolutiva. Evoluções ramificadas, como as de Eevee, aparecem em ramos separados. A interface sinaliza carregamento, erro e buscas sem resultado. Em caso de falha de rede, é possível repetir a consulta.
-
-O coração do cartão permite escolher um único favorito. Em **Entrar**, use uma conta existente ou escolha **Criar conta**. O cadastro pede um nome de 4 a 20 caracteres sem espaços, três iniciais distintos em uma ordem secreta e um PIN de quatro dígitos. O perfil começa com Pikachu como avatar. Abra o perfil para trocar a foto por nome ou número ou sair da conta. O banco reserva esse nome sem diferenciar maiúsculas e minúsculas. Ao trocar de favorito, a confirmação identifica o Pokémon atual e o novo. A página **Comunidade** destaca os três primeiros no pódio e exibe o quarto e o quinto logo abaixo. Empates seguem a ordem do número nacional. A aba **Treinadores** permite buscar por parte do nome. Cada treinador pode divulgar seu nick do Pokémon GO e uma descrição de até 500 caracteres no perfil. O modo escuro pode ser alternado no cabeçalho.
+Em **Entrar**, use uma conta existente ou escolha **Criar conta**. O cadastro pede um nome de 4 a 20 caracteres sem espaços, três iniciais distintos em uma ordem secreta e um PIN de quatro dígitos. O perfil começa com Pikachu como avatar. Abra o perfil para trocar a foto por nome ou número ou sair da conta. O banco reserva esse nome sem diferenciar maiúsculas e minúsculas. Ao trocar de favorito, a confirmação identifica o Pokémon atual e o novo. A página **Comunidade** destaca os três primeiros no pódio e exibe o quarto e o quinto logo abaixo. Empates seguem a ordem do número da Pokédex. A aba **Treinadores** permite buscar por parte do nome. Cada treinador pode divulgar seu nick do Pokémon GO e uma descrição de até 500 caracteres no perfil. O modo escuro pode ser alternado no cabeçalho.
 
 ## Executar localmente
 
@@ -19,6 +25,7 @@ Requisitos: Git, Node.js 24 e npm. A PokéAPI e as imagens precisam de conexão 
 ```sh
 git clone https://github.com/gustavosergio/testetecnico-merx.git
 cd testetecnico-merx
+git switch versao-completa
 npm ci
 npm run dev
 ```
@@ -45,3 +52,5 @@ Importe este repositório na Vercel com a raiz do projeto no diretório do repos
 - **Votos concorrentes.** Cada registro de treinador contém apenas um favorito. A atualização verifica se o favorito anterior ainda é o que apareceu na confirmação. Assim, uma segunda aba não pode sobrescrever silenciosamente uma escolha mais recente.
 
 A arte dos Pokémon vem do [repositório de sprites da PokéAPI](https://github.com/PokeAPI/sprites). A ilustração do aparelho foi construída em CSS. Dados obtidos pela [PokéAPI REST](https://pokeapi.co/docs/v2).
+
+Os retratos pixelados do ícone Meu favorito vêm dos colaboradores do [PMDCollab SpriteCollab](https://github.com/PMDCollab/SpriteCollab), conforme os [créditos por espécie](https://sprites.pmdcollab.org/) e a [licença CC BY-NC 4.0 do projeto](https://github.com/PMDCollab/SpriteCollab/blob/master/LICENSE.md).

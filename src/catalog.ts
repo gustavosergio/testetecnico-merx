@@ -10,7 +10,8 @@ type PokemonResponse = {
   types: { slot: number; type: Ref }[]
   sprites: {
     front_default: string | null
-    other: { 'official-artwork': { front_default: string | null } }
+    front_shiny: string | null
+    other: { 'official-artwork': { front_default: string | null; front_shiny: string | null } }
   }
 }
 type SpeciesResponse = {
@@ -29,8 +30,7 @@ type ChainLink = {
 }
 type EvolutionRequirement = {
   level: number | null
-  item: string | null
-  heldItem: string | null
+  items: string[]
 }
 export type Evolution = SpeciesEntry & {
   next: Evolution[]
@@ -38,6 +38,7 @@ export type Evolution = SpeciesEntry & {
 }
 export type Pokemon = SpeciesEntry & {
   image: string | null
+  shinyImage: string | null
   types: string[]
   speciesUrl: string
   height: number
@@ -161,6 +162,7 @@ export const listType = cached(async (type) => {
 export async function loadCatalogIndex(
   regionKeys: string[],
   typeKeys: string[],
+  requireAllTypes = false,
 ) {
   const [catalogs, typeSets] = await Promise.all([
     Promise.all((regionKeys.length ? regionKeys : ['all']).map(listRegion)),
@@ -169,9 +171,12 @@ export async function loadCatalogIndex(
   const byNumber = new Map<number, SpeciesEntry>()
   for (const species of catalogs.flat()) byNumber.set(species.id, species)
   const all = [...byNumber.values()].sort((a, b) => a.id - b.id)
-  const typed = typeSets.length
-    ? new Set(typeSets.flatMap((ids) => [...ids]))
-    : null
+  const [firstType, ...otherTypes] = typeSets
+  const typed = !firstType
+    ? null
+    : requireAllTypes
+      ? new Set([...firstType].filter((id) => otherTypes.every((ids) => ids.has(id))))
+      : new Set(typeSets.flatMap((ids) => [...ids]))
   return { all, typed }
 }
 function normalize(value: string) {
@@ -208,6 +213,10 @@ export const loadPokemon = cached(async (id) => {
     image:
       p.sprites.other['official-artwork'].front_default ??
       p.sprites.front_default,
+    shinyImage:
+      p.sprites.other['official-artwork'].front_shiny ??
+      p.sprites.front_shiny ??
+      null,
     types: p.types.sort((a, b) => a.slot - b.slot).map((t) => t.type.name),
     speciesUrl: p.species.url,
     height: p.height / 10,
@@ -219,10 +228,11 @@ function evolution(link: ChainLink): Evolution {
   for (const detail of link.evolution_details ?? []) {
     const requirement = {
       level: detail.min_level ?? null,
-      item: detail.item?.name ?? null,
-      heldItem: detail.held_item?.name ?? null,
+      items: [...new Set([detail.item?.name, detail.held_item?.name])]
+        .filter((name): name is string => Boolean(name))
+        .sort(),
     }
-    if (requirement.level || requirement.item || requirement.heldItem) {
+    if (requirement.level !== null || requirement.items.length) {
       requirements.set(JSON.stringify(requirement), requirement)
     }
   }

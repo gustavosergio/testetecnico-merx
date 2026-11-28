@@ -31,7 +31,7 @@ test('preserva os ramos da evolução e usa descrição em inglês se não houve
       species: ref('eevee', 133),
       evolves_to: [
         leaf('jolteon', 135),
-        { ...leaf('vaporeon', 134), evolution_details: [detail, detail] },
+        { ...leaf('vaporeon', 134), evolution_details: [detail, { ...detail, item: null, held_item: stone }] },
       ],
     },
   }
@@ -56,7 +56,7 @@ test('preserva os ramos da evolução e usa descrição em inglês se não houve
     ['jolteon', 'vaporeon'],
   )
   assert.deepEqual(result.tree.next[1].requirements, [
-    { level: null, item: 'water-stone', heldItem: null },
+    { level: null, items: ['water-stone'] },
   ])
 })
 
@@ -69,7 +69,7 @@ test('une regiões e tipos, cruza os dois filtros e mantém a ordem nacional', a
     'generation/1': { pokemon_species: [7, 6, 1].map(ref) },
     'generation/6': { pokemon_species: [658, 661].map(ref) },
     'type/water': {
-      pokemon: [7, 658, 260].map((id) => ({ pokemon: ref(id) })),
+      pokemon: [6, 7, 658, 260].map((id) => ({ pokemon: ref(id) })),
     },
     'type/flying': { pokemon: [6, 661].map((id) => ({ pokemon: ref(id) })) },
   }
@@ -84,4 +84,10 @@ test('une regiões e tipos, cruza os dois filtros e mantém a ordem nacional', a
     selectEntries(all, '', typed).map((p) => p.id),
     [6, 7, 658, 661],
   )
+  const dual = await loadCatalogIndex(['kanto', 'kalos'], ['water', 'flying'], true)
+  assert.deepEqual(
+    selectEntries(dual.all, '', dual.typed).map((p) => p.id),
+    [6],
+  )
+  assert.deepEqual(selectEntries(dual.all, '7', dual.typed), [])
 })

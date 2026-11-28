@@ -1,0 +1,55 @@
+.trainer-greeting {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+
+.trainer-welcome {
+  width: min(26rem, calc(100% - 2rem));
+  padding: clamp(1rem, 5vw, 1.75rem);
+  color: inherit;
+  background: #f6fcfd;
+  border: 1px solid #78959c;
+  border-radius: 1rem;
+}
+[data-theme='dark'] .trainer-welcome {
+  background: var(--night-panel);
+}
+.trainer-welcome::backdrop {
+  background: #101e2ab3;
+}
+.trainer-welcome h2 {
+  margin: 0 0 1rem;
+  line-height: 1.15;
+}
+.trainer-welcome label {
+  display: block;
+  font-weight: 650;
+}
+.trainer-welcome input {
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.65rem;
+  border: 1px solid #78959c;
+  border-radius: 0.5rem;
+}
+.trainer-welcome-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+.trainer-welcome button {
+  padding: 0.55rem 0.8rem;
+  border: 1px solid #78959c;
+  border-radius: 0.5rem;
+  background: transparent;
+}
+.trainer-welcome button[type='submit'] {
+  background: #245762;
+  color: white;
+}
+.trainer-welcome button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}

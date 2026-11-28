@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import FavoritePrompt from './FavoritePrompt'
 import './community.css'
 import { starters } from '../shared/starters'
 import { displayName } from './catalog'
@@ -193,6 +194,7 @@ function Credentials({
 
 export function useTrainer() {
   const [trainer, setTrainer] = useState<Trainer | null>(null)
+  const [sessionReady, setSessionReady] = useState(false)
   const [visible, setVisible] = useState(false)
   const [checking, setChecking] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
@@ -224,12 +226,14 @@ export function useTrainer() {
   }, [])
   useEffect(() => {
     const controller = new AbortController()
-    void refresh(controller.signal).catch(() => {})
+    void refresh(controller.signal).catch(() => {}).finally(() => {
+      if (!controller.signal.aborted) setSessionReady(true)
+    })
     return () => controller.abort()
   }, [refresh])
   useEffect(() => {
     if (visible) modal.current?.showModal()
-  }, [visible])
+  }, [visible, checking, trainer])
   function resetProfile(current: Trainer | null) {
     setAvatar('')
     setGoNick(current?.goNick ?? '')
@@ -255,31 +259,20 @@ export function useTrainer() {
     setVisible(true)
     void check()
   }
-  async function submit(event: FormEvent) {
-    event.preventDefault()
-    if (busy || checking || unavailable) return
-    setBusy(true)
-    setError('')
+  async function saveFavorite() {
+    if (!target || !trainer) return
+    const previous = trainer.favorite?.id ?? null
     try {
-      const current = trainer
-      if (!current) return
-      if (target && current.favorite?.id !== target.id) {
-        const updated = await communityRequest<Trainer>('favorite', {
-          id: target.id,
-          previous: current.favorite?.id ?? null,
-        })
-        setTrainer(updated)
-        setRevision((n) => n + 1)
-        setStatus(`${displayName(target.name)} é seu favorito!`)
-      } else {
-        setStatus(`Treinador ${current.name} conectado.`)
-      }
-      setVisible(false)
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Falha na conexão.')
+      const updated = await communityRequest<Trainer>('favorite', {
+        id: previous === target.id ? null : target.id,
+        previous,
+      })
+      setTrainer(updated)
+      setRevision((n) => n + 1)
+      setStatus(updated.favorite ? displayName(updated.favorite.name) + ' é seu favorito!' : 'Favorito removido.')
+    } catch (error) {
       await refresh().catch(() => {})
-    } finally {
-      setBusy(false)
+      throw error
     }
   }
   async function accountAction(body: object, close = false) {
@@ -345,15 +338,7 @@ export function useTrainer() {
       setBusy(false)
     }
   }
-  const title = !trainer
-    ? 'Nome de treinador'
-    : !target
-      ? 'Seu treinador'
-      : target.id === trainer.favorite?.id
-        ? 'Seu favorito'
-        : trainer.favorite
-          ? 'Trocar favorito?'
-          : 'Escolher favorito?'
+  const showFavorite = visible && !checking && !unavailable && trainer && !trainer.needsSetup && target
   const dialog = (
     <>
       {status && (
@@ -368,7 +353,15 @@ export function useTrainer() {
           </button>
         </div>
       )}
-      {visible && (
+      {showFavorite ? (
+        <FavoritePrompt
+          pokemon={{ ...target, image: avatarImage(target.id) }}
+          action={target.id === trainer.favorite?.id ? 'remove' : 'favorite'}
+          currentName={trainer.favorite?.name}
+          onConfirm={saveFavorite}
+          onClose={() => setVisible(false)}
+        />
+      ) : visible && (
         <dialog
           ref={modal}
           className="trainer-dialog"
@@ -391,7 +384,7 @@ export function useTrainer() {
               ? 'Conta de treinador'
               : trainer.needsSetup
                 ? 'Configure sua senha'
-                : title}
+                : 'Seu treinador'}
           </h2>
           {checking ? (
             <p role="status">Consultando perfil…</p>
@@ -403,35 +396,6 @@ export function useTrainer() {
               busy={busy}
               authenticate={accountAction}
             />
-          ) : target ? (
-            <form onSubmit={submit}>
-              <p>
-                {trainer.favorite && trainer.favorite.id !== target.id ? (
-                  <>
-                    Substituir{' '}
-                    <strong>{displayName(trainer.favorite.name)}</strong> por{' '}
-                    <strong>{displayName(target.name)}</strong>?
-                  </>
-                ) : (
-                  <>
-                    Seu favorito será{' '}
-                    <strong>{displayName(target.name)}</strong>.
-                  </>
-                )}
-              </p>
-              <div className="trainer-actions">
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => setVisible(false)}
-                >
-                  Cancelar
-                </button>
-                <button className="trainer-primary" disabled={busy}>
-                  Confirmar voto
-                </button>
-              </div>
-            </form>
           ) : (
             <>
               <div className="avatar-heading">
@@ -526,9 +490,10 @@ export function useTrainer() {
   )
   return {
     trainer,
+    sessionReady,
     revision,
     dialog,
     openTrainer: () => open(null),
-    onFavorite: (id: number, name: string) => open({ id, name }),
+    onFavorite: (pokemon: Pokemon) => open(pokemon),
   }
 }

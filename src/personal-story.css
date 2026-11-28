@@ -1,0 +1,33 @@
+.personal-story {
+  width: min(100%, 44rem);
+  margin-inline: auto;
+  padding: clamp(1.15rem, 5vw, 2.75rem);
+  border: 1px solid #dfc8ce;
+  border-top: 4px solid #bf2a40;
+  border-radius: 1rem;
+  background: #fff;
+  color: #222934;
+}
+[data-theme='dark'] .personal-story {
+  border-color: #53737c;
+  border-top-color: #ff9ead;
+  background: var(--night-panel);
+  color: var(--night-text);
+}
+.personal-story h1 {
+  margin: 0 0 1.25rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3rem);
+  line-height: 1.05;
+}
+.personal-story p {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+.personal-story p + p {
+  margin-top: 1rem;
+}
+.personal-story code {
+  overflow-wrap: anywhere;
+}

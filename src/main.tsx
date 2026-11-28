@@ -5,48 +5,19 @@ import '@fontsource/barlow-condensed/latin-700.css'
 import '@fontsource/ibm-plex-mono/latin-500.css'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import Catalog from './Catalog'
+import Catalog, { FavoriteDetails, LoveBall, MasterBall } from './Catalog'
+import { displayName, numberLabel, type Pokemon } from './catalog'
+import FavoritePrompt from './FavoritePrompt'
 import Community from './Community'
-import Device from './Device'
 import Trainers from './Trainers'
-import TypeMatchups from './TypeMatchups'
 import { avatarImage, useTrainer } from './trainer'
+import Device from './Device'
+import TypeMatchups from './TypeMatchups'
+import TrainerGreeting from './TrainerGreeting'
+import PersonalStory from './PersonalStory'
 import './shell.css'
 import './theme.css'
 
-type IconName = 'pokedex' | 'community' | 'trainers' | 'types' | 'user'
-function Icon({ name }: { name: IconName }) {
-  if (name === 'pokedex') {
-    return <img src="/art/nav-pokedex.webp" width="16" height="19" alt="" />
-  }
-  if (name === 'trainers') {
-    return <img src="/art/nav-trainers.webp" width="19" height="19" alt="" />
-  }
-  if (name === 'types') {
-    return <img src="/art/nav-types.webp" width="19" height="19" alt="" />
-  }
-  if (name === 'community') {
-    return <img src="/art/nav-community.webp" width="19" height="19" alt="" style={{ objectFit: 'contain' }} />
-  }
-  const paths = {
-    user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4 21a8 8 0 0 1 16 0',
-  }
-  return (
-    <svg
-      aria-hidden="true"
-      width="19"
-      height="19"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinejoin="round"
-      strokeLinecap="round"
-    >
-      <path d={paths[name]} />
-    </svg>
-  )
-}
 function ThemeSwitch() {
   const [dark, setDark] = useState(() => {
     try {
@@ -62,7 +33,7 @@ function ThemeSwitch() {
     <button
       className="theme-switch"
       type="button"
-      aria-label={dark ? 'Ativar tema claro' : 'Ativar tema escuro'}
+      aria-label={dark ? 'Alterar tema para claro' : 'Alterar tema para escuro'}
       title={
         dark
           ? 'Ativar tema claro · Quick Ball'
@@ -81,18 +52,53 @@ function ThemeSwitch() {
         height="42"
         alt=""
       />
+      <span>Alterar tema</span>
     </button>
   )
 }
 
 const mainLinks = [
-  { href: '#pokedex', label: 'Pokédex', icon: 'pokedex' },
-  { href: '#comunidade', label: 'Comunidade', icon: 'community' },
-  { href: '#treinadores', label: 'Treinadores', icon: 'trainers' },
-  { href: '#tipos', label: 'Tipos', icon: 'types' },
+  { href: '#pokedex', label: 'Pokédex', icon: '/art/nav-pokedex.webp' },
+  { href: '#comunidade', label: 'Comunidade', icon: '/art/nav-community.webp' },
+  { href: '#treinadores', label: 'Treinadores', icon: '/art/nav-trainers.webp' },
+  { href: '#tipos', label: 'Tipos', icon: '/art/nav-types.webp' },
+  { href: '#curtidos', label: 'Curtidos', icon: null },
+  { href: '#favorito', label: 'Meu favorito', icon: null },
 ] as const
 
-function Navigation({ page, close }: { page: string; close?: () => void }) {
+function FavoriteIcon({ id }: { id: number }) {
+  const [portraitFailed, setPortraitFailed] = useState(false)
+  const [spriteFailed, setSpriteFailed] = useState(false)
+  if (spriteFailed) return <MasterBall />
+
+  const portraitId = String(id).padStart(4, '0')
+  const src = portraitFailed
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+    : `https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/portrait/${portraitId}/Normal.png`
+  return (
+    <img
+      className="favorite-nav-icon"
+      src={src}
+      width="22"
+      height="22"
+      alt=""
+      onError={() => {
+        if (portraitFailed) setSpriteFailed(true)
+        else setPortraitFailed(true)
+      }}
+    />
+  )
+}
+
+function Navigation({
+  page,
+  favoriteId,
+  close,
+}: {
+  page: string
+  favoriteId?: number
+  close?: () => void
+}) {
   const active =
     page === '#sobre' || mainLinks.some((link) => link.href === page)
       ? page
@@ -109,7 +115,15 @@ function Navigation({ page, close }: { page: string; close?: () => void }) {
           aria-current={active === href ? 'page' : undefined}
           onClick={close}
         >
-          <Icon name={icon} />
+          {icon ? (
+            <img src={icon} width="19" height="19" alt="" style={{ objectFit: 'contain' }} />
+          ) : href === '#curtidos' ? (
+            <LoveBall />
+          ) : favoriteId ? (
+            <FavoriteIcon key={favoriteId} id={favoriteId} />
+          ) : (
+            <MasterBall />
+          )}
           {label}
         </a>
       ))}
@@ -119,14 +133,14 @@ function Navigation({ page, close }: { page: string; close?: () => void }) {
           aria-current={active === '#sobre' ? 'page' : undefined}
           onClick={close}
         >
-          Sobre o projeto
+          Relato pessoal
         </a>
       )}
     </nav>
   )
 }
 
-function MobileMenu({ page }: { page: string }) {
+function MobileMenu({ page, favoriteId }: { page: string; favoriteId?: number }) {
   const menu = useRef<HTMLDetailsElement>(null)
   const toggle = useRef<HTMLElement>(null)
   useEffect(() => {
@@ -160,14 +174,168 @@ function MobileMenu({ page }: { page: string }) {
       <summary ref={toggle} aria-label="Menu de navegação">
         <span aria-hidden="true">⋮</span>
       </summary>
-      <Navigation page={page} close={close} />
+      <Navigation page={page} favoriteId={favoriteId} close={close} />
     </details>
   )
 }
 
-function App() {
+type SavedPokemon = Pick<Pokemon, 'id' | 'name'>
+type FavoriteCandidate = SavedPokemon & Pick<Pokemon, 'image'>
+type Selection = { pokemon: FavoriteCandidate; action: 'like' | 'unlike' }
+
+function isSavedPokemon(value: unknown): value is SavedPokemon {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    typeof value.id === 'number' &&
+    Number.isSafeInteger(value.id) &&
+    value.id > 0 &&
+    'name' in value &&
+    typeof value.name === 'string'
+  )
+}
+
+function readLikes(likesKey: string): SavedPokemon[] {
+  try {
+    const stored = localStorage.getItem(likesKey)
+    if (stored === null) return []
+    const saved: unknown = JSON.parse(stored)
+    if (Array.isArray(saved)) {
+      return [...new Map(saved.filter(isSavedPokemon).map((pokemon) => [pokemon.id, pokemon])).values()]
+    }
+  } catch {
+    // Storage may be unavailable or contain an invalid entry.
+  }
+  return []
+}
+
+function LikedList({
+  likes,
+  onUnlike,
+}: {
+  likes: SavedPokemon[]
+  onUnlike: (pokemon: SavedPokemon) => void
+}) {
+  return (
+    <section className="dex-detail favorite-page" aria-labelledby="likes-title">
+      <h1 id="likes-title">Curtidos</h1>
+      {likes.length ? (
+        <ul className="liked-list">
+          {likes.map((pokemon) => {
+            const name = displayName(pokemon.name)
+            return (
+              <li key={pokemon.id}>
+                <a href={`/?busca=${pokemon.id}#pokedex`}>
+                  <img
+                    src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`}
+                    alt=""
+                    width="42"
+                    height="42"
+                    loading="lazy"
+                    onError={(event) => { event.currentTarget.hidden = true }}
+                  />
+                  <span>{name} <small>{numberLabel(pokemon.id)}</small></span>
+                </a>
+                <button
+                  className="dex-like"
+                  type="button"
+                  aria-label={`Descurtir ${name}`}
+                  onClick={() => onUnlike(pokemon)}
+                >
+                  <LoveBall />
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      ) : (
+        <div className="favorite-page-empty">
+          <p>Você ainda não curtiu nenhum Pokémon.</p>
+          <a href="/#pokedex">Explorar a Pokédex</a>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function officialArtwork(id: number) {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
+}
+
+function FavoritePage({
+  favorite,
+  likedIds,
+  onLike,
+  onFavorite,
+}: {
+  favorite: SavedPokemon | null
+  likedIds: ReadonlySet<number>
+  onLike: (pokemon: SavedPokemon) => void
+  onFavorite: (pokemon: FavoriteCandidate) => void
+}) {
+  const image = favorite ? officialArtwork(favorite.id) : null
+
+  return (
+    <section className="dex-detail favorite-page" aria-labelledby="favorite-page-title">
+      <h1 id="favorite-page-title">Meu favorito</h1>
+      {favorite ? (
+        <>
+          <FavoriteDetails
+            key={favorite.id}
+            id={favorite.id}
+            favorite={favorite.id}
+            likedIds={likedIds}
+            onLike={onLike}
+            onFavorite={onFavorite}
+          />
+          <div className="favorite-page-actions">
+            <a href={`/?busca=${favorite.id}#pokedex`}>Ver na Pokédex</a>
+            <button type="button" onClick={() => onFavorite({ ...favorite, image })}>
+              <MasterBall />
+              Remover dos favoritos
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="favorite-page-empty">
+          <p>Você ainda não tem um Pokémon favorito.</p>
+          <a href="/#pokedex">Explorar a Pokédex</a>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function Site({ account }: { account: ReturnType<typeof useTrainer> }) {
+  const { trainer, sessionReady, openTrainer, onFavorite: askFavorite, revision } = account
+  const favorite = trainer?.favorite ?? null
+  const likesKey = trainer ? 'energdex-likes:trainer:' + trainer.name.toLowerCase() : 'energdex-likes:guest'
   const [page, setPage] = useState(location.hash)
-  const { trainer, openTrainer, onFavorite, dialog, revision } = useTrainer()
+  const main = useRef<HTMLElement>(null)
+  const [likes, setLikes] = useState(() => readLikes(likesKey))
+  const likedIds = new Set(likes.map(({ id }) => id))
+  const [selection, setSelection] = useState<Selection | null>(null)
+  function saveLike({ id, name }: SavedPokemon, liked: boolean) {
+    if (likedIds.has(id) === liked) return
+    const next = liked
+      ? [...likes, { id, name }]
+      : likes.filter((pokemon) => pokemon.id !== id)
+    setLikes(next)
+    try {
+      localStorage.setItem(likesKey, JSON.stringify(next))
+    } catch {
+      // Likes remain available until the page closes.
+    }
+  }
+
+  function askLikeChange(pokemon: SavedPokemon & { image?: string | null }) {
+    setSelection({
+      pokemon: { ...pokemon, image: pokemon.image ?? officialArtwork(pokemon.id) },
+      action: likedIds.has(pokemon.id) ? 'unlike' : 'like',
+    })
+  }
+
   useEffect(() => {
     const navigate = () => {
       if (location.hash !== '#conteudo') setPage(location.hash)
@@ -178,7 +346,15 @@ function App() {
   }, [])
   return (
     <>
-      <a className="skip" href="#conteudo">
+      <a
+        className="skip"
+        href="#conteudo"
+        onClick={(event) => {
+          event.preventDefault()
+          main.current?.focus({ preventScroll: true })
+          main.current?.scrollIntoView({ block: 'start' })
+        }}
+      >
         Pular para o conteúdo
       </a>
       <header className="mast">
@@ -187,55 +363,56 @@ function App() {
             <img src="/dex.svg" alt="" />
             Energ<span>Dex</span>
           </a>
-          <Navigation page={page} />
+          <div className="mast-links">
+            <Navigation page={page} favoriteId={favorite?.id} />
+            <ThemeSwitch />
+          </div>
           <div className="mast-controls">
             <a
               className="about-link"
               href="#sobre"
               aria-current={page === '#sobre' ? 'page' : undefined}
             >
-              Sobre o projeto
+              Relato pessoal
             </a>
-            <ThemeSwitch />
-            <button className="identity" onClick={openTrainer}>
-              <>
-                {trainer ? (
-                  <img
-                    width="34"
-                    height="34"
-                    src={avatarImage(trainer.avatar)}
-                    alt=""
-                  />
-                ) : (
-                  <Icon name="user" />
-                )}
-              </>
-              {trainer?.name ?? 'Entrar'}
+            <button className="identity" type="button" onClick={openTrainer}>
+              {trainer && <img src={avatarImage(trainer.avatar)} width="32" height="32" alt="" />}
+              <span>{trainer?.name ?? 'Entrar'}</span>
             </button>
-            <MobileMenu page={page} />
+            <MobileMenu page={page} favoriteId={favorite?.id} />
           </div>
         </div>
       </header>
-      <main id="conteudo" className="main-wrap">
-        {page === '#sobre' ? null : page === '#tipos' ? (
+      <main ref={main} id="conteudo" className="main-wrap" tabIndex={-1}>
+        {trainer ? <p className="trainer-greeting">Olá, <strong>{trainer.name}</strong>!</p> : sessionReady && <TrainerGreeting />}
+        {page === '#sobre' ? <PersonalStory /> : page === '#tipos' ? (
           <TypeMatchups />
-        ) : page === '#treinadores' ? (
-          <Trainers />
         ) : page === '#comunidade' ? (
           <Community revision={revision} />
+        ) : page === '#treinadores' ? (
+          <Trainers />
+        ) : page === '#curtidos' ? (
+          <LikedList likes={likes} onUnlike={askLikeChange} />
+        ) : page === '#favorito' ? (
+          <FavoritePage
+            favorite={favorite}
+            likedIds={likedIds}
+            onLike={askLikeChange}
+            onFavorite={askFavorite}
+          />
         ) : (
           <>
             <section className="hero" aria-labelledby="title">
               <div className="hero-copy">
                 <div className="eyeline">
-                  <i aria-hidden="true" /> SISTEMA KALOS
+                  <i aria-hidden="true" /> ENERGDEX
                 </div>
                 <h1 id="title">
-                  Pokédex regional<span>.</span>
+                  Explore o mundo Pokémon<span>.</span>
                 </h1>
                 <p>
-                  Explore as regiões, descubra evoluções e escolha seu Pokémon
-                  favorito.
+                  Busque por nome ou número, filtre por região ou tipo e
+                  descubra como cada Pokémon evolui.
                 </p>
               </div>
               <div className="device-stage">
@@ -244,18 +421,34 @@ function App() {
               <div className="vents" aria-hidden="true" />
             </section>
             <Catalog
-              favorite={trainer?.favorite?.id ?? null}
-              onFavorite={onFavorite}
+              favorite={favorite?.id ?? null}
+              likedIds={likedIds}
+              onLike={askLikeChange}
+              onFavorite={askFavorite}
             />
           </>
         )}
       </main>
+      {selection && (
+        <FavoritePrompt
+          pokemon={selection.pokemon}
+          action={selection.action}
+          onConfirm={() => saveLike(selection.pokemon, selection.action === 'like')}
+          onClose={() => setSelection(null)}
+        />
+      )}
       <footer className="foot">
         <span>EnergDex</span>
         <a href="https://pokeapi.co/">Dados da PokéAPI</a>
       </footer>
-      {dialog}
     </>
   )
+}
+function App() {
+  const account = useTrainer()
+  return <>
+    <Site key={account.trainer?.name ?? ''} account={account} />
+    {account.dialog}
+  </>
 }
 createRoot(document.getElementById('root')!).render(<App />)
