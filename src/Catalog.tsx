@@ -504,6 +504,46 @@ function FilterChoices({
     </details>
   )
 }
+function Pagination({
+  page,
+  pages,
+  onMove,
+}: {
+  page: number
+  pages: number
+  onMove: (page: number) => void
+}) {
+  const jumps = (steps: number[]) =>
+    steps.map((step) => {
+      const distance = Math.abs(step)
+      const target = page + step
+      const back = step < 0
+      const label = `${back ? 'Voltar' : 'Avançar'} ${distance} ${distance === 1 ? 'página' : 'páginas'}`
+      return (
+        <button
+          key={step}
+          type="button"
+          aria-label={label}
+          title={label}
+          disabled={target < 1 || target > pages}
+          onClick={() => onMove(target)}
+        >
+          {back ? `← ${distance}` : `${distance} →`}
+        </button>
+      )
+    })
+
+  return (
+    <nav className="dex-pages" aria-label="Paginação">
+      <div className="dex-page-steps dex-page-back">{jumps([-3, -2, -1])}</div>
+      <span className="dex-page-count" aria-live="polite">
+        Página {page} de {pages}
+      </span>
+      <div className="dex-page-steps dex-page-forward">{jumps([1, 2, 3])}</div>
+    </nav>
+  )
+}
+
 export default function Catalog(actions: Props) {
   const [filters, setFilters] = useState(readFilters)
   const [searchDraft, setSearchDraft] = useState(filters.search)
@@ -673,17 +713,7 @@ export default function Catalog(actions: Props) {
           )}
         </div>
         {entries.length > 0 && (
-          <nav className="dex-pages" aria-label="Paginação">
-            <button disabled={page <= 1} onClick={() => move(page - 1)}>
-              Anterior
-            </button>
-            <span aria-live="polite">
-              Página {page} de {pages}
-            </span>
-            <button disabled={page >= pages} onClick={() => move(page + 1)}>
-              Próxima
-            </button>
-          </nav>
+          <Pagination page={page} pages={pages} onMove={move} />
         )}
         {detail && (
           <Details
