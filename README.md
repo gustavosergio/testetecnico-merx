@@ -1,8 +1,8 @@
-# MerxDex
+# EnergDex
 
 Pokédex regional desenvolvida para o [teste de estágio da MERX Energia](https://github.com/Merx-TI/testetecnico). A carcaça vermelha e o visor azul do modelo de Kalos inspiraram o aparelho da tela inicial e a moldura do catálogo.
 
-[Abrir a Pokédex](https://merxdex.vercel.app)
+[Abrir a Pokédex](https://energdex.vercel.app)
 
 ## Como explorar
 

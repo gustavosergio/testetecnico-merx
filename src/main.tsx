@@ -183,9 +183,9 @@ function App() {
       </a>
       <header className="mast">
         <div className="mast-inner">
-          <a className="brand" href="/" aria-label="MerxDex, início">
+          <a className="brand" href="/" aria-label="EnergDex, início">
             <img src="/dex.svg" alt="" />
-            Merx<span>Dex</span>
+            Energ<span>Dex</span>
           </a>
           <Navigation page={page} />
           <div className="mast-controls">
@@ -251,7 +251,7 @@ function App() {
         )}
       </main>
       <footer className="foot">
-        <span>MerxDex</span>
+        <span>EnergDex</span>
         <a href="https://pokeapi.co/">Dados da PokéAPI</a>
       </footer>
       {dialog}
