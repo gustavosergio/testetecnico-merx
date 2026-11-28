@@ -11,9 +11,8 @@ export default function AboutProject() {
         normal e shiny.
       </p>
       <p>
-        Na versão completa, você pode criar uma conta de treinador e usar a
-        Master Ball para escolher seu Pokémon favorito. Cada escolha conta
-        como um voto e ajuda a formar o pódio da Comunidade.
+        Crie sua conta de treinador e use a Master Ball para escolher seu
+        Pokémon favorito. Sua escolha vale um voto no pódio da Comunidade.
       </p>
       <p>
         <a href="https://github.com/gustavosergio/testetecnico-merx">
