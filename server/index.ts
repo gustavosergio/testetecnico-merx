@@ -78,7 +78,7 @@ async function handleAPI(req: Request, env: Env, url: URL) {
   }
   if (path === '/api/ranking' && req.method === 'GET') {
     const { results } = await env.DB.prepare(
-      'SELECT favorite_id AS id, MIN(favorite_name) AS name, COUNT(*) AS votes FROM trainers WHERE favorite_id IS NOT NULL GROUP BY favorite_id ORDER BY votes DESC, favorite_id LIMIT 5',
+      'SELECT favorite_id AS id, MIN(favorite_name) AS name, COUNT(*) AS votes FROM trainers WHERE favorite_id IS NOT NULL GROUP BY favorite_id ORDER BY votes DESC, favorite_id LIMIT 10',
     ).all()
     return json(results)
   }

@@ -37,7 +37,7 @@ export default function Community({ revision = 0 }: { revision?: number }) {
     <section className="community community-stadium" aria-labelledby="community-title">
       <div className="scenery-panel stadium-ranking">
         <h2 id="community-title">Favoritos da comunidade</h2>
-        <p>Os cinco Pokémon mais escolhidos pelos treinadores.</p>
+        <p>Até 10 Pokémon mais escolhidos pelos treinadores.</p>
         {error ? (
           <div role="alert">
             {error}{' '}
@@ -77,7 +77,7 @@ export default function Community({ revision = 0 }: { revision?: number }) {
               ))}
             </ol>
             <ol className="ranking-rest" start={4}>
-              {[3, 4].map((i) => (
+              {Array.from({ length: 7 }, (_, index) => index + 3).map((i) => (
                 <li key={i}>
                   <b>{i + 1}º</b>
                   {ranking[i] && <Art entry={ranking[i]} />}
