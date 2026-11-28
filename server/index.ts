@@ -54,6 +54,12 @@ async function digest(token: string) {
 async function handleAPI(req: Request, env: Env, url: URL) {
   const path = url.pathname
   if (path === '/api/trainers' && req.method === 'GET') {
+    if (url.searchParams.get('count') === '1') {
+      const total = await env.DB.prepare(
+        'SELECT COUNT(*) AS total FROM trainers',
+      ).first<{ total: number }>()
+      return json({ total: total?.total ?? 0 })
+    }
     const query = (url.searchParams.get('q') ?? '')
       .normalize('NFKC')
       .trim()

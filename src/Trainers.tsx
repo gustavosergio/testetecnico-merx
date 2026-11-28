@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { avatarImage, communityRequest } from './trainer'
 import { displayName } from './catalog'
 
@@ -39,6 +39,21 @@ function storeHistory(terms: string[]) {
 }
 
 export default function Trainers() {
+  const [total, setTotal] = useState<number | null>(null)
+  const [totalUnavailable, setTotalUnavailable] = useState(false)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    void communityRequest<{ total: number }>('trainers?count=1', undefined, controller.signal)
+      .then((data) => {
+        if (!controller.signal.aborted) setTotal(data.total)
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setTotalUnavailable(true)
+      })
+    return () => controller.abort()
+  }, [])
+
   const [query, setQuery] = useState('')
   const [history, setHistory] = useState(readHistory)
   const [results, setResults] = useState<PublicTrainer[] | null>(null)
@@ -76,6 +91,13 @@ export default function Trainers() {
     >
       <div className="scenery-panel">
         <h2 id="trainer-directory-title">Pesquisar treinadores</h2>
+        <p role="status">
+          {totalUnavailable ? 'Total de treinadores indisponível.' : total === null ? (
+            'Consultando total de treinadores…'
+          ) : (
+            <>Treinadores cadastrados <strong>{total.toLocaleString('pt-BR')}</strong></>
+          )}
+        </p>
         <form
           onSubmit={(event) => {
             event.preventDefault()

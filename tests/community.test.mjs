@@ -194,6 +194,11 @@ test('ranking detalhado conta votos fora do top 10 e lista só nomes públicos',
   await insert.bind('aline', 'Aline', 'extra', 1, 'pokemon1').run()
   await insert.bind('semvoto', 'SemVoto', 'semvoto', null, null).run()
 
+  const count = await worker.fetch(
+    new Request('https://kalos.test/api/trainers?count=1'), env,
+  )
+  assert.deepEqual(await count.json(), { total: 13 })
+
   const ranking = await (await request()).json()
   assert.equal(ranking.totalVotes, 12)
   assert.equal(ranking.distinctPokemon, 11)
