@@ -438,7 +438,8 @@ function App() {
                 </h1>
                 <p>
                   Busque por nome ou número, filtre por região ou tipo e
-                  descubra como cada Pokémon evolui.
+                  descubra como cada Pokémon evolui. Curta quantos Pokémon quiser e
+                  escolha apenas um favorito.
                 </p>
               </div>
               <div className="device-stage">
