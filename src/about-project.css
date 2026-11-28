@@ -28,6 +28,8 @@
 .about-project p + p {
   margin-top: 1rem;
 }
-.about-project code {
-  overflow-wrap: anywhere;
+.about-project a {
+  color: inherit;
+  font-weight: 700;
+  text-underline-offset: 0.18em;
 }
