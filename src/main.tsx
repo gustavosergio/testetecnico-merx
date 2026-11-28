@@ -339,18 +339,10 @@ function App() {
     }
   }
 
-  function toggleLike(pokemon: SavedPokemon & { image?: string | null }) {
-    if (likedIds.has(pokemon.id)) {
-      saveLike(pokemon, false)
-      return
-    }
-    setSelection({ pokemon: { ...pokemon, image: pokemon.image ?? null }, action: 'like' })
-  }
-
-  function askUnlike(pokemon: SavedPokemon) {
+  function askLikeChange(pokemon: SavedPokemon & { image?: string | null }) {
     setSelection({
-      pokemon: { ...pokemon, image: officialArtwork(pokemon.id) },
-      action: 'unlike',
+      pokemon: { ...pokemon, image: pokemon.image ?? officialArtwork(pokemon.id) },
+      action: likedIds.has(pokemon.id) ? 'unlike' : 'like',
     })
   }
 
@@ -426,12 +418,12 @@ function App() {
         {page === '#sobre' ? <PersonalStory /> : page === '#tipos' ? (
           <TypeMatchups />
         ) : page === '#curtidos' ? (
-          <LikedList likes={likes} onUnlike={askUnlike} />
+          <LikedList likes={likes} onUnlike={askLikeChange} />
         ) : page === '#favorito' ? (
           <FavoritePage
             favorite={favorite}
             likedIds={likedIds}
-            onLike={toggleLike}
+            onLike={askLikeChange}
             onFavorite={askFavorite}
           />
         ) : (
@@ -457,7 +449,7 @@ function App() {
             <Catalog
               favorite={favorite?.id ?? null}
               likedIds={likedIds}
-              onLike={toggleLike}
+              onLike={askLikeChange}
               onFavorite={askFavorite}
             />
           </>
