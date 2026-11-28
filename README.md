@@ -1,6 +1,6 @@
-# MerxDex
+# EnergDex
 
-Pokédex regional desenvolvida para o [teste de estágio da MERX Energia](https://github.com/Merx-TI/testetecnico). A versão de entrega está na branch `main` e roda inteiramente no navegador. [Abrir a versão de entrega](https://merxdex-frontend.vercel.app/)
+Pokédex regional desenvolvida para o [teste de estágio da MERX Energia](https://github.com/Merx-TI/testetecnico). A versão de entrega está na branch `main` e roda inteiramente no navegador. [Abrir a versão de entrega](https://energdex-frontend.vercel.app/)
 
 ## Tecnologias
 
@@ -42,7 +42,7 @@ Os testes automatizados cobrem busca, combinação de filtros e leitura da cadei
 
 - **Busca, filtros e paginação.** A PokéAPI distribui as informações entre endpoints de espécie, geração, tipo e Pokémon. O catálogo cruza os identificadores antes de paginar e busca os detalhes só dos cartões visíveis. Um cache em memória reaproveita consultas bem-sucedidas.
 - **Regiões e evoluções.** Cada espécie aparece pela geração de estreia, com sua forma padrão. Galar e Hisui são tratados separadamente dentro da oitava geração. As evoluções são renderizadas como árvore porque uma espécie pode ter vários caminhos. A descrição prioriza português e usa inglês quando necessário.
-- **Escopo da entrega.** A `main` usa o armazenamento do navegador para curtidas e favorito. A [branch versao-completa](https://github.com/gustavosergio/testetecnico-merx/tree/versao-completa) preserva o projeto anterior, com contas, perfis e ranking comunitário. [Abrir a versão completa](https://merxdex.vercel.app/)
+- **Escopo da entrega.** A `main` usa o armazenamento do navegador para curtidas e favorito. A [branch versao-completa](https://github.com/gustavosergio/testetecnico-merx/tree/versao-completa) preserva o projeto anterior, com contas, perfis e ranking comunitário. [Abrir a versão completa](https://energdex.vercel.app/)
 
 A carcaça e o visor da Pokédex de Kalos inspiraram a ilustração do aparelho em CSS. Os sprites vêm do [repositório de imagens da PokéAPI](https://github.com/PokeAPI/sprites).
 

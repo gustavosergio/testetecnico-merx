@@ -393,9 +393,9 @@ function App() {
       </a>
       <header className="mast">
         <div className="mast-inner">
-          <a className="brand" href="/" aria-label="MerxDex, início">
+          <a className="brand" href="/" aria-label="EnergDex, início">
             <img src="/dex.svg" alt="" />
-            Merx<span>Dex</span>
+            Energ<span>Dex</span>
           </a>
           <div className="mast-links">
             <Navigation page={page} favoriteId={favorite?.id} />
@@ -431,7 +431,7 @@ function App() {
             <section className="hero" aria-labelledby="title">
               <div className="hero-copy">
                 <div className="eyeline">
-                  <i aria-hidden="true" /> MERXDEX
+                  <i aria-hidden="true" /> ENERGDEX
                 </div>
                 <h1 id="title">
                   Explore o mundo Pokémon<span>.</span>
@@ -468,7 +468,7 @@ function App() {
         />
       )}
       <footer className="foot">
-        <span>MerxDex</span>
+        <span>EnergDex</span>
         <a href="https://pokeapi.co/">Dados da PokéAPI</a>
       </footer>
     </>
