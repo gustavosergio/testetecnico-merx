@@ -48,7 +48,7 @@ export default function TrainerGreeting() {
             event.preventDefault()
             if (draft.trim()) finish(draft.trim())
           }}>
-            <h2 id="trainer-welcome-title">Como você gostaria de ser chamado, treinador?</h2>
+            <h2 id="trainer-welcome-title">Como você gostaria de ser chamado(a), treinador (a)?</h2>
             <label htmlFor="trainer-name">Seu nome</label>
             <input
               id="trainer-name"
